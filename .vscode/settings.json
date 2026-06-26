@@ -10,6 +10,7 @@
   "[markdown]": {
     "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
   },
+  "markdownlint.severityForError": "Hint",
   "[shellcheck]": {
     "editor.codeActionsOnSave": {
       "source.fixAll": "explicit"

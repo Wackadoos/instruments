@@ -14134,7 +14134,7 @@
 				)
 			)
 		)
-		(property "Friendly Name" "VRLA Battery"
+		(property "Friendly Name" "VRLA AGM Battery"
 			(at 273.304 37.592 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -18686,7 +18686,7 @@
 				)
 			)
 		)
-		(property "Friendly Name" "VRLA Battery"
+		(property "Friendly Name" "VRLA AGM Battery"
 			(at 272.796 20.574 90)
 			(show_name no)
 			(do_not_autoplace no)
