@@ -1,0 +1,12 @@
+(sym_lib_table
+	(version 7)
+	(lib (name "Micro SD Module") (type "KiCad") (uri "${KIPRJMOD}/library/254.kicad_sym") (options "") (descr ""))
+	(lib (name "Arduino Mega") (type "KiCad") (uri "${KIPRJMOD}/library/A000067.kicad_sym") (options "") (descr ""))
+	(lib (name "Accelerometer") (type "KiCad") (uri "${KIPRJMOD}/library/GY-521.kicad_sym") (options "") (descr ""))
+	(lib (name "Real Time Clock") (type "KiCad") (uri "${KIPRJMOD}/library/TC00500.kicad_sym") (options "") (descr ""))
+	(lib (name "Logic Level Shifter") (type "KiCad") (uri "${KIPRJMOD}/library/ZC323900.kicad_sym") (options "") (descr ""))
+	(lib (name "Temperature & Pressure") (type "KiCad") (uri "${KIPRJMOD}/library/AHT20_BMP280.kicad_sym") (options "") (descr ""))
+	(lib (name "Temperature 1 Wire") (type "KiCad") (uri "${KIPRJMOD}/library/DS18B20_.kicad_sym") (options "") (descr ""))
+	(lib (name "Beam Break Sensor") (type "KiCad") (uri "${KIPRJMOD}/library/TCST2103.kicad_sym") (options "") (descr ""))
+	(lib (name "Custom") (type "KiCad") (uri "${KIPRJMOD}/library/Custom.kicad_sym") (options "") (descr ""))
+)

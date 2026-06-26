@@ -1,0 +1,132 @@
+{
+  "C_Cpp.autocomplete": "default",
+  "C_Cpp.intelliSenseEngine": "default",
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
+  },
+  "[shellcheck]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit"
+    }
+  },
+  "[toml]": {
+    "editor.defaultFormatter": "tombi-toml.tombi"
+  },
+  "cSpell.autocorrect": true,
+  "cSpell.diagnosticLevel": "Hint",
+  "cSpell.spellCheckOnlyWorkspaceFiles": true,
+  "clangd.arguments": [
+    "--header-insertion=never",
+    "--query-driver=**"
+  ],
+  "debug.internalConsoleOptions": "openOnSessionStart",
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.expand": false,
+  "explorer.fileNesting.patterns": {
+    "*.cs": "${capture}.designer.cs,${capture}.g.cs,${capture}.generated.cs,${capture}.run.json,${capture}.settings.json,${capture}.settings.*.json",
+    "*.cshtml": "${capture}.cshtml.cs,${capture}.cshtml.css",
+    "*.csproj": "${capture}.csproj.user",
+    "*.dart": "${capture}.g.dart",
+    "*.js": "${capture}.js.map, ${capture}.min.js, ${capture}.d.ts",
+    "*.json": "${capture}.Development.json",
+    "*.jsx": "${capture}.js",
+    "*.razor": "${capture}.razor.cs,${capture}.razor.css",
+    "*.resx": "${capture}.Designer.cs",
+    "*.ts": "${capture}.js",
+    "*.tsx": "${capture}.ts",
+    "*.xaml": "${capture}.xaml.cs",
+    ".gitignore": ".gitattributes,template.gitignore,template.gitattributes",
+    "Cargo.toml": "Cargo.lock",
+    "MODULE.bazel": "MODULE.bazel.lock,*.bazelrc,.bazelversion,.bazelignore",
+    "PklProject": "PklProject.deps.json",
+    "Pulumi.yaml": "Pulumi.*.yaml",
+    "README.md": "REPOSITORY.md,TODO,TODO.md,CONTRIBUTING,CONTRIBUTING.md,CHANGELOG,CHANGELOG.md,AGENTS.md,LICENSE,LICENSE.md",
+    "firebase.json": ".firebaserc,storage.rules,cors.json",
+    "mise.toml": "mise*.toml, mise.lock",
+    "package.json": ".npmrc,package-lock.json,yarn.lock,pnpm-lock.yaml,bun.lockb,bun.lock,aube-lock.yaml,aube-workspace.yaml,package.spdx.json",
+    "pitchfork.toml": "pitchfork*.toml",
+    "pubspec.yaml": "pubspec.lock,pubspec_overrides.yaml,.packages,.flutter-plugins,.flutter-plugins-dependencies,.metadata,analysis_options.yaml",
+    "pyproject.toml": ".python-version, uv.lock",
+    "rp-config.json": "rp-manifest.json",
+    "tsconfig.json": "tsconfig.*.json"
+  },
+  "files.associations": {
+    "*.inc": "cpp",
+    "*.ipp": "cpp",
+    "*.tcc": "cpp",
+    ".clangd": "yaml"
+  },
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "**/flutter/ephemeral": true,
+    "**/Flutter/ephemeral": true,
+    "**/.symlinks": true,
+    "**/.plugin_symlinks": true,
+    "**/.cache": true,
+    "**/.dart_tool": true,
+    "**/.lycheecache": true,
+    "**/.pkl-lsp": true,
+    "**/.ruff_cache": true,
+    "**/.venv": true,
+    "**/__pycache__": true,
+    "**/node_modules": true,
+    ".pio": true
+  },
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  "files.trimTrailingWhitespace": true,
+  "markdownlint.config": {
+    "extends": "${workspaceFolder}/.config/generated/markdownlint.yml"
+  },
+  "markdownlint.run": "onSave",
+  "mise.checkForNewMiseVersion": false,
+  "mise.configureExtensionsAutomatically": true,
+  "mise.configureExtensionsAutomaticallyIgnoreList": [],
+  "mise.configureExtensionsIncludeGlobalTools": false,
+  "mise.configureExtensionsUseSymLinks": true,
+  "mise.customBinaryExtensions": [
+    {
+      "binName": "clangd",
+      "extensionId": "llvm-vs-code-extensions.vscode-clangd",
+      "supportsShims": true,
+      "supportsSymlinks": true,
+      "toolSources": [
+        "buildit:clang"
+      ],
+      "vscodeSetting": {
+        "key": "clangd.path"
+      }
+    },
+    {
+      "binName": "lldb-dap",
+      "extensionId": "llvm-vs-code-extensions.lldb-dap",
+      "supportsShims": true,
+      "supportsSymlinks": true,
+      "toolSources": [
+        "buildit:lldb"
+      ],
+      "vscodeSetting": {
+        "key": "lldb-dap.executable-path"
+      }
+    }
+  ],
+  "shellcheck.disableVersionCheck": true,
+  "shellcheck.run": "onSave",
+  "shellcheck.useWorkspaceRootAsCwd": true,
+  "workbench.editorAssociations": {
+    "*.hex": "hexEditor.hexedit"
+  },
+  "workbench.iconTheme": "material-icon-theme",
+  "explorerExclude.backup": {},
+  "clangd.enable": false,
+}
