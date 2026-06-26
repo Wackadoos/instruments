@@ -2,6 +2,8 @@
  * This program tests the dateTimeCallback() function
  * and the timestamp() function.
  */
+#include <Arduino.h>
+
 #include <SPI.h>
 #include "SdFat.h"
 #include "sdios.h"
@@ -36,7 +38,8 @@ uint8_t second = 40;
  * User provided date time callback function.
  * See SdFile::dateTimeCallback() for usage.
  */
-void dateTime(uint16_t* date, uint16_t* time) {
+void dateTime(uint16_t *date, uint16_t *time)
+{
   // User gets date and time from GPS or real-time
   // clock in real callback function
 
@@ -50,29 +53,36 @@ void dateTime(uint16_t* date, uint16_t* time) {
 /*
  * Function to print all timestamps.
  */
-void printTimestamps(FsFile& f) {
+void printTimestamps(FsFile &f)
+{
   cout << F("Creation: ");
   f.printCreateDateTime(&Serial);
-  cout << endl << F("Modify: ");
+  cout << endl
+       << F("Modify: ");
   f.printModifyDateTime(&Serial);
-  cout << endl << F("Access: ");
+  cout << endl
+       << F("Access: ");
   f.printAccessDateTime(&Serial);
   cout << endl;
 }
 //------------------------------------------------------------------------------
-void setup(void) {
+void setup(void)
+{
   Serial.begin(9600);
   // Wait for USB Serial
-  while (!Serial) {
+  while (!Serial)
+  {
     yield();
   }
   cout << F("Type any character to start\n");
-  while (!Serial.available()) {
+  while (!Serial.available())
+  {
     yield();
   }
   // Initialize at the highest speed supported by the board that is
   // not over 50 MHz. Try a lower speed if SPI errors occur.
-  if (!sd.begin(chipSelect, SD_SCK_MHZ(50))) {
+  if (!sd.begin(chipSelect, SD_SCK_MHZ(50)))
+  {
     sd.initErrorHalt();
   }
 
@@ -82,7 +92,8 @@ void setup(void) {
   sd.remove("stamp.txt");
 
   // create a new file with default timestamps
-  if (!file.open("default.txt", O_WRONLY | O_CREAT)) {
+  if (!file.open("default.txt", O_WRONLY | O_CREAT))
+  {
     error("open default.txt failed");
   }
   cout << F("\nOpen with default times\n");
@@ -105,7 +116,8 @@ void setup(void) {
   SdFile::dateTimeCallback(dateTime);
 
   // create a new file with callback timestamps
-  if (!file.open("callback.txt", O_WRONLY | O_CREAT)) {
+  if (!file.open("callback.txt", O_WRONLY | O_CREAT))
+  {
     error("open callback.txt failed");
   }
   cout << ("\nOpen with callback times\n");
@@ -137,19 +149,23 @@ void setup(void) {
   SdFile::dateTimeCallbackCancel();
 
   // create a new file with default timestamps
-  if (!file.open("stamp.txt", O_WRONLY | O_CREAT)) {
+  if (!file.open("stamp.txt", O_WRONLY | O_CREAT))
+  {
     error("open stamp.txt failed");
   }
   // set creation date time
-  if (!file.timestamp(T_CREATE, 2021, 11, 10, 1, 2, 3)) {
+  if (!file.timestamp(T_CREATE, 2021, 11, 10, 1, 2, 3))
+  {
     error("set create time failed");
   }
   // set write/modification date time
-  if (!file.timestamp(T_WRITE, 2021, 11, 11, 4, 5, 6)) {
+  if (!file.timestamp(T_WRITE, 2021, 11, 11, 4, 5, 6))
+  {
     error("set write time failed");
   }
   // set access date
-  if (!file.timestamp(T_ACCESS, 2021, 11, 12, 7, 8, 9)) {
+  if (!file.timestamp(T_ACCESS, 2021, 11, 12, 7, 8, 9))
+  {
     error("set access time failed");
   }
   cout << F("\nTimes after timestamp() calls\n");

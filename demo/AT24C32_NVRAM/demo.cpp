@@ -7,6 +7,7 @@
  */
 
 // include libraries
+#include <Arduino.h>
 #include <AT24CX.h>
 #include <Wire.h>
 
@@ -14,7 +15,8 @@
 AT24CX mem;
 
 // setup
-void setup() {
+void setup()
+{
   // serial init
   Serial.begin(115200);
   Serial.println("AT24CX read/write demo");
@@ -22,7 +24,8 @@ void setup() {
 }
 
 // main loop
-void loop() {
+void loop()
+{
   // read and write byte
   Serial.println("Write 42 to address 12");
   mem.write(12, 42);
@@ -93,10 +96,10 @@ void loop() {
 
   // write array of bytes
   Serial.println("Write array of 80 bytes at address 1000");
-  byte xy[] = {0,   0,   0,   1,   1,   1,   2,   2,   2,   3,
-               3,   3,   4,   4,   4,   5,   5,   5,   6,   6,
-               6,   7,   7,   7,   8,   8,   8,   9,   9,   9,   // 10 x 3 = 30
-               10,  11,  12,  13,  14,  15,  16,  17,  18,  19,  //          10
+  byte xy[] = {0, 0, 0, 1, 1, 1, 2, 2, 2, 3,
+               3, 3, 4, 4, 4, 5, 5, 5, 6, 6,
+               6, 7, 7, 7, 8, 8, 8, 9, 9, 9,                     // 10 x 3 = 30
+               10, 11, 12, 13, 14, 15, 16, 17, 18, 19,           //          10
                120, 121, 122, 123, 124, 125, 126, 127, 128, 129, //          10
                130, 131, 132, 133, 134, 135, 136, 137, 138, 139, //          10
                200, 201, 202, 203, 204, 205, 206, 207, 208, 209,
@@ -105,7 +108,8 @@ void loop() {
 
   // read bytes with multiple steps
   Serial.println("Read 80 single bytes starting at address 1000");
-  for (int i = 0; i < sizeof(xy); i++) {
+  for (int i = 0; i < sizeof(xy); i++)
+  {
     byte sb = mem.read(1000 + i);
     Serial.print("[");
     Serial.print(1000 + i);
@@ -119,7 +123,8 @@ void loop() {
   byte z[80];
   memset(&z[0], 32, sizeof(z));
   mem.read(1000, z, sizeof(z));
-  for (int i = 0; i < sizeof(z); i++) {
+  for (int i = 0; i < sizeof(z); i++)
+  {
     Serial.print("[");
     Serial.print(1000 + i);
     Serial.print("] = ");
@@ -127,6 +132,7 @@ void loop() {
   }
 
   // stop
-  while (1 == 1) {
+  while (1 == 1)
+  {
   }
 }

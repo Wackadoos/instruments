@@ -1,22 +1,26 @@
 // Demo for getting individual unified sensor data from the AHT Humidity and
 // Temperature sensor
 
+#include <Arduino.h>
 #include <Adafruit_AHTX0.h>
 
 Adafruit_AHTX0 aht;
 
 Adafruit_Sensor *aht_humidity, *aht_temp;
 
-void setup(void) {
+void setup(void)
+{
   Serial.begin(115200);
   while (!Serial)
     delay(10); // will pause Zero, Leonardo, etc until serial console opens
 
   Serial.println("Adafruit AHT10/AHT20 test!");
 
-  if (!aht.begin()) {
+  if (!aht.begin())
+  {
     Serial.println("Failed to find AHT10/AHT20 chip");
-    while (1) {
+    while (1)
+    {
       delay(10);
     }
   }
@@ -29,7 +33,8 @@ void setup(void) {
   aht_humidity->printSensorDetails();
 }
 
-void loop() {
+void loop()
+{
   //  /* Get a new normalized sensor event */
   sensors_event_t humidity;
   sensors_event_t temp;

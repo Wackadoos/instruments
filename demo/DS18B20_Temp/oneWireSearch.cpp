@@ -14,6 +14,7 @@
 // 0.1.01 first published version
 // 0.1.02 small output changes
 
+#include <Arduino.h>
 #include <OneWire.h>
 
 void setup()
@@ -39,21 +40,23 @@ uint8_t findDevices(int pin)
   uint8_t address[8];
   uint8_t count = 0;
 
-
   if (ow.search(address))
   {
     Serial.print("\nuint8_t pin");
     Serial.print(pin, DEC);
     Serial.println("[][8] = {");
-    do {
+    do
+    {
       count++;
       Serial.println("  {");
       for (uint8_t i = 0; i < 8; i++)
       {
         Serial.print("0x");
-        if (address[i] < 0x10) Serial.print("0");
+        if (address[i] < 0x10)
+          Serial.print("0");
         Serial.print(address[i], HEX);
-        if (i < 7) Serial.print(", ");
+        if (i < 7)
+          Serial.print(", ");
       }
       Serial.println("  },");
     } while (ow.search(address));

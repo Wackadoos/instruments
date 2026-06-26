@@ -6,6 +6,7 @@
                 Remember to change the baud rate to a correct value, you can find which baud rate does your VESC use in VESCTool -> UART section.
 */
 
+#include <Arduino.h>
 #include <VescUart.h>
 #include <SoftwareSerial.h>
 
@@ -15,7 +16,8 @@ VescUart vesc;
 /** Initiate SoftwareSerial class */
 SoftwareSerial vescSerial(13, 15);
 
-void setup() {
+void setup()
+{
 
   /** Setup Serial port to display data */
   Serial.begin(9600);
@@ -27,16 +29,17 @@ void setup() {
   vesc.setSerialPort(&vescSerial);
 }
 
-void loop() {
-  
+void loop()
+{
+
   /** Call the function getVescValues() to acquire data from VESC */
-  if ( vesc.getVescValues() ) {
+  if (vesc.getVescValues())
+  {
 
     Serial.println(vesc.data.rpm);
     Serial.println(vesc.data.inpVoltage);
     Serial.println(vesc.data.ampHours);
     Serial.println(vesc.data.tachometerAbs);
-
   }
   else
   {

@@ -1,13 +1,18 @@
 // Print a list of error codes, symbols, and comments.
+#include <Arduino.h>
+
 #include "SdFat.h"
-void setup() {
+void setup()
+{
   Serial.begin(9600);
-  while (!Serial) {
+  while (!Serial)
+  {
   }
   delay(1000);
   Serial.println();
   Serial.println(F("Code,Symbol - failed operation"));
-  for (uint8_t code = 0; code <= SD_CARD_ERROR_UNKNOWN; code++) {
+  for (uint8_t code = 0; code <= SD_CARD_ERROR_UNKNOWN; code++)
+  {
     Serial.print(code < 16 ? "0X0" : "0X");
     Serial.print(code, HEX);
     Serial.print(",");

@@ -7,15 +7,20 @@
 #define SD_MISO MISO
 #define SD_MOSI MOSI
 
+#include <Arduino.h>
+
 #include "SPI.h"
-void setup() {
+void setup()
+{
   uint8_t rx, tx;
   Serial.begin(9600);
-  while (!Serial) {
-    yield();    
+  while (!Serial)
+  {
+    yield();
   }
   Serial.println(F("\nType any character to start"));
-  while (!Serial.available()) {
+  while (!Serial.available())
+  {
     yield();
   }
   Serial.print("Begin, SD_MISO: ");
@@ -24,12 +29,14 @@ void setup() {
   pinMode(SD_MISO, INPUT_PULLUP);
   pinMode(SD_MOSI, OUTPUT);
   digitalWrite(SD_MOSI, HIGH);
-  if (!digitalRead(SD_MISO)) {
+  if (!digitalRead(SD_MISO))
+  {
     Serial.println("Error: SD_MISO not HIGH");
     goto fail;
   }
   digitalWrite(SD_MOSI, LOW);
-  if (digitalRead(SD_MISO)) {
+  if (digitalRead(SD_MISO))
+  {
     Serial.println("Error: SD_MISO not LOW");
     goto fail;
   }
@@ -43,9 +50,11 @@ void setup() {
   // Start with a 400 kHz clock.  Try full speed if success for 400 kHz.
   SD_SPI.beginTransaction(SPISettings(400000, MSBFIRST, SPI_MODE0));
   tx = 0;
-  do {
+  do
+  {
     rx = SD_SPI.transfer(tx);
-    if (tx != rx) {
+    if (tx != rx)
+    {
       Serial.print("Error rx: 0x");
       Serial.print(rx, HEX);
       Serial.print(" != tx: 0x");

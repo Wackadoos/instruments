@@ -12,6 +12,7 @@
 // You must connect a pull up resistor (~10kohm) from the SQW pin up to VCC.
 // Without this pull up the wave output will not work!
 
+#include <Arduino.h>
 #include "RTClib.h"
 
 RTC_DS1307 rtc;
@@ -25,11 +26,13 @@ Ds1307SqwPinMode modes[] = {DS1307_OFF,
                             DS1307_SquareWave8kHz,
                             DS1307_SquareWave32kHz};
 
-void print_mode() {
+void print_mode()
+{
   Ds1307SqwPinMode mode = rtc.readSqwPinMode();
 
   Serial.print("Sqw Pin Mode: ");
-  switch (mode) {
+  switch (mode)
+  {
   case DS1307_OFF:
     Serial.println("OFF");
     break;
@@ -54,7 +57,8 @@ void print_mode() {
   }
 }
 
-void setup() {
+void setup()
+{
   Serial.begin(57600);
 
 #ifndef ESP8266
@@ -62,7 +66,8 @@ void setup() {
     ; // wait for serial port to connect. Needed for native USB
 #endif
 
-  if (!rtc.begin()) {
+  if (!rtc.begin())
+  {
     Serial.println("Couldn't find RTC");
     Serial.flush();
     while (1)
@@ -72,11 +77,13 @@ void setup() {
   print_mode();
 }
 
-void loop() {
+void loop()
+{
   rtc.writeSqwPinMode(modes[mode_index++]);
   print_mode();
 
-  if (mode_index > 5) {
+  if (mode_index > 5)
+  {
     mode_index = 0;
   }
 

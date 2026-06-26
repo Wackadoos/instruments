@@ -27,9 +27,11 @@ https://learn.adafruit.com/adafruit-microsd-spi-sdio
 
 Wires should be short since signals can be as faster than 50 MHz.
 */
+#include <Arduino.h>
+
 #ifndef DISABLE_FS_H_WARNING
-#define DISABLE_FS_H_WARNING  // Disable warning for type File not defined.
-#endif                        // DISABLE_FS_H_WARNING
+#define DISABLE_FS_H_WARNING // Disable warning for type File not defined.
+#endif                       // DISABLE_FS_H_WARNING
 #include "SdFat.h"
 //------------------------------------------------------------------------------
 // Example GPIO definitions I use for debug. Edit for your setup.
@@ -44,9 +46,9 @@ Wires should be short since signals can be as faster than 50 MHz.
 #elif defined(ARDUINO_ADAFRUIT_FEATHER_RP2350_HSTX)
 // CLK: GPIO10, CMD: GPIO11, DAT[0,3]: GPIO[22, 25].
 #define SD_CONFIG SdioConfig(10u, 11u, 22u)
-#else  // defined(ARDUINO_ARCH_RP2040)
+#else // defined(ARDUINO_ARCH_RP2040)
 #warning "Undefined SD_CONFIG. Run this program for the Variant Symbol."
-#endif  // defined(ARDUINO_ARCH_RP2040)
+#endif // defined(ARDUINO_ARCH_RP2040)
 //------------------------------------------------------------------------------
 // Class File is not defined by SdFat since the RP2040 system defines it.
 // 1 for FAT16/FAT32, 2 for exFAT, 3 for FAT16/FAT32 and exFAT.
@@ -61,17 +63,20 @@ ExFile file;
 #elif SD_FAT_TYPE == 3
 SdFs sd;
 FsFile file;
-#else  // SD_FAT_TYPE
+#else // SD_FAT_TYPE
 #error Invalid SD_FAT_TYPE
-#endif  // SD_FAT_TYPE
+#endif // SD_FAT_TYPE
 
-void setup() {
+void setup()
+{
   Serial.begin(9600);
-  while (!Serial) {
+  while (!Serial)
+  {
     yield();
   }
   Serial.println("Type any character to start\n");
-  while (!Serial.available()) {
+  while (!Serial.available())
+  {
     yield();
   }
   Serial.printf("Variant Symbol: ARDUINO_%s\n\n", BOARD_NAME);
@@ -79,14 +84,15 @@ void setup() {
   SdioConfig cfg = SD_CONFIG;
   Serial.printf("clkPin: %d, cmdPin: %d, dat0Pin: %d, clkDiv: %4.2f\n",
                 cfg.clkPin(), cfg.cmdPin(), cfg.dat0Pin(), cfg.clkDiv());
-  if (!sd.begin(SD_CONFIG)) {
+  if (!sd.begin(SD_CONFIG))
+  {
     sd.initErrorHalt(&Serial);
   }
   Serial.println("Card successfully initialized.");
   Serial.println("\nls:");
-  sd.ls(LS_A | LS_DATE | LS_SIZE);  // Add LS_R for recursive list.
+  sd.ls(LS_A | LS_DATE | LS_SIZE); // Add LS_R for recursive list.
   Serial.println("\nDone! Try the bench example next.");
-#else  // #if defined(SD_CONFIG)
+#else // #if defined(SD_CONFIG)
   Serial.println("Error: SD_CONFIG undefined for your board.");
   Serial.println("Define clkPin, cmdPin, and dat0Pin above.");
 #endif

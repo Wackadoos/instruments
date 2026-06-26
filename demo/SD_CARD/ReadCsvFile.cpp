@@ -1,6 +1,8 @@
+#include <Arduino.h>
+
 #ifndef DISABLE_FS_H_WARNING
-#define DISABLE_FS_H_WARNING  // Disable warning for type File not defined. 
-#endif  // DISABLE_FS_H_WARNING 
+#define DISABLE_FS_H_WARNING // Disable warning for type File not defined.
+#endif                       // DISABLE_FS_H_WARNING
 #include "SdFat.h"
 
 // SD_FAT_TYPE = 0 for SdFat/File as defined in SdFatConfig.h,
@@ -18,10 +20,10 @@
 // SDCARD_SS_PIN is defined for the built-in SD on some boards.
 #ifndef SDCARD_SS_PIN
 const uint8_t SD_CS_PIN = SS;
-#else   // SDCARD_SS_PIN
+#else  // SDCARD_SS_PIN
 // Assume built-in SD is used.
 const uint8_t SD_CS_PIN = SDCARD_SS_PIN;
-#endif  // SDCARD_SS_PIN
+#endif // SDCARD_SS_PIN
 
 // Try max SPI clock for an SD. Reduce SPI_CLOCK if errors occur.
 #define SPI_CLOCK SD_SCK_MHZ(50)
@@ -34,9 +36,9 @@ const uint8_t SD_CS_PIN = SDCARD_SS_PIN;
 #define SD_CONFIG SdioConfig(PIN_SD_CLK, PIN_SD_CMD_MOSI, PIN_SD_DAT0_MISO)
 #elif ENABLE_DEDICATED_SPI
 #define SD_CONFIG SdSpiConfig(SD_CS_PIN, DEDICATED_SPI, SPI_CLOCK)
-#else  // HAS_TEENSY_SDIO
+#else // HAS_TEENSY_SDIO
 #define SD_CONFIG SdSpiConfig(SD_CS_PIN, SHARED_SPI, SPI_CLOCK)
-#endif  // HAS_TEENSY_SDIO
+#endif // HAS_TEENSY_SDIO
 
 #if SD_FAT_TYPE == 0
 SdFat sd;
@@ -50,9 +52,9 @@ ExFile file;
 #elif SD_FAT_TYPE == 3
 SdFs sd;
 FsFile file;
-#else  // SD_FAT_TYPE
+#else // SD_FAT_TYPE
 #error Invalid SD_FAT_TYPE
-#endif  // SD_FAT_TYPE
+#endif // SD_FAT_TYPE
 
 char line[40];
 
@@ -61,75 +63,92 @@ char line[40];
 #define error(s) sd.errorHalt(&Serial, F(s))
 //------------------------------------------------------------------------------
 // Check for extra characters in field or find minus sign.
-char* skipSpace(char* str) {
-  while (isspace(*str)) str++;
+char *skipSpace(char *str)
+{
+  while (isspace(*str))
+    str++;
   return str;
 }
 //------------------------------------------------------------------------------
-bool parseLine(char* str) {
-  char* ptr;
+bool parseLine(char *str)
+{
+  char *ptr;
 
   // Set strtok start of line.
   str = strtok(str, ",");
-  if (!str) return false;
+  if (!str)
+    return false;
 
   // Print text field.
   Serial.println(str);
 
   // Subsequent calls to strtok expects a null pointer.
   str = strtok(nullptr, ",");
-  if (!str) return false;
+  if (!str)
+    return false;
 
   // Convert string to long integer.
   int32_t i32 = strtol(str, &ptr, 0);
-  if (str == ptr || *skipSpace(ptr)) return false;
+  if (str == ptr || *skipSpace(ptr))
+    return false;
   Serial.println(i32);
 
   str = strtok(nullptr, ",");
-  if (!str) return false;
+  if (!str)
+    return false;
 
   // strtoul accepts a leading minus with unexpected results.
-  if (*skipSpace(str) == '-') return false;
+  if (*skipSpace(str) == '-')
+    return false;
 
   // Convert string to unsigned long integer.
   uint32_t u32 = strtoul(str, &ptr, 0);
-  if (str == ptr || *skipSpace(ptr)) return false;
+  if (str == ptr || *skipSpace(ptr))
+    return false;
   Serial.println(u32);
 
   str = strtok(nullptr, ",");
-  if (!str) return false;
+  if (!str)
+    return false;
 
   // Convert string to double.
   double d = strtod(str, &ptr);
-  if (str == ptr || *skipSpace(ptr)) return false;
+  if (str == ptr || *skipSpace(ptr))
+    return false;
   Serial.println(d);
 
   // Check for extra fields.
   return strtok(nullptr, ",") == nullptr;
 }
 //------------------------------------------------------------------------------
-void setup() {
+void setup()
+{
   Serial.begin(9600);
 
   // Wait for USB Serial
-  while (!Serial) {
+  while (!Serial)
+  {
     yield();
   }
   Serial.println("Type any character to start");
-  while (!Serial.available()) {
+  while (!Serial.available())
+  {
     yield();
   }
   // Initialize the SD.
-  if (!sd.begin(SD_CONFIG)) {
+  if (!sd.begin(SD_CONFIG))
+  {
     sd.initErrorHalt(&Serial);
     return;
   }
   // Remove any existing file.
-  if (sd.exists("ReadCsvDemo.csv")) {
+  if (sd.exists("ReadCsvDemo.csv"))
+  {
     sd.remove("ReadCsvDemo.csv");
   }
   // Create the file.
-  if (!file.open("ReadCsvDemo.csv", FILE_WRITE)) {
+  if (!file.open("ReadCsvDemo.csv", FILE_WRITE))
+  {
     error("open failed");
   }
   // Write test data. Test missing CRLF on last line.
@@ -141,19 +160,24 @@ void setup() {
   // Rewind file for read.
   file.rewind();
 
-  while (file.available()) {
+  while (file.available())
+  {
     int n = file.fgets(line, sizeof(line));
-    if (n <= 0) {
+    if (n <= 0)
+    {
       error("fgets failed");
     }
-    if (line[n - 1] != '\n' && n == (sizeof(line) - 1)) {
+    if (line[n - 1] != '\n' && n == (sizeof(line) - 1))
+    {
       error("line too long");
     }
-    if (line[n - 1] == '\n') {
+    if (line[n - 1] == '\n')
+    {
       // Remove new line.
-      line[n -1] = 0;
+      line[n - 1] = 0;
     }
-    if (!parseLine(line)) {
+    if (!parseLine(line))
+    {
       error("parseLine failed");
     }
     Serial.println();

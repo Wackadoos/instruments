@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
@@ -14,7 +15,7 @@ DallasTemperature sensors(&oneWire);
 DeviceAddress insideThermometer, outsideThermometer;
 
 // function that will be called when an alarm condition exists during DallasTemperatures::processAlarms();
-void newAlarmHandler(const uint8_t* deviceAddress)
+void newAlarmHandler(const uint8_t *deviceAddress)
 {
   Serial.println("Alarm Handler Start");
   printAlarmInfo(deviceAddress);
@@ -35,7 +36,8 @@ void printAddress(const DeviceAddress deviceAddress)
   Serial.print("Address: ");
   for (uint8_t i = 0; i < 8; i++)
   {
-    if (deviceAddress[i] < 16) Serial.print("0");
+    if (deviceAddress[i] < 16)
+      Serial.print("0");
     Serial.print(deviceAddress[i], HEX);
   }
   Serial.print(" ");
@@ -49,7 +51,8 @@ void printTemp(const DeviceAddress deviceAddress)
     Serial.print("Current Temp C: ");
     Serial.print(tempC);
   }
-  else Serial.print("DEVICE DISCONNECTED");
+  else
+    Serial.print("DEVICE DISCONNECTED");
   Serial.print(" ");
 }
 
@@ -83,8 +86,10 @@ void setup(void)
   Serial.println(" devices.");
 
   // search for devices on the bus and assign based on an index
-  if (!sensors.getAddress(insideThermometer, 0)) Serial.println("Unable to find address for Device 0");
-  if (!sensors.getAddress(outsideThermometer, 1)) Serial.println("Unable to find address for Device 1");
+  if (!sensors.getAddress(insideThermometer, 0))
+    Serial.println("Unable to find address for Device 0");
+  if (!sensors.getAddress(outsideThermometer, 1))
+    Serial.println("Unable to find address for Device 1");
 
   Serial.print("Device insideThermometer ");
   printAlarmInfo(insideThermometer);
@@ -111,7 +116,6 @@ void setup(void)
 
   // attach alarm handler
   sensors.setAlarmHandler(&newAlarmHandler);
-
 }
 
 void loop(void)

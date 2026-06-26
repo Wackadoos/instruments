@@ -1,6 +1,7 @@
 //
 // Sample of using Async reading of Dallas Temperature Sensors
 //
+#include <Arduino.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
@@ -15,11 +16,11 @@ DallasTemperature sensors(&oneWire);
 
 DeviceAddress tempDeviceAddress;
 
-int  resolution = 12;
+int resolution = 12;
 unsigned long lastTempRequest = 0;
-int  delayInMillis = 0;
+int delayInMillis = 0;
 float temperature = 0.0;
-int  idle = 0;
+int idle = 0;
 //
 // SETUP
 //
@@ -64,7 +65,8 @@ void loop(void)
     // in the async modus
     // for the demo we let the resolution change to show differences
     resolution++;
-    if (resolution > 12) resolution = 9;
+    if (resolution > 12)
+      resolution = 9;
 
     sensors.setResolution(tempDeviceAddress, resolution);
     sensors.requestTemperatures();

@@ -1,4 +1,5 @@
 // Include the libraries we need
+#include <Arduino.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
@@ -39,8 +40,10 @@ void setup(void)
 
   // report parasite power requirements
   Serial.print("Parasite power is: ");
-  if (sensors.isParasitePowerMode()) Serial.println("ON");
-  else Serial.println("OFF");
+  if (sensors.isParasitePowerMode())
+    Serial.println("ON");
+  else
+    Serial.println("OFF");
 
   // Search for devices on the bus and assign based on an index. Ideally,
   // you would do this to initially discover addresses on the bus and then
@@ -48,8 +51,10 @@ void setup(void)
   // the devices on your bus (and assuming they don't change).
   //
   // method 1: by index
-  if (!sensors.getAddress(insideThermometer, 0)) Serial.println("Unable to find address for Device 0");
-  if (!sensors.getAddress(outsideThermometer, 1)) Serial.println("Unable to find address for Device 1");
+  if (!sensors.getAddress(insideThermometer, 0))
+    Serial.println("Unable to find address for Device 0");
+  if (!sensors.getAddress(outsideThermometer, 1))
+    Serial.println("Unable to find address for Device 1");
 
   // method 2: search()
   // search() looks for the next device. Returns 1 if a new address has been
@@ -59,11 +64,11 @@ void setup(void)
   // deterministic. You will always get the same devices in the same order
   //
   // Must be called before search()
-  //oneWire.reset_search();
+  // oneWire.reset_search();
   // assigns the first address found to insideThermometer
-  //if (!oneWire.search(insideThermometer)) Serial.println("Unable to find address for insideThermometer");
+  // if (!oneWire.search(insideThermometer)) Serial.println("Unable to find address for insideThermometer");
   // assigns the seconds address found to outsideThermometer
-  //if (!oneWire.search(outsideThermometer)) Serial.println("Unable to find address for outsideThermometer");
+  // if (!oneWire.search(outsideThermometer)) Serial.println("Unable to find address for outsideThermometer");
 
   // show the addresses we found on the bus
   Serial.print("Device 0 Address: ");
@@ -93,7 +98,8 @@ void printAddress(DeviceAddress deviceAddress)
   for (uint8_t i = 0; i < 8; i++)
   {
     // zero pad the address if necessary
-    if (deviceAddress[i] < 16) Serial.print("0");
+    if (deviceAddress[i] < 16)
+      Serial.print("0");
     Serial.print(deviceAddress[i], HEX);
   }
 }

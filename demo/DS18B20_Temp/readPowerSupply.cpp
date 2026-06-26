@@ -9,6 +9,7 @@
 //
 
 // Include the libraries we need
+#include <Arduino.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
@@ -48,12 +49,16 @@ void setup(void)
 
   // report parasite power requirements
   Serial.print("Parasite power is: ");
-  if (sensors.readPowerSupply()) Serial.println("ON");  // no address means "scan all devices for parasite mode"
-  else Serial.println("OFF");
+  if (sensors.readPowerSupply())
+    Serial.println("ON"); // no address means "scan all devices for parasite mode"
+  else
+    Serial.println("OFF");
 
   // Search for devices on the bus and assign based on an index.
-  if (!sensors.getAddress(insideThermometer, 0)) Serial.println("Unable to find address for Device 0");
-  if (!sensors.getAddress(outsideThermometer, 1)) Serial.println("Unable to find address for Device 1");
+  if (!sensors.getAddress(insideThermometer, 0))
+    Serial.println("Unable to find address for Device 0");
+  if (!sensors.getAddress(outsideThermometer, 1))
+    Serial.println("Unable to find address for Device 1");
 
   // show the addresses we found on the bus
   Serial.print("Device 0 Address: ");
@@ -79,7 +84,8 @@ void printAddress(DeviceAddress deviceAddress)
   for (uint8_t i = 0; i < 8; i++)
   {
     // zero pad the address if necessary
-    if (deviceAddress[i] < 0x10) Serial.print("0");
+    if (deviceAddress[i] < 0x10)
+      Serial.print("0");
     Serial.print(deviceAddress[i], HEX);
   }
 }

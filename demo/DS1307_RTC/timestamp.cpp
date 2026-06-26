@@ -8,11 +8,13 @@
 ** Last Edit:
 */
 
+#include <Arduino.h>
 #include "RTClib.h"
 
 RTC_DS1307 rtc;
 
-void setup() {
+void setup()
+{
   Serial.begin(57600);
 
 #ifndef ESP8266
@@ -20,14 +22,16 @@ void setup() {
     ; // wait for serial port to connect. Needed for native USB
 #endif
 
-  if (!rtc.begin()) {
+  if (!rtc.begin())
+  {
     Serial.println("Couldn't find RTC");
     Serial.flush();
     while (1)
       delay(10);
   }
 
-  if (!rtc.isrunning()) {
+  if (!rtc.isrunning())
+  {
     Serial.println("RTC is NOT running, let's set the time!");
     // When time needs to be set on a new device, or after a power loss, the
     // following line sets the RTC to the date & time this sketch was compiled
@@ -45,7 +49,8 @@ void setup() {
   // rtc.adjust(DateTime(2014, 1, 21, 3, 0, 0));
 }
 
-void loop() {
+void loop()
+{
   DateTime time = rtc.now();
 
   // Full Timestamp

@@ -1,8 +1,9 @@
+#include <Arduino.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
 // Data wire is plugged into port 2 on the Arduino, while external pullup P-MOSFET gate into port 3
-#define ONE_WIRE_BUS    2
+#define ONE_WIRE_BUS 2
 #define ONE_WIRE_PULLUP 3
 
 // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
@@ -29,7 +30,8 @@ void loop(void)
   sensors.requestTemperatures(); // Send the command to get temperatures
   Serial.println("DONE");
 
-  for (int i = 0; i < sensors.getDeviceCount(); i++) {
+  for (int i = 0; i < sensors.getDeviceCount(); i++)
+  {
     Serial.println("Temperature for Device " + String(i) + " is: " + String(sensors.getTempCByIndex(i)));
   }
 }

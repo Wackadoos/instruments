@@ -9,6 +9,7 @@
 // Released to the public domain
 //
 
+#include <Arduino.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 

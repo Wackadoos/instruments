@@ -9,6 +9,7 @@
 // 0.0.1 = 2020-02-18 initial version
 //
 
+#include <Arduino.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
@@ -56,10 +57,10 @@ void setup()
 
   // Print current values on the scratchpad (resolution = 12, userdata = 24680)
   printValues();
-
 }
 
-void loop() {
+void loop()
+{
 
   // Change configuration and alarm/userdata registers on the scratchpad
   int8_t resolution = 10;
@@ -89,10 +90,10 @@ void loop() {
   printValues();
 
   delay(2000);
-
 }
 
-void printValues() {
+void printValues()
+{
 
   Serial.println();
   Serial.println("Current values on the scratchpad:");
@@ -102,5 +103,4 @@ void printValues() {
 
   Serial.print("User data:\t");
   Serial.println(sensors.getUserData(deviceAddress));
-
 }

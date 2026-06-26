@@ -10,6 +10,8 @@
  * Note: Some cards may 'stutter' others just get slow due
  * to the number of flash erases this program causes.
  */
+#include <Arduino.h>
+
 #include <SdFat.h>
 
 const uint8_t SD_CHIP_SELECT = SS;
@@ -23,20 +25,23 @@ typedef File file_t;
 /*
  * create enough files to force a cluster to be allocated to dir.
  */
-void dirAllocTest(file_t* dir) {
+void dirAllocTest(file_t *dir)
+{
   char buf[32], name[32];
   file_t file;
   uint16_t n;
   uint32_t size = dir->dirSize();
 
   // create files and write name to file
-  for (n = 0; ; n++){
+  for (n = 0;; n++)
+  {
     // make file name
     sprintf(name, "%u.TXT", n);
 
     // open start time
     uint32_t t0 = millis();
-    if (!file.open(dir, name, O_WRONLY | O_CREAT | O_EXCL)) {
+    if (!file.open(dir, name, O_WRONLY | O_CREAT | O_EXCL))
+    {
       error("open for write failed");
     }
 
@@ -44,7 +49,8 @@ void dirAllocTest(file_t* dir) {
     uint32_t t1 = millis();
     // write file name to file
     file.print(name);
-    if (!file.close()) error("close write");
+    if (!file.close())
+      error("close write");
 
     // write end time
     uint32_t t2 = millis();
@@ -60,32 +66,38 @@ void dirAllocTest(file_t* dir) {
     Serial.println(t2 - t1);
 
     // directory size will change when a cluster is added
-    if (dir->curPosition() > size) break;
+    if (dir->curPosition() > size)
+      break;
   }
 
   // read files and check content
-  for (uint16_t i = 0; i <= n; i++) {
+  for (uint16_t i = 0; i <= n; i++)
+  {
     sprintf(name, "%u.TXT", i);
 
     // open start time
     uint32_t t0 = millis();
-    if (!file.open(dir, name, O_RDONLY)) {
+    if (!file.open(dir, name, O_RDONLY))
+    {
       error("open for read failed");
     }
 
     // open end time and read start time
     uint32_t t1 = millis();
     int16_t nr = file.read(buf, sizeof(buf));
-    if (nr < 5) error("file.read failed");
+    if (nr < 5)
+      error("file.read failed");
 
     // read end time
     uint32_t t2 = millis();
 
     // check file content
-    if (strlen(name) != (size_t)nr || strncmp(name, buf, nr)) {
+    if (strlen(name) != (size_t)nr || strncmp(name, buf, nr))
+    {
       error("content compare failed");
     }
-    if (!file.close()) error("close read failed");
+    if (!file.close())
+      error("close read failed");
 
     Serial.print(F("RD "));
     Serial.print(i);
@@ -100,36 +112,45 @@ void dirAllocTest(file_t* dir) {
   }
 }
 
-void setup() {
+void setup()
+{
   file_t root;
   Serial.begin(9600);
-  while (!Serial) {}  // wait for Leonardo
+  while (!Serial)
+  {
+  } // wait for Leonardo
   Serial.println(F("Type any character to start"));
-  while (Serial.read() <= 0) {}
-  delay(200);  // Catch Due reset problem
+  while (Serial.read() <= 0)
+  {
+  }
+  delay(200); // Catch Due reset problem
 
   // initialize the SD card at SPI_FULL_SPEED for best performance.
   // try lower speed if bus errors occur.
-  if (!sd.begin(SD_CHIP_SELECT, SPI_FULL_SPEED)) {
+  if (!sd.begin(SD_CHIP_SELECT, SPI_FULL_SPEED))
+  {
     sd.initErrorHalt(&Serial);
   }
   root.openRoot(&sd);
   uint32_t m = millis();
   // write files to root if not FAT16
-  if (sd.fatType() != 16) {
+  if (sd.fatType() != 16)
+  {
     Serial.println(F("Writing files to root"));
     dirAllocTest(&root);
   }
 
   // create sub1 and write files
   file_t sub1;
-  if (!sub1.mkdir(&root, "SUB1")) error("makdeDir SUB1 failed");
+  if (!sub1.mkdir(&root, "SUB1"))
+    error("makdeDir SUB1 failed");
   Serial.println(F("Writing files to SUB1"));
   dirAllocTest(&sub1);
 
   // create sub2 and write files
   file_t sub2;
-  if (!sub2.mkdir(&sub1, "SUB2")) error("mkdir SUB2 failed");
+  if (!sub2.mkdir(&sub1, "SUB2"))
+    error("mkdir SUB2 failed");
   Serial.println(F("Writing files to SUB2"));
   dirAllocTest(&sub2);
   m = millis() - m;
@@ -137,4 +158,4 @@ void setup() {
   Serial.println(m);
 }
 
-void loop() { }
+void loop() {}

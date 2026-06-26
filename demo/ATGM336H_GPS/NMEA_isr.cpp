@@ -6,9 +6,9 @@
 //  Prerequisites:
 //     1) NMEA.ino works with your device
 //
-//  Description:  This minimal program parses the GPS data during the 
+//  Description:  This minimal program parses the GPS data during the
 //     RX character interrupt.  The ISR passes the character to
-//     the GPS object for parsing.  The GPS object will add gps_fix 
+//     the GPS object for parsing.  The GPS object will add gps_fix
 //     structures to a buffer that can be later read() by loop().
 //
 //  License:

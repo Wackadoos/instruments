@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
@@ -36,8 +37,10 @@ void setup(void)
 
   // report parasite power requirements
   Serial.print("Parasite power is: ");
-  if (sensors.isParasitePowerMode()) Serial.println("ON");
-  else Serial.println("OFF");
+  if (sensors.isParasitePowerMode())
+    Serial.println("ON");
+  else
+    Serial.println("OFF");
 
   // Loop through each device, print out address
   for (int i = 0; i < numberOfDevices; i++)
@@ -60,23 +63,24 @@ void setup(void)
       Serial.print("Resolution actually set to: ");
       Serial.print(sensors.getResolution(tempDeviceAddress), DEC);
       Serial.println();
-    } else {
+    }
+    else
+    {
       Serial.print("Found ghost device at ");
       Serial.print(i, DEC);
       Serial.print(" but could not detect address. Check power and cabling");
     }
   }
-
 }
 
 // function to print the temperature for a device
 void printTemperature(DeviceAddress deviceAddress)
 {
   // method 1 - slower
-  //Serial.print("Temp C: ");
-  //Serial.print(sensors.getTempC(deviceAddress));
-  //Serial.print(" Temp F: ");
-  //Serial.print(sensors.getTempF(deviceAddress)); // Makes a second call to getTempC and then converts to Fahrenheit
+  // Serial.print("Temp C: ");
+  // Serial.print(sensors.getTempC(deviceAddress));
+  // Serial.print(" Temp F: ");
+  // Serial.print(sensors.getTempF(deviceAddress)); // Makes a second call to getTempC and then converts to Fahrenheit
 
   // method 2 - faster
   float tempC = sensors.getTempC(deviceAddress);
@@ -99,7 +103,6 @@ void loop(void)
   sensors.requestTemperatures(); // Send the command to get temperatures
   Serial.println("DONE");
 
-
   // Loop through each device, print out temperature data
   for (int i = 0; i < numberOfDevices; i++)
   {
@@ -113,8 +116,7 @@ void loop(void)
       // It responds almost immediately. Let's print out the data
       printTemperature(tempDeviceAddress); // Use a simple function to print out the data
     }
-    //else ghost device! Check your power requirements and cabling
-
+    // else ghost device! Check your power requirements and cabling
   }
 }
 
@@ -123,7 +125,8 @@ void printAddress(DeviceAddress deviceAddress)
 {
   for (uint8_t i = 0; i < 8; i++)
   {
-    if (deviceAddress[i] < 16) Serial.print("0");
+    if (deviceAddress[i] < 16)
+      Serial.print("0");
     Serial.print(deviceAddress[i], HEX);
   }
 }

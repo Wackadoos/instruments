@@ -9,10 +9,11 @@
 // Released to the public domain
 //
 
+#include <Arduino.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
-#define ONE_WIRE_BUS      2
+#define ONE_WIRE_BUS 2
 
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
@@ -44,7 +45,8 @@ void printAddress(DeviceAddress deviceAddress)
   for (uint8_t i = 0; i < 8; i++)
   {
     // zero pad the address if necessary
-    if (deviceAddress[i] < 16) Serial.print("0");
+    if (deviceAddress[i] < 16)
+      Serial.print("0");
     Serial.print(deviceAddress[i], HEX);
   }
 }
@@ -80,9 +82,7 @@ void setup(void)
     Serial.println();
   }
   Serial.println();
-
 }
-
 
 void loop(void)
 {
@@ -101,7 +101,7 @@ void loop(void)
   }
 
   Serial.print(millis());
-  Serial.println("\tGet temp by ID");  // assume ID = 0, 1, 2, 3
+  Serial.println("\tGet temp by ID"); // assume ID = 0, 1, 2, 3
   for (int id = 0; id < 4; id++)
   {
     Serial.print(millis());

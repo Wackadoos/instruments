@@ -10,6 +10,7 @@
 // 0.0.2    2020-02-13 updates to work with current lib version
 // 0.0.3    2020-02-20 added timing measurement of setResolution
 
+#include <Arduino.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
@@ -19,7 +20,6 @@ OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensor(&oneWire);
 
 uint32_t start, stop;
-
 
 void setup()
 {
@@ -33,7 +33,7 @@ void setup()
 
 void loop()
 {
-  float ti[4] = { 94, 188, 375, 750 };
+  float ti[4] = {94, 188, 375, 750};
 
   Serial.println();
   Serial.println("Test takes about 30 seconds for 4 resolutions");

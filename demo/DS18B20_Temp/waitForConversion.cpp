@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
@@ -42,14 +43,13 @@ void loop(void)
   // Request temperature conversion - non-blocking / async
   Serial.println("Before NON-blocking/async requestForConversion");
   start = millis();
-  sensors.setWaitForConversion(false);  // makes it async
+  sensors.setWaitForConversion(false); // makes it async
   sensors.requestTemperatures();
   sensors.setWaitForConversion(true);
   stop = millis();
   Serial.println("After NON-blocking/async requestForConversion");
   Serial.print("Time used: ");
   Serial.println(stop - start);
-
 
   // 9 bit resolution by default
   // Note the programmer is responsible for the right delay

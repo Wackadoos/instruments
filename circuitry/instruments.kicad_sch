@@ -17554,7 +17554,7 @@
 				)
 			)
 		)
-		(property "Friendly Name" "Temp & Pressure"
+		(property "Friendly Name" "Atmospheric Sensor"
 			(at 149.86 49.022 0)
 			(show_name no)
 			(do_not_autoplace no)

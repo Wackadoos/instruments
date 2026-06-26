@@ -8,12 +8,14 @@
 // The maximum sample rate is determined by the time to read the sensor
 // and write 512 bytes to the SD.  Also the ring buffer must be large enough.
 //
-// Note: The RingBuf class can be use to log from a ISR - see the 
+// Note: The RingBuf class can be use to log from a ISR - see the
 // TeensyDmaAdcLogger example.
 //
+#include <Arduino.h>
+
 #ifndef DISABLE_FS_H_WARNING
-#define DISABLE_FS_H_WARNING  // Disable warning for type File not defined.
-#endif                        // DISABLE_FS_H_WARNING
+#define DISABLE_FS_H_WARNING // Disable warning for type File not defined.
+#endif                       // DISABLE_FS_H_WARNING
 #include "RingBuf.h"
 #include "SdFat.h"
 
@@ -40,10 +42,9 @@
 // If 1000 usec is too fast, increase LOG_INTERVAL_USEC or edit SdfatCongig.h
 // and set USE_SPI_ARRAY_TRANSFER non-zero to improve SPI data rate.
 #define LOG_INTERVAL_USEC 1000
-#else  // defined(HAS_TEENSY_SDIO)
+#else // defined(HAS_TEENSY_SDIO)
 #error "Shared SPI is not supported"
-#endif  //defined(HAS_TEENSY_SDIO)
-
+#endif // defined(HAS_TEENSY_SDIO)
 
 // Sample rate.
 #define SAMPLES_PER_SECOND (1000000 / LOG_INTERVAL_USEC)
@@ -63,19 +64,23 @@ FsFile file;
 // RingBuf for File type FsFile.
 RingBuf<FsFile, 512 * RING_BUF_SECTORS> rb;
 
-void logData() {
+void logData()
+{
   // Initialize the SD.
-  if (!sd.begin(SD_CONFIG)) {
+  if (!sd.begin(SD_CONFIG))
+  {
     sd.initErrorHalt(&Serial);
   }
   // Open or create file - truncate existing file.
-  if (!file.open(LOG_FILENAME, O_RDWR | O_CREAT | O_TRUNC)) {
+  if (!file.open(LOG_FILENAME, O_RDWR | O_CREAT | O_TRUNC))
+  {
     Serial.println("open failed\n");
     return;
   }
   // File must be pre-allocated to avoid huge
   // delays searching for free clusters.
-  if (!file.preAllocate(LOG_FILE_SIZE)) {
+  if (!file.preAllocate(LOG_FILE_SIZE))
+  {
     Serial.println("preAllocate failed\n");
     file.close();
     return;
@@ -94,20 +99,25 @@ void logData() {
   // Start time.
   uint32_t logTime = micros();
   // Log data until Serial input or file full.
-  while (!Serial.available()) {
+  while (!Serial.available())
+  {
     // Amount of data in ringBuf.
     size_t n = rb.bytesUsed();
-    if ((n + file.curPosition()) > (LOG_FILE_SIZE - 20)) {
+    if ((n + file.curPosition()) > (LOG_FILE_SIZE - 20))
+    {
       Serial.println("File full - quitting.");
       break;
     }
-    if (n > maxUsed) {
+    if (n > maxUsed)
+    {
       maxUsed = n;
     }
-    if (n >= 512 && !file.isBusy()) {
+    if (n >= 512 && !file.isBusy())
+    {
       // Not busy only allows one sector before possible busy wait.
       // Write one sector from RingBuf to file.
-      if (512 != rb.writeOut(512)) {
+      if (512 != rb.writeOut(512))
+      {
         Serial.println("writeOut failed");
         break;
       }
@@ -115,16 +125,19 @@ void logData() {
     // Time for next point.
     logTime += LOG_INTERVAL_USEC;
     int32_t spareMicros = logTime - micros();
-    if (spareMicros < minSpareMicros) {
+    if (spareMicros < minSpareMicros)
+    {
       minSpareMicros = spareMicros;
     }
-    if (spareMicros <= 0) {
+    if (spareMicros <= 0)
+    {
       Serial.print("Rate too fast ");
       Serial.println(spareMicros);
       break;
     }
     // Wait until time to log data.
-    while (micros() < logTime) {
+    while (micros() < logTime)
+    {
     }
 
     // Read ADC0
@@ -134,7 +147,8 @@ void logData() {
     rb.write(',');
     // Print adc into RingBuf.
     rb.println(adc);
-    if (rb.getWriteError()) {
+    if (rb.getWriteError())
+    {
       // Error caused by too few free bytes in RingBuf.
       Serial.println("WriteError");
       break;
@@ -147,13 +161,16 @@ void logData() {
   file.rewind();
   // Print first hundred lines of file.
   Serial.println("spareMicros,ADC0");
-  for (uint8_t n = 0; n < 100 && file.available();) {
+  for (uint8_t n = 0; n < 100 && file.available();)
+  {
     int c = file.read();
-    if (c < 0) {
+    if (c < 0)
+    {
       break;
     }
     Serial.write(c);
-    if (c == '\n') n++;
+    if (c == '\n')
+      n++;
   }
   Serial.print("\nfileSize: ");
   Serial.println((uint32_t)file.fileSize());
@@ -164,20 +181,27 @@ void logData() {
   file.close();
   sd.end();
 }
-void clearSerialInput() {
-  for (uint32_t m = micros(); micros() - m < 10000;) {
-    if (Serial.read() >= 0) {
+void clearSerialInput()
+{
+  for (uint32_t m = micros(); micros() - m < 10000;)
+  {
+    if (Serial.read() >= 0)
+    {
       m = micros();
     }
   }
 }
-void setup() {
+void setup()
+{
   Serial.begin(9600);
-  while (!Serial) {
+  while (!Serial)
+  {
   }
   uint32_t m = 0;
-  while (!Serial.available()) {
-    if (m == 0 || millis() - m > 4000) {
+  while (!Serial.available())
+  {
+    if (m == 0 || millis() - m > 4000)
+    {
       Serial.println("Type any character to begin");
       m = millis();
     }
@@ -190,10 +214,12 @@ void setup() {
   Serial.println(LOG_FILE_SIZE);
 }
 
-void loop() {
+void loop()
+{
   clearSerialInput();
   Serial.println("\nType any character to log data");
-  while (!Serial.available()) {
+  while (!Serial.available())
+  {
   }
   clearSerialInput();
   logData();

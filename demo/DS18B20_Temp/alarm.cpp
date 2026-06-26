@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
@@ -28,8 +29,10 @@ void setup(void)
   Serial.println(" devices.");
 
   // search for devices on the bus and assign based on an index.
-  if (!sensors.getAddress(insideThermometer, 0)) Serial.println("Unable to find address for Device 0");
-  if (!sensors.getAddress(outsideThermometer, 1)) Serial.println("Unable to find address for Device 1");
+  if (!sensors.getAddress(insideThermometer, 0))
+    Serial.println("Unable to find address for Device 0");
+  if (!sensors.getAddress(outsideThermometer, 1))
+    Serial.println("Unable to find address for Device 1");
 
   // show the addresses we found on the bus
   Serial.print("Device 0 Address: ");
@@ -76,7 +79,8 @@ void printAddress(DeviceAddress deviceAddress)
 {
   for (uint8_t i = 0; i < 8; i++)
   {
-    if (deviceAddress[i] < 16) Serial.print("0");
+    if (deviceAddress[i] < 16)
+      Serial.print("0");
     Serial.print(deviceAddress[i], HEX);
   }
 }
@@ -138,24 +142,23 @@ void loop(void)
   // check each address individually for an alarm condition
   checkAlarm(insideThermometer);
   checkAlarm(outsideThermometer);
-/*
-  // Alternate method:
-  // Search the bus and iterate through addresses of devices with alarms
+  /*
+    // Alternate method:
+    // Search the bus and iterate through addresses of devices with alarms
 
-  // space for the alarm device's address
-  DeviceAddress alarmAddr;
+    // space for the alarm device's address
+    DeviceAddress alarmAddr;
 
-  Serial.println("Searching for alarms...");
+    Serial.println("Searching for alarms...");
 
-  // resetAlarmSearch() must be called before calling alarmSearch()
-  sensors.resetAlarmSearch();
+    // resetAlarmSearch() must be called before calling alarmSearch()
+    sensors.resetAlarmSearch();
 
-  // alarmSearch() returns 0 when there are no devices with alarms
-  while (sensors.alarmSearch(alarmAddr))
-  {
-    Serial.print("ALARM: ");
-    printData(alarmAddr);
-  }
-*/
-
+    // alarmSearch() returns 0 when there are no devices with alarms
+    while (sensors.alarmSearch(alarmAddr))
+    {
+      Serial.print("ALARM: ");
+      printData(alarmAddr);
+    }
+  */
 }

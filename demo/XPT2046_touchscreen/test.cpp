@@ -1,38 +1,45 @@
+#include <Arduino.h>
+
 #include <ILI9341_t3.h>
 #include <font_Arial.h> // from ILI9341_t3
 #include <XPT2046_Touchscreen.h>
 #include <SPI.h>
 
-#define CS_PIN  8
-#define TFT_DC  9
+#define CS_PIN 8
+#define TFT_DC 9
 #define TFT_CS 10
 // MOSI=11, MISO=12, SCK=13
 
 XPT2046_Touchscreen ts(CS_PIN);
-#define TIRQ_PIN  2
-//XPT2046_Touchscreen ts(CS_PIN);  // Param 2 - NULL - No interrupts
-//XPT2046_Touchscreen ts(CS_PIN, 255);  // Param 2 - 255 - No interrupts
-//XPT2046_Touchscreen ts(CS_PIN, TIRQ_PIN);  // Param 2 - Touch IRQ Pin - interrupt enabled polling
+#define TIRQ_PIN 2
+// XPT2046_Touchscreen ts(CS_PIN);  // Param 2 - NULL - No interrupts
+// XPT2046_Touchscreen ts(CS_PIN, 255);  // Param 2 - 255 - No interrupts
+// XPT2046_Touchscreen ts(CS_PIN, TIRQ_PIN);  // Param 2 - Touch IRQ Pin - interrupt enabled polling
 
 ILI9341_t3 tft = ILI9341_t3(TFT_CS, TFT_DC);
 
-void setup() {
+void setup()
+{
   Serial.begin(38400);
   tft.begin();
   tft.setRotation(1);
   tft.fillScreen(ILI9341_BLACK);
   ts.begin();
   ts.setRotation(1);
-  while (!Serial && (millis() <= 1000));
+  while (!Serial && (millis() <= 1000))
+    ;
 }
 
 boolean wastouched = true;
 
-void loop() {
+void loop()
+{
   boolean istouched = ts.touched();
-  if (istouched) {
+  if (istouched)
+  {
     TS_Point p = ts.getPoint();
-    if (!wastouched) {
+    if (!wastouched)
+    {
       tft.fillScreen(ILI9341_BLACK);
       tft.setTextColor(ILI9341_YELLOW);
       tft.setFont(Arial_60);
@@ -52,8 +59,11 @@ void loop() {
     Serial.print(p.x);
     Serial.print(", y = ");
     Serial.println(p.y);
-  } else {
-    if (wastouched) {
+  }
+  else
+  {
+    if (wastouched)
+    {
       tft.fillScreen(ILI9341_BLACK);
       tft.setTextColor(ILI9341_RED);
       tft.setFont(Arial_48);

@@ -4,6 +4,7 @@
 // a specific ID.
 //
 
+#include <Arduino.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
@@ -26,7 +27,6 @@ void setup(void)
 
   // Start up the library
   sensors.begin();
-
 }
 
 void loop(void)
