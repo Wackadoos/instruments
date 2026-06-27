@@ -82,7 +82,7 @@ General:
 - APP to Use: ADC and UART
 - Timeout Brake Current: 5.0 A
 - CAN Mode: Unused
-- Kill Switch Mode: PPM Low
+- Kill Switch Mode: PPM High
 
 #### ADC
 

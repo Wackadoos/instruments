@@ -657,15 +657,24 @@
         "filename": "instruments.kicad_sch",
         "name": "Circuit",
         "uuid": "bf4d8783-6ac1-4225-b331-e4a489898a98"
+      },
+      {
+        "filename": "connectors.kicad_sch",
+        "name": "Connectors",
+        "uuid": "e566f3df-9815-4f6c-bfdc-af177396f12d"
       }
     ],
-    "used_designators": "GPS1,CB1-2,Q1,RV1-2,LS1,DC1,M1-3,ACC1,BZ1,R1-3,BT1-2,DISP1,IC1,ESC1,DS1-2,SW1-4,U1-5,F1-4,RN1,D1-2,#PWR1-41,A1",
+    "used_designators": "RF1,J1-93,TP1,RV1-2,GPS1,CB1-2,Q1,LS1,DC1,M1-3,P2-21,ACC1,BZ1,R1-3,BT1-2,DISP1,IC1,ESC1,DS1-2,SW1-5,U1-5,D1-2,F1-4,RN1,#PWR1-54,A1",
     "variants": []
   },
   "sheets": [
     [
       "bf4d8783-6ac1-4225-b331-e4a489898a98",
       "Circuit"
+    ],
+    [
+      "e566f3df-9815-4f6c-bfdc-af177396f12d",
+      "Connectors"
     ]
   ],
   "text_variables": {},
