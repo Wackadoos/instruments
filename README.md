@@ -120,3 +120,9 @@ IMU Type: IMU_TYPE_OFF
 ### SWD
 
 To program an NRF51822 for Bluetooth connectivity to the ESC, connect to the swd pins (DIO -> SDO & CLK -> SCLK) and press connect in VESC. Then, select the firmware with RX: 11 TX: 9 and flash it. After, you can connect the pins P0.11 -> TX2 and P0.9 -> RX2 to allow the bluetooth module to talk to the ESC on it's secondary serial port (leaving the primary for app usage ie connecting with arduino etc.)
+
+## SD Cards
+
+### Detecting Fake Cards
+
+https://github.com/AltraMayor/f3

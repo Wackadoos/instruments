@@ -240,7 +240,7 @@
       "internal_id": "",
       "mfg": "",
       "mpn": "",
-      "sch_revision": "1"
+      "sch_revision": "3"
     },
     "layer_pairs": [],
     "layer_presets": [],
@@ -654,27 +654,35 @@
     "subpart_id_separator": 0,
     "top_level_sheets": [
       {
-        "filename": "instruments.kicad_sch",
-        "name": "Circuit",
-        "uuid": "bf4d8783-6ac1-4225-b331-e4a489898a98"
+        "filename": "circuit.kicad_sch",
+        "name": "Main",
+        "uuid": "7b3a8acc-a7bf-4991-b6ab-1771768f1043"
       },
       {
-        "filename": "connectors.kicad_sch",
-        "name": "Connectors",
-        "uuid": "e566f3df-9815-4f6c-bfdc-af177396f12d"
+        "filename": "info.kicad_sch",
+        "name": "Info",
+        "uuid": "39bd7319-5a50-41f0-9b9e-a03a1d4d30dc"
       }
     ],
-    "used_designators": "RF1,J1-93,TP1,RV1-2,GPS1,CB1-2,Q1,LS1,DC1,M1-3,P2-21,ACC1,BZ1,R1-3,BT1-2,DISP1,IC1,ESC1,DS1-2,SW1-5,U1-5,D1-2,F1-4,RN1,#PWR1-54,A1",
+    "used_designators": "F1-8,D1-2,#PWR1-92,A1,RN1,MCU1-2,SW1-10,U1-5,DS1-2,ESC1-2,IC1,HUI1-2,DISP1,BT1-5,R1-6,BZ1-2,P2-44,ACC1,M1-6,DC1-2,LS1,GPS1,RV1-3,Q1,J1-124,S1-14,CB1-4,RF1-2,TP1,MA1-6",
     "variants": []
   },
   "sheets": [
     [
-      "bf4d8783-6ac1-4225-b331-e4a489898a98",
-      "Circuit"
+      "7b3a8acc-a7bf-4991-b6ab-1771768f1043",
+      "Main"
     ],
     [
-      "e566f3df-9815-4f6c-bfdc-af177396f12d",
-      "Connectors"
+      "608a92c2-19b6-4f51-b30d-201cbac165bf",
+      "Motor Housing"
+    ],
+    [
+      "48c869f0-37c7-4f58-87f7-eb0e41b18d06",
+      "Instruments Box"
+    ],
+    [
+      "39bd7319-5a50-41f0-9b9e-a03a1d4d30dc",
+      "Info"
     ]
   ],
   "text_variables": {},
