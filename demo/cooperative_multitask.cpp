@@ -15,33 +15,33 @@
 #include <Arduino.h>
 
 // ── Pin assignments ─────────────────────────────────────────
-const uint8_t PIN_BLINK  = 13;   // built-in LED on most boards
-const uint8_t PIN_BREATH = 11;   // must be a PWM-capable pin
+const uint8_t PIN_BLINK = 13;   // built-in LED on most boards
+const uint8_t PIN_BREATH = 11;  // must be a PWM-capable pin
 
 // ── Task state ──────────────────────────────────────────────
 // Each task stores only the timestamp of its NEXT scheduled run.
 
-unsigned long blinkNextMs   = 0;
-unsigned long breathNextMs  = 0;
-unsigned long reportNextMs  = 0;
+unsigned long blinkNextMs = 0;
+unsigned long breathNextMs = 0;
+unsigned long reportNextMs = 0;
 
-bool blinkState = false;         // current LED on/off state
+bool blinkState = false;  // current LED on/off state
 
 // Breathing: iterate brightness 0→255→0 in small steps
-uint8_t  breathBrightness = 0;
-int8_t   breathDirection  = 1;   // +1 rising, -1 falling
+uint8_t breathBrightness = 0;
+int8_t breathDirection = 1;  // +1 rising, -1 falling
 uint16_t breathCycleCount = 0;
 
 unsigned long taskRunCount[3] = {0, 0, 0};  // for the status report
 
-
 // ── Setup ────────────────────────────────────────────────────
 void setup() {
-  pinMode(PIN_BLINK,  OUTPUT);
+  pinMode(PIN_BLINK, OUTPUT);
   pinMode(PIN_BREATH, OUTPUT);
 
   Serial.begin(9600);
-  while (!Serial) {}           // wait for USB serial on Leonardo/Micro
+  while (!Serial) {
+  }  // wait for USB serial on Leonardo/Micro
 
   Serial.println(F("=== Cooperative Multitasking Demo ==="));
   Serial.println(F("Tasks:"));
@@ -50,7 +50,6 @@ void setup() {
   Serial.println(F("  [3] Serial report           every 2 000 ms"));
   Serial.println();
 }
-
 
 // ── Main loop ────────────────────────────────────────────────
 //
@@ -66,7 +65,7 @@ void loop() {
     blinkState = !blinkState;
     digitalWrite(PIN_BLINK, blinkState ? HIGH : LOW);
 
-    blinkNextMs = now + 500UL;   // reschedule 500 ms from NOW
+    blinkNextMs = now + 500UL;  // reschedule 500 ms from NOW
     taskRunCount[0]++;
   }
 
@@ -79,14 +78,14 @@ void loop() {
     // Reverse direction at the ends of the range
     if (breathBrightness >= 250) {
       breathBrightness = 255;
-      breathDirection  = -1;
+      breathDirection = -1;
       breathCycleCount++;
     } else if (breathBrightness <= 5) {
       breathBrightness = 0;
-      breathDirection  = 1;
+      breathDirection = 1;
     }
 
-    breathNextMs = now + 10UL;   // reschedule 10 ms from NOW
+    breathNextMs = now + 10UL;  // reschedule 10 ms from NOW
     taskRunCount[1]++;
   }
 

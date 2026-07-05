@@ -8996,7 +8996,7 @@
 				)
 			)
 		)
-		(property "Value" "DS1307 + AT24C32"
+		(property "Value" "DS3231 + AT24C32"
 			(at 203.2 19.812 0)
 			(show_name no)
 			(do_not_autoplace no)

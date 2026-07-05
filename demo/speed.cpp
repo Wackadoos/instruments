@@ -1,12 +1,10 @@
 //! TCST2103 based speed sensing using interrups
 #include <Arduino.h>
 
-void setup()
-{
+void setup() {
 }
 
-void loop()
-{
+void loop() {
 }
 
 // TODO set up pin interrupt & handler & atomic.

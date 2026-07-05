@@ -1,6 +1,6 @@
 {
-  "C_Cpp.autocomplete": "default",
-  "C_Cpp.intelliSenseEngine": "default",
+  "C_Cpp.autocomplete": "disabled",
+  "C_Cpp.intelliSenseEngine": "disabled",
   "[json]": {
     "editor.defaultFormatter": "vscode.json-language-features"
   },
@@ -129,5 +129,6 @@
   },
   "workbench.iconTheme": "material-icon-theme",
   "explorerExclude.backup": {},
-  "clangd.enable": false,
+  "clangd.enable": true,
+  "clangd.path": "${workspaceFolder}/.vscode/mise-tools/clangd",
 }

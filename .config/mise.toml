@@ -1,0 +1,5 @@
+[tools]
+"buildit:clang" = { version = "22.1", clang_extras = true }
+
+[plugins]
+"vfox-backend:buildit" = "https://github.com/Quasiflo/buildit"
