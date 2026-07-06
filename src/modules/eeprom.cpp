@@ -1,6 +1,6 @@
 #include "eeprom.h"
 
-#include "errors.h"
+#include "utils/errors.h"
 
 void EEPROM::init(TwoWire* wire) {
   if (eeprom.begin(0x50, *wire)) {

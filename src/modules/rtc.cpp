@@ -1,7 +1,7 @@
 #include "rtc.h"
 
-#include "errors.h"
 #include "settings.h"
+#include "utils/errors.h"
 
 void RTC::init(TwoWire* wire, SensorState* state) {
   sensorState = state;

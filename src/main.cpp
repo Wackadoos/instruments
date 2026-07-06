@@ -2,7 +2,6 @@
 
 #include <Wire.h>
 
-#include "errors.h"
 #include "hardware.h"
 #include "modules/ath20.h"
 #include "modules/bmp280.h"
@@ -10,9 +9,10 @@
 #include "modules/rtc.h"
 #include "modules/speed.h"
 #include "modules/temps.h"
-#include "scheduler.h"
 #include "settings.h"
 #include "state.h"
+#include "utils/errors.h"
+#include "utils/scheduler.h"
 
 SensorState sensorState = SensorState();
 AppState currentState = AppState::IDLE;

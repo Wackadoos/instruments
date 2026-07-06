@@ -1,6 +1,6 @@
 #include "temps.h"
 
-#include "errors.h"
+#include "utils/errors.h"
 
 // TODO have interface for enumerating and selecting and storing which temp probes are available and which is which
 

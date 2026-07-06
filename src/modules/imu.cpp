@@ -1,7 +1,7 @@
 #include "imu.h"
 
-#include "errors.h"
 #include "hardware.h"
+#include "utils/errors.h"
 
 void IMU::init(TwoWire* wire, SensorState* state) {
   sensorState = state;

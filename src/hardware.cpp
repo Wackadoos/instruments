@@ -1,12 +1,12 @@
 #include "hardware.h"
 
-#include "errors.h"
 #include "modules/ath20.h"
 #include "modules/bmp280.h"
 #include "modules/eeprom.h"
 #include "modules/imu.h"
 #include "modules/rtc.h"
 #include "modules/temps.h"
+#include "utils/errors.h"
 
 void HARDWARE::init(SensorState* state) {
   //* Set pin modes. Some of these may be set by libraries, but there's no harm in setting the same mode twice to be safe.

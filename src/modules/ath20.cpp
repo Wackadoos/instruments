@@ -1,6 +1,6 @@
 #include "ath20.h"
 
-#include "errors.h"
+#include "utils/errors.h"
 
 void ATH::init(TwoWire* wire, SensorState* state) {
   sensorState = state;

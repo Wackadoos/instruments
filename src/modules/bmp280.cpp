@@ -1,6 +1,6 @@
 #include "bmp280.h"
 
-#include "errors.h"
+#include "utils/errors.h"
 
 void BMP::init(TwoWire* wire, SensorState* state) {
   sensorState = state;

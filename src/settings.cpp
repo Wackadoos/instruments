@@ -1,8 +1,8 @@
 #include "settings.h"
 
-#include "errors.h"
 #include "modules/eeprom.h"
 #include "modules/speed.h"
+#include "utils/errors.h"
 
 void SETTINGS::init() {
   if (EEPROM::isEnabled()) {
