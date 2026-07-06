@@ -90,6 +90,7 @@ void printTemperature(DeviceAddress deviceAddress) {
 }
 
 uint32_t run(int runs) {
+  #pragma clang diagnostic ignored "-Wunused-but-set-variable"
   volatile float t;
   start = millis();
   for (int i = 0; i < runs; i++) {
