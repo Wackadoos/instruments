@@ -8,12 +8,13 @@
 #include "modules/bmp280.h"
 #include "modules/imu.h"
 #include "modules/rtc.h"
+#include "modules/speed.h"
 #include "modules/temps.h"
 #include "scheduler.h"
 #include "settings.h"
 #include "state.h"
 
-SensorState sensorState = SensorState::empty();
+SensorState sensorState = SensorState();
 AppState currentState = AppState::IDLE;
 Drivers currentDriver = Drivers::UNKNOWN;
 
@@ -25,6 +26,7 @@ ScheduledTask tasks[] = {
     // ScheduledTask(50, 0, readTouchScreen),
     // ScheduledTask(100, 0, readGPS),
     // ScheduledTask(500, 0, displayBattStats),
+    ScheduledTask(20, 0, SPEED::update),
     ScheduledTask(500, 100, ATH::update),
     ScheduledTask(500, 200, BMP::update),
     ScheduledTask(500, 300, TEMPS::update),

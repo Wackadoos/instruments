@@ -2,6 +2,7 @@
 
 #include "errors.h"
 #include "modules/eeprom.h"
+#include "modules/speed.h"
 
 void SETTINGS::init() {
   if (EEPROM::isEnabled()) {
@@ -14,6 +15,8 @@ void SETTINGS::init() {
       settings = defaultSettings();
       Errors::logError(Error::SETTINGS_CHECKSUM_FAILED);
     }
+
+    SETTINGS::apply();
   } else {
     settings = defaultSettings();
     Errors::logError(Error::SETTINGS_VOLATILE);
@@ -27,16 +30,27 @@ SettingsBlock SETTINGS::getSettings() {
 void SETTINGS::pushSetting(const SettingsBlock& newSettings) {
   settings = newSettings;
   settings._checksum = checksum(settings);
+
   if (EEPROM::isEnabled()) {
     EEPROM::eeprom.put(SETTINGS_INDEX, newSettings);  // This could be optimised to only write the bytes that changed!
   }
+
+  SETTINGS::apply();
+}
+
+void SETTINGS::apply() {
+  SPEED::configure(
+      settings.speed_sensor_wheel_circumference,
+      settings.speed_sensor_pulses_per_revolution);
 }
 
 SettingsBlock SETTINGS::defaultSettings() {
   auto default_block = SettingsBlock{
-      SETTINGS::SETTINGS_BLOCK_VERSION,
-      0,
-      0,
+      ._version = SETTINGS::SETTINGS_BLOCK_VERSION,
+      .timezone_offset = 0,
+      .speed_sensor_wheel_circumference = 1596,  // 20" Wheel
+      .speed_sensor_pulses_per_revolution = 4,
+      ._checksum = 0,
   };
   default_block._checksum = SETTINGS::checksum(default_block);
   return default_block;

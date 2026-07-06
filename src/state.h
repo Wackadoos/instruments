@@ -43,10 +43,10 @@ struct SensorState {
   //* ATH20 Humidity & Temperature Sensor
   float relative_humidity = 0;      // Relative Humidity in % rH
   float ambient_temperature_2 = 0;  // Ambient temp according to ATH20 in degrees C
+  //* Optical Gate Speed Sensor
+  float kilometers_per_hour = 0;  // Speed in km/h
   //* System Stats
   uint16_t ram_free_bytes_minimum = 0;  // Least recorded available ram
   uint32_t longest_scheduler_isr = 0;   // Longest recorded scheduler ISR
   // TODO logging of percentages cpu used by each task & longest task executions before yield
-
-  static SensorState empty();
 };
