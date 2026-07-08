@@ -10,7 +10,7 @@
 		(rev "3")
 		(company "Wackadoos F24+")
 		(comment 1 "Connector Convention: Pin 1 = GND. Pin 2 = VCC. Further pins are signal")
-		(comment 2 "Power Wire: 8AWG Tinned Copper with Polyvinyl Chloride Insulation, 56A Continuous")
+		(comment 2 "Power Wire: 10AWG Tinned Copper with Polyvinyl Chloride Insulation, 30A Continuous")
 		(comment 3 "Signal Wire: 24AWG Tinned Copper with Polyvinyl Chloride Insulation, 5A Continuous")
 	)
 	(lib_symbols)
