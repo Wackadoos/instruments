@@ -4,6 +4,7 @@
 #include <RTClib.h>
 
 #include "state.h"
+#include "utils/metrics.h"
 
 class RTC {
  public:
@@ -13,8 +14,10 @@ class RTC {
   static inline bool isEnabled() { return enabled; };
 
  private:
+  static RTC_DS3231 rtc;
+  static IntervalMetric dataProcessTime;
+
   inline static bool enabled = false;
-  inline static SensorState* sensorState;
+  inline static SensorState* sensorState = nullptr;
   inline static bool needs_adjust = false;
-  inline static RTC_DS3231 rtc = RTC_DS3231();
 };

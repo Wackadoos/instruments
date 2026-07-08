@@ -3,29 +3,36 @@
 #include "hardware.h"
 #include "utils/errors.h"
 
+bfs::Mpu9250 IMU::imu = bfs::Mpu9250();
+IntervalMetric IMU::dataProcessTime = IntervalMetric();
+
 void IMU::init(TwoWire* wire, SensorState* state) {
   sensorState = state;
   imu.Config(wire, bfs::Mpu9250::I2C_ADDR_PRIM);
 
-  if (imu.Begin()) {
-    if (imu.ConfigSrd(19)) {      // Set sample rate to 50hz
-      if (imu.EnableDrdyInt()) {  // Enable interrupt on new sample
-        enabled = true;
-        attachInterrupt(digitalPinToInterrupt(ACCELEROMETER_INTERRUPT_PIN), imu_isr, RISING);
-      } else {
-        Errors::logError(Error::IMU_INTERRUPT_ERR);
-      }
-    } else {
-      Errors::logError(Error::IMU_SAMPLE_RATE_ERR);
-    }
-  } else {
+  if (!imu.Begin()) {
     Errors::logError(Error::IMU_UNINITIALISED);
+    return;
   }
+  if (!imu.ConfigSrd(19)) {  // Set sample rate to 50hz
+    Errors::logError(Error::IMU_SAMPLE_RATE_ERR);
+    return;
+  }
+  if (!imu.EnableDrdyInt()) {  // Enable interrupt on new sample
+    Errors::logError(Error::IMU_INTERRUPT_ERR);
+    return;
+  }
+
+  attachInterrupt(digitalPinToInterrupt(ACCELEROMETER_INTERRUPT_PIN), imu_isr, RISING);
+
+  dataProcessTime.init(F("IMU Proc"), F("Time to process IMU Data"));
+  enabled = true;
 }
 
 void IMU::run() {
   if (enabled && dataReady) {
     dataReady = false;
+    dataProcessTime.start();
     if (imu.Read()) {
       sensorState->imu_accel_x = imu.accel_x_mps2();
       sensorState->imu_accel_y = imu.accel_y_mps2();
@@ -41,6 +48,7 @@ void IMU::run() {
     } else {
       Errors::logError(Error::IMU_DATA_READ_FAILED);
     }
+    dataProcessTime.stop();
   }
 }
 

@@ -6,7 +6,7 @@
 
 class EEPROM {
  public:
-  inline static ExternalEEPROM eeprom = ExternalEEPROM();
+  static ExternalEEPROM eeprom;
 
   static void init(TwoWire* wire);
   static inline bool isEnabled() { return enabled; };

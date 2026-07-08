@@ -8,6 +8,8 @@
 #include "modules/temps.h"
 #include "utils/errors.h"
 
+OneWire HARDWARE::oneWire = OneWire(ONEWIRE_TEMPERATURE_SENSORS_PIN);
+
 void HARDWARE::init(SensorState* state) {
   //* Set pin modes. Some of these may be set by libraries, but there's no harm in setting the same mode twice to be safe.
   pinMode(GPS_PULSE_PER_SECOND_PIN, INPUT);

@@ -4,6 +4,8 @@
 #include "modules/speed.h"
 #include "utils/errors.h"
 
+SettingsBlock SETTINGS::settings = SettingsBlock();
+
 void SETTINGS::init() {
   if (EEPROM::isEnabled()) {
     EEPROM::eeprom.get(SETTINGS_INDEX, settings);

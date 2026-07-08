@@ -2,11 +2,15 @@
 
 #include "hardware.h"
 
+IntervalMetric SPEED::dataProcessTime = IntervalMetric();
+
 void SPEED::init(SensorState* state) {
   sensorState = state;
 
   previousMicros = micros();
   attachInterrupt(digitalPinToInterrupt(WHEEL_SPEED_SENSOR_PIN), sensor_isr, FALLING);  // Sense on falling, pulls to ground through phototransistor
+
+  dataProcessTime.init(F("Speed Proc"), F("Time to process Speed Data"));
   enabled = true;
 }
 
@@ -23,6 +27,7 @@ void SPEED::configure(uint16_t wheelCircumferenceMillimeters, uint8_t pulsesPerR
 
 void SPEED::update() {
   if (enabled) {
+    dataProcessTime.start();
     noInterrupts();  // Must disable interrupts to copy - uint16_t isn't atomic!
     auto pulsesRecorded = pulseCount;
     pulseCount = 0;
@@ -33,6 +38,7 @@ void SPEED::update() {
     previousMicros = time;
 
     sensorState->kilometers_per_hour = coefficient * pulsesRecorded / microsElapsed;
+    dataProcessTime.stop();
   }
 }
 

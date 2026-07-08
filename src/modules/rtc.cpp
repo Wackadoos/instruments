@@ -3,23 +3,34 @@
 #include "settings.h"
 #include "utils/errors.h"
 
+RTC_DS3231 RTC::rtc = RTC_DS3231();
+IntervalMetric RTC::dataProcessTime = IntervalMetric();
+
 void RTC::init(TwoWire* wire, SensorState* state) {
   sensorState = state;
-  if (rtc.begin(wire)) {
-    enabled = true;
-    if (rtc.lostPower()) {
-      Errors::logError(Error::RTC_LOST_POWER);
-      needs_adjust = true;
-    }
-  } else {
+
+  if (!rtc.begin(wire)) {
     Errors::logError(Error::RTC_UNINITIALISED);
+    return;
   }
+
+  if (rtc.lostPower()) {
+    Errors::logError(Error::RTC_LOST_POWER);
+    needs_adjust = true;
+  }
+
+  dataProcessTime.init(F("RTC Proc"), F("Time to process RTC Data"));
+  enabled = true;
 }
 
 void RTC::update() {
-  if (needs_adjust) {
-    // TODO
-    adjust();
+  if (enabled) {
+    dataProcessTime.start();
+    if (needs_adjust) {
+      // TODO
+      adjust();
+    }
+    dataProcessTime.stop();
   }
 }
 

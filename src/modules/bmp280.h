@@ -4,6 +4,7 @@
 #include <Arduino.h>
 
 #include "state.h"
+#include "utils/metrics.h"
 
 class BMP {
  public:
@@ -12,7 +13,9 @@ class BMP {
   static inline bool isEnabled() { return enabled; };
 
  private:
+  static Adafruit_BMP280 bmp280;
+  static IntervalMetric dataProcessTime;
+
   inline static bool enabled = false;
-  inline static SensorState* sensorState;
-  inline static Adafruit_BMP280 bmp280;  // Initialised in init to set wire
+  inline static SensorState* sensorState = nullptr;
 };

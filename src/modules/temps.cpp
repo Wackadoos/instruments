@@ -3,6 +3,10 @@
 #include "utils/errors.h"
 
 // TODO have interface for enumerating and selecting and storing which temp probes are available and which is which
+IntervalMetric TEMPS::dataRequestTime = IntervalMetric();
+IntervalMetric TEMPS::dataAcquisitionTime = IntervalMetric();
+IntervalMetric TEMPS::dataProcessTime = IntervalMetric();
+DallasTemperature TEMPS::sensors = DallasTemperature();
 
 void TEMPS::init(OneWire* oneWire, SensorState* state) {
   sensorState = state;
@@ -10,40 +14,52 @@ void TEMPS::init(OneWire* oneWire, SensorState* state) {
   sensors.begin();
   auto numberOfDevices = sensors.getDeviceCount();
 
-  if (numberOfDevices == EXPECTED_SENSOR_COUNT) {
-    enabled = true;
-    for (int i = 0; i < EXPECTED_SENSOR_COUNT; i++) {
-      if (sensors.getAddress(addresses[i], i)) {
-        sensors.setResolution(addresses[i], SENSOR_RESOLUTION);
-        if (sensors.getResolution(addresses[i]) != SENSOR_RESOLUTION) {
-          Errors::logError(Error::TEMP_RESOLUTION_INCORRECT);  // Not a reason to disable the module, just to notify
-        }
-        sensors.setWaitForConversion(false);  // Enable async mode
-      } else {
-        enabled = false;
-        Errors::logError(Error::GHOST_TEMP_PROBE);
-        return;
-      }
-    }
-    if (!sortAddresses(addresses, EXPECTED_SENSOR_COUNT)) {
-      enabled = false;
-      Errors::logError(Error::DUPLICATE_TEMP_SENSOR_IDS);
-    }
-  } else if (numberOfDevices == 0) {
+  if (numberOfDevices == 0) {
     Errors::logError(Error::NO_TEMPS_FOUND);
-  } else {
-    Errors::logError(Error::INCORRECT_NUM_TEMPS);
+    return;
   }
+  if (numberOfDevices != EXPECTED_SENSOR_COUNT) {
+    Errors::logError(Error::INCORRECT_NUM_TEMPS);
+    return;
+  }
+
+  for (int i = 0; i < EXPECTED_SENSOR_COUNT; i++) {
+    if (sensors.getAddress(addresses[i], i)) {
+      sensors.setResolution(addresses[i], SENSOR_RESOLUTION);
+      if (sensors.getResolution(addresses[i]) != SENSOR_RESOLUTION) {
+        Errors::logError(Error::TEMP_RESOLUTION_INCORRECT);  // Not a reason to disable the module, just to notify
+      }
+      sensors.setWaitForConversion(false);  // Enable async mode
+    } else {
+      Errors::logError(Error::GHOST_TEMP_PROBE);
+      return;
+    }
+  }
+
+  if (!sortAddresses(addresses, EXPECTED_SENSOR_COUNT)) {
+    Errors::logError(Error::DUPLICATE_TEMP_SENSOR_IDS);
+    return;
+  }
+
+  dataRequestTime.init(F("Temp Req"), F("Time to send Temperature Request"));
+  dataAcquisitionTime.init(F("Temp Acq"), F("Time until Temperature Response"));
+  dataProcessTime.init(F("Temp Proc"), F("Time to process Temperature Data"));
+  enabled = true;
 }
 
 void TEMPS::update() {
   if (enabled) {
+    dataRequestTime.start();
     sensors.requestTemperaturesByAddress(addresses[current_address]);
+    dataRequestTime.stop();
+    dataAcquisitionTime.start();
   }
 }
 
 void TEMPS::run() {
   if (enabled && sensors.isConversionComplete()) {  // isConversionComplete reads i2c bit which has micros waits. Could check this less often for efficiency!
+    dataAcquisitionTime.stop();
+    dataProcessTime.start();
     float tempC = sensors.getTempC(addresses[current_address]);
 
     if (tempC == DEVICE_DISCONNECTED_C) {
@@ -57,6 +73,7 @@ void TEMPS::run() {
     if (current_address >= EXPECTED_SENSOR_COUNT) {
       current_address = 0;
     }
+    dataProcessTime.stop();
   }
 }
 

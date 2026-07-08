@@ -20,8 +20,9 @@ class SETTINGS {
   static void pushSetting(const SettingsBlock& newSettings);
 
  private:
+  static SettingsBlock settings;
+
   static constexpr uint32_t SETTINGS_INDEX = 0;  // Where in the eeprom to store the settings. Typically 0 (the start)
-  inline static SettingsBlock settings = SettingsBlock();
 
   static void apply();
   static SettingsBlock defaultSettings();

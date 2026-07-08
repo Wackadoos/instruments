@@ -1,5 +1,35 @@
 #pragma once
 
-// TODO Count clock cycles for each task
-// TODO Keep track of average and longest + average & longest main loop time
-// TODO Measure time from sensor request to sensor data update (in state)
+#include <Arduino.h>
+#include <LinkedList.h>
+#include <limits.h>
+
+class IntervalMetric {
+ private:
+  uint32_t startTime = 0;
+  uint32_t minTime = ULONG_MAX;            // Minimum recorded time in microseconds. Starts at maximum
+  uint32_t maxTime = 0;                    // Maximum recorded time in microseconds. Starts at minimum
+  uint32_t totalTime = 0;                  // Total time in microseconds / 8 (~9hr rollover, sufficient for use case)
+  uint32_t count = 0;                      // Number of measurements taken
+  const __FlashStringHelper* name;         // Name of the interval
+  const __FlashStringHelper* description;  // Description of the interval
+
+ public:
+  IntervalMetric() = default;
+
+  void init(const __FlashStringHelper* name, const __FlashStringHelper* description);
+  void start();
+  void stop();
+  uint32_t average() const;
+  inline uint32_t shortest() const { return minTime; };
+  inline uint32_t longest() const { return maxTime; };
+  inline uint32_t total() const { return totalTime; };
+};
+
+class METRICS {
+ public:
+  static void addMetric(IntervalMetric* metric);
+
+ private:
+  static LinkedList<IntervalMetric*> metrics;
+};

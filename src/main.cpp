@@ -17,6 +17,7 @@
 SensorState sensorState = SensorState();
 AppState currentState = AppState::IDLE;
 Drivers currentDriver = Drivers::UNKNOWN;
+IntervalMetric mainLoopTime = IntervalMetric();
 
 void logData();
 
@@ -42,10 +43,13 @@ void setup() {
 
   SETTINGS::init();
 
+  mainLoopTime.init(F("Main Loop"), F("Interval measurement of main loop"));
+
   Scheduler::start(tasks);
 }
 
 void loop() {
+  mainLoopTime.start();  // TODO maybe have a minimum threshold on this? So a busy-wait isn't included
   Scheduler::runTasks();
   HARDWARE::run();
   TEMPS::run();
@@ -59,6 +63,7 @@ void loop() {
       break;
   }
   // for dev track framerate of display updates for different values?
+  mainLoopTime.stop();
 }
 
 void displayCritical() {

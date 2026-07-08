@@ -26,5 +26,5 @@ class HARDWARE {
   static void run();
 
  private:
-  inline static OneWire oneWire = OneWire(ONEWIRE_TEMPERATURE_SENSORS_PIN);
+  static OneWire oneWire;
 };
