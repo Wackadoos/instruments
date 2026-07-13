@@ -45,6 +45,14 @@ struct SensorState {
   float ambient_temperature_2 = 0;  // Ambient temp according to ATH20 in degrees C
   //* Optical Gate Speed Sensor
   float kilometers_per_hour = 0;  // Speed in km/h
+  //* Vesc
+  float motor_current; // Current through the windings (during duty cycle on period ONLY)
+  float battery_current; // Current into ESC (overall average regardless duty cycle)
+  float duty_cycle; // Duty cycle right now
+  float battery_voltage; // Battery Voltage
+  float watts_used; // Total WH consumed
+  float watts_charged; // Total WH charged
+  float esc_temp; // Temperature of ESC MOSFET Chips
   //* System Stats
   uint16_t ram_free_bytes_minimum = 0;  // Least recorded available ram
   uint32_t longest_scheduler_isr = 0;   // Longest recorded scheduler ISR

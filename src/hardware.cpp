@@ -6,6 +6,7 @@
 #include "modules/imu.h"
 #include "modules/rtc.h"
 #include "modules/temps.h"
+#include "modules/vesc.h"
 #include "utils/errors.h"
 
 OneWire HARDWARE::oneWire = OneWire(ONEWIRE_TEMPERATURE_SENSORS_PIN);
@@ -33,6 +34,7 @@ void HARDWARE::init(SensorState* state) {
   BMP::init(&Wire, state);
   ATH::init(&Wire, state);
   IMU::init(&Wire, state);
+  VESC::init(&VESC_SERIAL_PORT, state);
 
   // Wire.setClock(400000); // Must be set last! TODO enable after switching to high speed RTC chip
 

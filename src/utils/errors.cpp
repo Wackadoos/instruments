@@ -65,6 +65,24 @@ String Errors::errorDescription(Error error) {
     case Error::TEMP_UNREADABLE:
       return String(F("DS18B20 sensor temperature unreadable!"));
       // TODO this could fire very quickly. Need to have a cap of some kind to not fill up everything.
+    case Error::VESC_DATA_UNAVAILABLE:
+      return String(F("Failed to read data from VESC!"));
+    // TODO this could fire very quickly. Need to have a cap of some kind to not fill up everything.
+    case Error::VESC_REPORTED_UNCOMMON_ERROR:
+      return String(F("Uncommon/unknown error reported on VESC!"));
+    // TODO this could fire very quickly. Need to have a cap of some kind to not fill up everything.
+    case Error::VESC_REPORTED_HARDWARE_FAULT:
+      return String(F("Hardware error reported on VESC!"));
+    // TODO this could fire very quickly. Need to have a cap of some kind to not fill up everything.
+    case Error::VESC_REPORTED_TEMPERATURE_FAULT:
+      return String(F("Temperature error reported on VESC!"));
+    // TODO this could fire very quickly. Need to have a cap of some kind to not fill up everything.
+    case Error::VESC_REPORTED_VOLTAGE_FAULT:
+      return String(F("Voltage error reported on VESC!"));
+    // TODO this could fire very quickly. Need to have a cap of some kind to not fill up everything.
+    case Error::VESC_REPORTED_FLASH_CORRUPTION:
+      return String(F("Flash Corruption error reported on VESC!"));
+      // TODO this could fire very quickly. Need to have a cap of some kind to not fill up everything.
     default:
       return String(F("An undefined error occurred!"));
   }

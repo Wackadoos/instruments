@@ -5,11 +5,11 @@
 #include "state.h"
 
 //! Arduino Mega Pin Allocation
-#define GPS_PULSE_PER_SECOND_PIN 2        // INT4
-#define ACCELEROMETER_INTERRUPT_PIN 3     // INT5
-#define DISPLAY_BACKLIGHT_PIN 4           // High Frequency PWM
+#define GPS_PULSE_PER_SECOND_PIN 2     // INT4
+#define ACCELEROMETER_INTERRUPT_PIN 3  // INT5
+#define DISPLAY_BACKLIGHT_PIN 4        // High Frequency PWM
 //* Hardware Serial 3 (14, 15) -> GPS Module (ATGM336H)
-//* Hardware Serial 2 (16, 17) -> ESC (Flipsky 75100)
+#define VESC_SERIAL_PORT Serial2   //* Hardware Serial 2 (16, 17) -> ESC (Flipsky 75100)
 #define WHEEL_SPEED_SENSOR_PIN 18     // INT3
 #define TOUCHSCREEN_INTERRUPT_PIN 19  // INT2
 #define ONEWIRE_TEMPERATURE_SENSORS_PIN 42

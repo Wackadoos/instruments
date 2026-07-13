@@ -9,6 +9,7 @@
 #include "modules/rtc.h"
 #include "modules/speed.h"
 #include "modules/temps.h"
+#include "modules/vesc.h"
 #include "settings.h"
 #include "state.h"
 #include "utils/errors.h"
@@ -23,11 +24,11 @@ void logData();
 
 ScheduledTask tasks[] = {
     // ScheduledTask(25, 0, displayCritical),
-    // ScheduledTask(50, 0, readESC),
     // ScheduledTask(50, 0, readTouchScreen),
     // ScheduledTask(100, 0, readGPS),
     // ScheduledTask(500, 0, displayBattStats),
     ScheduledTask(20, 0, SPEED::update),
+    ScheduledTask(100, 0, VESC::update),
     ScheduledTask(500, 100, ATH::update),
     ScheduledTask(500, 200, BMP::update),
     ScheduledTask(500, 300, TEMPS::update),
@@ -87,12 +88,6 @@ void displayCritical() {
   // - Estimated Empty
   // - Relative altitude
 }
-
-void readESC() {
-  // Battery Voltage
-  // Power Usage
-  // Errors
-};
 
 void readTouchScreen() {};
 
