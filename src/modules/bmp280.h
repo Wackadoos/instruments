@@ -19,3 +19,5 @@ class BMP {
   inline static bool enabled = false;
   inline static SensorState* sensorState = nullptr;
 };
+
+// TODO Calibrate barometric pressure using GPS altitude?

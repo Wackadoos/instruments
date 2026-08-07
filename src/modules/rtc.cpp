@@ -1,6 +1,7 @@
 #include "rtc.h"
 
 #include "settings.h"
+#include "utils/logging.h"
 #include "utils/errors.h"
 
 RTC_DS3231 RTC::rtc = RTC_DS3231();
@@ -28,8 +29,10 @@ void RTC::update() {
     dataProcessTime.start();
     if (needs_adjust) {
       // TODO
-      adjust();
+      rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+      // adjust();
     }
+    Logging::logDebug(F("RTC Time: "), rtc.now().timestamp(DateTime::TIMESTAMP_FULL));
     dataProcessTime.stop();
   }
 }

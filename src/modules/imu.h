@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Arduino.h>
-#include <mpu9250.h>
+#include <mpu6500.h>
 
 #include "state.h"
 #include "utils/metrics.h"
@@ -13,7 +13,7 @@ class IMU {
   static inline bool isEnabled() { return enabled; };
 
  private:
-  static bfs::Mpu9250 imu;
+  static bfs::Mpu6500 imu;
   static IntervalMetric dataProcessTime;
 
   inline static bool enabled = false;

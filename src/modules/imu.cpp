@@ -2,13 +2,14 @@
 
 #include "hardware.h"
 #include "utils/errors.h"
+#include "utils/logging.h"
 
-bfs::Mpu9250 IMU::imu = bfs::Mpu9250();
+bfs::Mpu6500 IMU::imu = bfs::Mpu6500();
 IntervalMetric IMU::dataProcessTime = IntervalMetric();
 
 void IMU::init(TwoWire* wire, SensorState* state) {
   sensorState = state;
-  imu.Config(wire, bfs::Mpu9250::I2C_ADDR_PRIM);
+  imu.Config(wire, IMU_I2C_ADDR);
 
   if (!imu.Begin()) {
     Errors::logError(Error::IMU_UNINITIALISED);
@@ -38,6 +39,20 @@ void IMU::run() {
       sensorState->imu_accel_y = imu.accel_y_mps2();
       sensorState->imu_accel_z = imu.accel_z_mps2();
       sensorState->imu_die_temp = imu.die_temp_c();
+
+#ifdef DEBUG_LOGGING
+      static uint8_t counter = 0;
+      if (counter == 25) {
+        Logging::logDebug(F("IMU x: "), imu.accel_x_mps2());
+        Logging::logDebug(F("IMU y: "), imu.accel_y_mps2());
+        Logging::logDebug(F("IMU z: "), imu.accel_z_mps2());
+        Logging::logDebug(F("IMU Temp: "), imu.die_temp_c());
+        counter = 0;
+      } else {
+        counter++;
+      }
+#endif
+
       // TODO sensorState->max_1s_acceleration
       //  imu.gyro_x_radps();
       //  imu.gyro_y_radps();

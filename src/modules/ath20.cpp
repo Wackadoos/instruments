@@ -1,6 +1,7 @@
 #include "ath20.h"
 
 #include "utils/errors.h"
+#include "utils/logging.h"
 
 Adafruit_AHTX0 ATH::ath20 = Adafruit_AHTX0();
 IntervalMetric ATH::dataProcessTime = IntervalMetric();
@@ -22,7 +23,9 @@ void ATH::update() {
     sensors_event_t humidity, temp;
     ath20.getEvent(&humidity, &temp);
     sensorState->relative_humidity = humidity.relative_humidity;
+    Logging::logDebug(F("ATH Humidity: "), humidity.relative_humidity);
     sensorState->ambient_temperature_2 = temp.temperature;
+    Logging::logDebug(F("ATH Temp: "), temp.temperature);
     dataProcessTime.stop();
   }
 }

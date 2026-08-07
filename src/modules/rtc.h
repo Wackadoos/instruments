@@ -21,3 +21,5 @@ class RTC {
   inline static SensorState* sensorState = nullptr;
   inline static bool needs_adjust = false;
 };
+
+// TODO Only adjust time when not in race mode and avoid updating too frequently!
