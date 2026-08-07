@@ -1,8 +1,8 @@
 //! MPU9255 Accelerometer Module
 #include <Arduino.h>
-#include <mpu9250.h>
+#include <mpu6500.h>
 
-bfs::Mpu9250 imu;
+bfs::Mpu6500 imu;
 volatile bool new_data;
 
 void imu_isr() {
@@ -13,13 +13,14 @@ void setup() {
   Serial.begin(115200);
   while (!Serial)
     delay(100);  // wait for native usb
+  delay(3000);
   Serial.println(F("MPU9250 test"));
 
   /* Start the I2C bus */
   Wire.begin();
   Wire.setClock(400000);
   /* I2C bus,  0x68 address */
-  imu.Config(&Wire, bfs::Mpu9250::I2C_ADDR_PRIM);
+  imu.Config(&Wire, bfs::Mpu6500::I2C_ADDR_SEC);
   /* Initialize and configure IMU */
   if (!imu.Begin()) {
     Serial.println("Couldn't initialise IMU");
@@ -43,8 +44,6 @@ void loop() {
   if (new_data && imu.Read()) {
     Serial.print(imu.new_imu_data());
     Serial.print("\t");
-    Serial.print(imu.new_mag_data());
-    Serial.print("\t");
     Serial.print(imu.accel_x_mps2());
     Serial.print("\t");
     Serial.print(imu.accel_y_mps2());
@@ -56,12 +55,6 @@ void loop() {
     Serial.print(imu.gyro_y_radps());
     Serial.print("\t");
     Serial.print(imu.gyro_z_radps());
-    Serial.print("\t");
-    Serial.print(imu.mag_x_ut());
-    Serial.print("\t");
-    Serial.print(imu.mag_y_ut());
-    Serial.print("\t");
-    Serial.print(imu.mag_z_ut());
     Serial.print("\t");
     Serial.print(imu.die_temp_c());
     Serial.print("\n");

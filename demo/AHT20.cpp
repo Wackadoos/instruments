@@ -7,6 +7,7 @@ void setup() {
   Serial.begin(115200);
   while (!Serial)
     delay(100);  // wait for native usb
+  delay(3000);
   Serial.println(F("ATH20 test"));
 
   if (!ath20.begin()) {

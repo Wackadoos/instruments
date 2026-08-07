@@ -8,13 +8,21 @@ void setup() {
   Serial.begin(115200);
   while (!Serial)
     delay(100);  // wait for native usb
+  delay(3000);
   Serial.println(F("EEPROM test"));
 
   Wire.begin();
-  if (eeprom.begin() == false) {
-    Serial.println("EEPROM not detected. Check wiring.");
-    while (true);
-  }
+  eeprom.begin(0x57, Wire);
+  // for (int addr = 0; addr <= 80; addr++) {
+  //   if (eeprom.begin(addr, Wire)) {
+  //     Serial.print("EEPROM detected on address ");
+  //     Serial.println(addr);
+  //     break;
+  //   } else if (addr == 80) {
+  //     Serial.println("EEPROM not detected. onCheck wiring.");
+  //     while (true);
+  //   }
+  // }
 
   Serial.print("Detected number of address bytes: ");
   Serial.println(eeprom.detectAddressBytes());

@@ -11,6 +11,7 @@ void setup() {
   Serial.begin(115200);
   while (!Serial)
     delay(100);  // wait for native usb
+  delay(3000);
   Serial.println(F("DS3231 test"));
 
   if (!rtc.begin()) {

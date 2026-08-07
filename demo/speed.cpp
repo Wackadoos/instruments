@@ -28,6 +28,7 @@ void setup() {
   Serial.begin(115200);
   while (!Serial)
     delay(100);  // wait for native usb
+  delay(3000);
   Serial.println(F("TCST2103 test"));
 
   coefficient = (float)WHEEL_CIRCUMFERENCE_MM / ((float)PULSES_PER_ROTATION * 3600.0f);
