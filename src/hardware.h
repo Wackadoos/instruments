@@ -19,6 +19,8 @@
 #define TOUCHSCREEN_CHIP_SELECT_PIN 49
 //* SPI (50, 51, 52) -> Display, Touchscreen, SD Card
 #define DISPLAY_CHIP_SELECT_PIN 53
+#define EEPROM_I2C_ADDR 0x57
+#define IMU_I2C_ADDR bfs::Mpu6500::I2C_ADDR_SEC
 
 class HARDWARE {
  public:

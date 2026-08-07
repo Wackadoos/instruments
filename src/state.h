@@ -8,24 +8,6 @@ enum class AppState : uint8_t {
   DEBUG,
 };
 
-enum class Drivers : uint8_t {
-  UNKNOWN,
-  ALEX,
-  DECLAN,
-  FIN,
-  FINN,
-  JAI,
-  JONTE,
-  KAYLA,
-  LLOYD,
-  LUKE,
-  MILLICENT,
-  MITCH,
-  ROY,
-  SAM,
-  ZION,
-};
-
 struct SensorState {
  public:
   //* DS18B20 Temp Sensors (Motor)

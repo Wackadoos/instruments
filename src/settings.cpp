@@ -11,10 +11,10 @@ void SETTINGS::init() {
     EEPROM::eeprom.get(SETTINGS_INDEX, settings);
 
     if (settings._version != SETTINGS_BLOCK_VERSION) {
-      settings = defaultSettings();
+      pushSetting(defaultSettings());
       Errors::logError(Error::SETTINGS_VERSION_CHANGED);
     } else if (checksum(settings) != settings._checksum) {
-      settings = defaultSettings();
+      pushSetting(defaultSettings());
       Errors::logError(Error::SETTINGS_CHECKSUM_FAILED);
     }
 

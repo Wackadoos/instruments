@@ -12,6 +12,11 @@
 OneWire HARDWARE::oneWire = OneWire(ONEWIRE_TEMPERATURE_SENSORS_PIN);
 
 void HARDWARE::init(SensorState* state) {
+#ifdef DEBUG_LOGGING
+  Serial.begin(115200);
+  delay(3000);
+#endif
+
   //* Set pin modes. Some of these may be set by libraries, but there's no harm in setting the same mode twice to be safe.
   pinMode(GPS_PULSE_PER_SECOND_PIN, INPUT);
   pinMode(ACCELEROMETER_INTERRUPT_PIN, INPUT);
@@ -25,6 +30,13 @@ void HARDWARE::init(SensorState* state) {
   pinMode(TOUCHSCREEN_CHIP_SELECT_PIN, OUTPUT);
   pinMode(DISPLAY_CHIP_SELECT_PIN, OUTPUT);
 
+  //* Set pin states
+  digitalWrite(DISPLAY_BACKLIGHT_PIN, LOW);         //* Start with display off
+  digitalWrite(DISPLAY_RESET_PIN, HIGH);            //* Display Reset pin uses LOW to reset
+  digitalWrite(SD_CARD_CHIP_SELECT_PIN, HIGH);      //* SPI Chip Select uses LOW to select a device
+  digitalWrite(TOUCHSCREEN_CHIP_SELECT_PIN, HIGH);  //* SPI Chip Select uses LOW to select a device
+  digitalWrite(DISPLAY_CHIP_SELECT_PIN, HIGH);      //* SPI Chip Select uses LOW to select a device
+
   //* I2C Devices
   Wire.begin();
   Wire.setWireTimeout(25000, true);  // 25ms timeout with auto reset
@@ -34,12 +46,12 @@ void HARDWARE::init(SensorState* state) {
   BMP::init(&Wire, state);
   ATH::init(&Wire, state);
   IMU::init(&Wire, state);
-  VESC::init(&VESC_SERIAL_PORT, state);
+  // VESC::init(&VESC_SERIAL_PORT, state);
 
-  // Wire.setClock(400000); // Must be set last! TODO enable after switching to high speed RTC chip
+  Wire.setClock(400000);  // Must be set after device init!
 
   //* OneWire Devices
-  TEMPS::init(&oneWire, state);
+  // TEMPS::init(&oneWire, state);
 
   //* SPI Devices
 }
