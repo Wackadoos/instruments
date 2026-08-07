@@ -1,5 +1,7 @@
 #include "utils/errors.h"
 
+#include "utils/logging.h"
+
 // TODO extend to have info logging as well, ie log "TIME UPDATED FROM GPS etc"
 
 void Errors::init() {
@@ -89,6 +91,9 @@ String Errors::errorDescription(Error error) {
 }
 
 void Errors::flushToLogfile(const ErrorEvent& errorEvent) {
+#ifdef DEBUG_LOGGING
+  Logging::logDebug(F("ERROR OCCURRED: "), errorDescription(errorEvent.type));
+#endif
   // TODO write out data to logfile in csv
 }
 
