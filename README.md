@@ -12,7 +12,7 @@ Stock ESC comes with VESC v5.02. Download and flash the latest (should be v7.0 o
 
 - The hardware is classified incorrectly as 75_300_R2, this is okay as it is compatible.
 - All settings will be reset with the update
-- Phase Filters will be enabled by default, but are **NOT COMPATIBLE** with this hardware. This needs to be turned off before running a motor!
+- Phase Filters will be enabled by default, but are **NOT COMPATIBLE** with this hardware. If running a brushless motor (not the greenpower standard DC motor) this needs to be turned off or the hardware will be damaged!
 
 ### Motor Settings
 
@@ -80,7 +80,7 @@ Motor General:
 General:
 
 - APP to Use: ADC and UART
-- Timeout Brake Current: 5.0 A
+- Timeout Brake Current: 0.0 A
 - CAN Mode: Unused
 - Kill Switch Mode: PPM High
 
@@ -88,9 +88,9 @@ General:
 
 General:
 
-- Control Type: Current
+- Control Type: Current No Reverse Brake Center
 - Use Filter: True
-- Safe Start: Regular
+- Safe Start: Disabled
 - Update Rate: 500 Hz
 - Positive Ramping Time: 0.3 s
 - Negative Ramping Time: 0.1 s
@@ -101,7 +101,7 @@ Mapping:
 - Input Deadband: 15%
 - ADC1 Start Voltage: 0.1 V
 - ADC1 End Voltage: 3.2 V
-- ADC1 Centre Voltage: 0.1 V
+- ADC1 Centre Voltage: 1.0 V
 - Invert ADC1 Voltage: False
 - ADC1 Abs Min Voltage: 0.0 V
 - ADC1 Abs Max Voltage: 3.5 V
