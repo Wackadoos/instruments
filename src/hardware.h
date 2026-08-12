@@ -2,8 +2,6 @@
 
 #include <OneWire.h>
 
-#include "state.h"
-
 //! Arduino Mega Pin Allocation
 #define GPS_PULSE_PER_SECOND_PIN 2     // INT4
 #define ACCELEROMETER_INTERRUPT_PIN 3  // INT5
@@ -24,7 +22,7 @@
 
 class HARDWARE {
  public:
-  static void init(SensorState* state);
+  static void init();
   static void run();
 
  private:

@@ -5,6 +5,7 @@
 #include "hardware.h"
 #include "modules/ath20.h"
 #include "modules/bmp280.h"
+#include "modules/display.h"
 #include "modules/imu.h"
 #include "modules/rtc.h"
 #include "modules/speed.h"
@@ -14,8 +15,8 @@
 #include "state.h"
 #include "utils/errors.h"
 #include "utils/scheduler.h"
+#include "widgets.h"
 
-SensorState sensorState = SensorState();
 AppState currentState = AppState::IDLE;
 IntervalMetric mainLoopTime = IntervalMetric();
 
@@ -40,7 +41,7 @@ void setup() {
 
   //! Setup SD class first before errors class
 
-  HARDWARE::init(&sensorState);
+  HARDWARE::init();
 
   SETTINGS::init();
 
@@ -55,6 +56,8 @@ void loop() {
   HARDWARE::run();
   // TEMPS::run();
   IMU::run();  // Internally scheduled via data ready interrupt
+  Display::run();
+
   switch (currentState) {
     case AppState::IDLE:
       break;

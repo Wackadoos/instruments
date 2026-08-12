@@ -3,12 +3,11 @@
 #include <Adafruit_BMP280.h>
 #include <Arduino.h>
 
-#include "state.h"
 #include "utils/metrics.h"
 
 class BMP {
  public:
-  static void init(TwoWire* wire, SensorState* state);
+  static void init(TwoWire* wire);
   static void update();
   static inline bool isEnabled() { return enabled; };
 
@@ -17,7 +16,6 @@ class BMP {
   static IntervalMetric dataProcessTime;
 
   inline static bool enabled = false;
-  inline static SensorState* sensorState = nullptr;
 };
 
 // TODO Calibrate barometric pressure using GPS altitude?

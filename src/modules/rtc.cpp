@@ -1,15 +1,14 @@
 #include "rtc.h"
 
 #include "settings.h"
-#include "utils/logging.h"
+#include "state.h"
 #include "utils/errors.h"
+#include "utils/logging.h"
 
 RTC_DS3231 RTC::rtc = RTC_DS3231();
 IntervalMetric RTC::dataProcessTime = IntervalMetric();
 
-void RTC::init(TwoWire* wire, SensorState* state) {
-  sensorState = state;
-
+void RTC::init(TwoWire* wire) {
   if (!rtc.begin(wire)) {
     Errors::logError(Error::RTC_UNINITIALISED);
     return;

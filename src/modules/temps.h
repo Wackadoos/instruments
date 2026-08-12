@@ -4,7 +4,6 @@
 #include <DallasTemperature.h>
 #include <OneWire.h>
 
-#include "state.h"
 #include "utils/metrics.h"
 
 class TEMPS {
@@ -12,7 +11,7 @@ class TEMPS {
   static constexpr uint8_t EXPECTED_SENSOR_COUNT = 2;
   static constexpr uint8_t SENSOR_RESOLUTION = 9;
 
-  static void init(OneWire* oneWire, SensorState* state);
+  static void init(OneWire* oneWire);
   static void update();
   static void run();
   static inline bool isEnabled() { return enabled; };
@@ -24,7 +23,6 @@ class TEMPS {
   static DallasTemperature sensors;
 
   inline static bool enabled = false;
-  inline static SensorState* sensorState = nullptr;
   inline static DeviceAddress addresses[EXPECTED_SENSOR_COUNT] = {};
   inline static uint8_t current_address = 0;  // Round robin sensor selector
 

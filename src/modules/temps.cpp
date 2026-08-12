@@ -1,15 +1,16 @@
 #include "temps.h"
 
+#include "state.h"
 #include "utils/errors.h"
 
 // TODO have interface for enumerating and selecting and storing which temp probes are available and which is which
+// TODO have setpoints in settings that show temps as red, yellow, green depending on temp
 IntervalMetric TEMPS::dataRequestTime = IntervalMetric();
 IntervalMetric TEMPS::dataAcquisitionTime = IntervalMetric();
 IntervalMetric TEMPS::dataProcessTime = IntervalMetric();
 DallasTemperature TEMPS::sensors = DallasTemperature();
 
-void TEMPS::init(OneWire* oneWire, SensorState* state) {
-  sensorState = state;
+void TEMPS::init(OneWire* oneWire) {
   sensors.setOneWire(oneWire);
   sensors.begin();
   auto numberOfDevices = sensors.getDeviceCount();
@@ -65,8 +66,8 @@ void TEMPS::run() {
     if (tempC == DEVICE_DISCONNECTED_C) {
       Errors::logError(Error::TEMP_UNREADABLE);
     } else {
-      sensorState->temp_motor_front = tempC;  // TODO set according to current_address + mapping setting
-      // sensorState->temp_motor_back = tempC;
+      SensorState::temp_motor_front = tempC;  // TODO set according to current_address + mapping setting
+      // SensorState::temp_motor_back = tempC;
     }
 
     current_address++;

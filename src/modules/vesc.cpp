@@ -1,12 +1,12 @@
 #include "vesc.h"
 
+#include "state.h"
 #include "utils/errors.h"
 
 VescUart VESC::vesc = VescUart(10);
 IntervalMetric VESC::dataProcessTime = IntervalMetric();
 
-void VESC::init(Stream* port, SensorState* state) {
-  sensorState = state;
+void VESC::init(Stream* port) {
   vesc.setSerialPort(port);
 
   dataProcessTime.init(F("VESC Proc"), F("Time to process VESC Data"));
@@ -17,13 +17,13 @@ void VESC::update() {
   if (enabled) {
     dataProcessTime.start();
     if (vesc.getVescValues()) {
-      sensorState->motor_current = vesc.data.avgMotorCurrent;
-      sensorState->battery_current = vesc.data.avgInputCurrent;
-      sensorState->duty_cycle = vesc.data.dutyCycleNow;
-      sensorState->battery_voltage = vesc.data.inpVoltage;
-      sensorState->watts_used = vesc.data.wattHours;
-      sensorState->watts_charged = vesc.data.wattHoursCharged;
-      sensorState->esc_temp = vesc.data.tempMosfet;
+      SensorState::motor_current = vesc.data.avgMotorCurrent;
+      SensorState::battery_current = vesc.data.avgInputCurrent;
+      SensorState::duty_cycle = vesc.data.dutyCycleNow;
+      SensorState::battery_voltage = vesc.data.inpVoltage;
+      SensorState::watts_used = vesc.data.wattHours;
+      SensorState::watts_charged = vesc.data.wattHoursCharged;
+      SensorState::esc_temp = vesc.data.tempMosfet;
 
       if (vesc.data.error) {  // Errors should be uncommon, avoid unnecessarily setting up jump table
         // TODO need a way to log additional error data like code

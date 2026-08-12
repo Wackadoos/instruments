@@ -1,12 +1,11 @@
 #include "speed.h"
 
 #include "hardware.h"
+#include "state.h"
 
 IntervalMetric SPEED::dataProcessTime = IntervalMetric();
 
-void SPEED::init(SensorState* state) {
-  sensorState = state;
-
+void SPEED::init() {
   previousMicros = micros();
   attachInterrupt(digitalPinToInterrupt(WHEEL_SPEED_SENSOR_PIN), sensor_isr, FALLING);  // Sense on falling, pulls to ground through phototransistor
 
@@ -37,7 +36,7 @@ void SPEED::update() {
     auto microsElapsed = time - previousMicros;  // Note! This correctly handles rollover (as long as less than ~71 mins)
     previousMicros = time;
 
-    sensorState->kilometers_per_hour = coefficient * pulsesRecorded / microsElapsed;
+    SensorState::kilometers_per_hour = coefficient * pulsesRecorded / microsElapsed;
     dataProcessTime.stop();
   }
 }

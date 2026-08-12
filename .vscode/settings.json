@@ -131,4 +131,8 @@
   "explorerExclude.backup": {},
   "clangd.enable": true,
   "clangd.path": "${workspaceFolder}/.vscode/mise-tools/clangd",
+  "editor.tokenColorCustomizations": {
+    "comments": "",
+    "textMateRules": []
+  },
 }

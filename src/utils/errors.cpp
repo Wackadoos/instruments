@@ -85,6 +85,8 @@ String Errors::errorDescription(Error error) {
     case Error::VESC_REPORTED_FLASH_CORRUPTION:
       return String(F("Flash Corruption error reported on VESC!"));
       // TODO this could fire very quickly. Need to have a cap of some kind to not fill up everything.
+    case Error::DISPLAY_UNINITIALISED:
+      return String(F("The Display failed to initialise!"));
     default:
       return String(F("An undefined error occurred!"));
   }

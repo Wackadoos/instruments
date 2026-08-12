@@ -1,13 +1,13 @@
 #include "bmp280.h"
 
+#include "state.h"
 #include "utils/errors.h"
 #include "utils/logging.h"
 
 Adafruit_BMP280 BMP::bmp280 = Adafruit_BMP280();
 IntervalMetric BMP::dataProcessTime = IntervalMetric();
 
-void BMP::init(TwoWire* wire, SensorState* state) {
-  sensorState = state;
+void BMP::init(TwoWire* wire) {
   bmp280 = Adafruit_BMP280(wire);  // Recreate object with wire now we have it
 
   if (!bmp280.begin()) {
@@ -29,10 +29,10 @@ void BMP::update() {
   if (enabled) {
     dataProcessTime.start();
     auto temp = bmp280.readTemperature();
-    sensorState->ambient_temperature = temp;
+    SensorState::ambient_temperature = temp;
     Logging::logDebug(F("BMP Temp: "), temp);
     auto alt = bmp280.readAltitude();
-    sensorState->uncalibrated_altitude = alt;
+    SensorState::uncalibrated_altitude = alt;
     Logging::logDebug(F("BMP Alt: "), alt);
     // bmp280.readPressure();
     dataProcessTime.stop();

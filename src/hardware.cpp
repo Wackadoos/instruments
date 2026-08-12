@@ -2,6 +2,7 @@
 
 #include "modules/ath20.h"
 #include "modules/bmp280.h"
+#include "modules/display.h"
 #include "modules/eeprom.h"
 #include "modules/imu.h"
 #include "modules/rtc.h"
@@ -11,12 +12,7 @@
 
 OneWire HARDWARE::oneWire = OneWire(ONEWIRE_TEMPERATURE_SENSORS_PIN);
 
-void HARDWARE::init(SensorState* state) {
-#ifdef DEBUG_LOGGING
-  Serial.begin(115200);
-  delay(3000);
-#endif
-
+void HARDWARE::init() {
   //* Set pin modes. Some of these may be set by libraries, but there's no harm in setting the same mode twice to be safe.
   pinMode(GPS_PULSE_PER_SECOND_PIN, INPUT);
   pinMode(ACCELEROMETER_INTERRUPT_PIN, INPUT);
@@ -37,15 +33,20 @@ void HARDWARE::init(SensorState* state) {
   digitalWrite(TOUCHSCREEN_CHIP_SELECT_PIN, HIGH);  //* SPI Chip Select uses LOW to select a device
   digitalWrite(DISPLAY_CHIP_SELECT_PIN, HIGH);      //* SPI Chip Select uses LOW to select a device
 
+#ifdef DEBUG_LOGGING
+  Serial.begin(115200);
+  delay(3000);
+#endif
+
   //* I2C Devices
   Wire.begin();
   Wire.setWireTimeout(25000, true);  // 25ms timeout with auto reset
 
   EEPROM::init(&Wire);
-  RTC::init(&Wire, state);
-  BMP::init(&Wire, state);
-  ATH::init(&Wire, state);
-  IMU::init(&Wire, state);
+  RTC::init(&Wire);
+  BMP::init(&Wire);
+  ATH::init(&Wire);
+  IMU::init(&Wire);
   // VESC::init(&VESC_SERIAL_PORT, state);
 
   Wire.setClock(400000);  // Must be set after device init!
@@ -54,6 +55,7 @@ void HARDWARE::init(SensorState* state) {
   // TEMPS::init(&oneWire, state);
 
   //* SPI Devices
+  Display::init(&SPI);
 }
 
 void HARDWARE::run() {

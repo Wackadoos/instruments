@@ -3,12 +3,11 @@
 #include <Arduino.h>
 #include <RTClib.h>
 
-#include "state.h"
 #include "utils/metrics.h"
 
 class RTC {
  public:
-  static void init(TwoWire* wire, SensorState* state);
+  static void init(TwoWire* wire);
   static void update();
   static void adjust();
   static inline bool isEnabled() { return enabled; };
@@ -18,7 +17,6 @@ class RTC {
   static IntervalMetric dataProcessTime;
 
   inline static bool enabled = false;
-  inline static SensorState* sensorState = nullptr;
   inline static bool needs_adjust = false;
 };
 
