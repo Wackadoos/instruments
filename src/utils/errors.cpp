@@ -87,6 +87,8 @@ String Errors::errorDescription(Error error) {
       // TODO this could fire very quickly. Need to have a cap of some kind to not fill up everything.
     case Error::DISPLAY_UNINITIALISED:
       return String(F("The Display failed to initialise!"));
+    case Error::TOUCHSCREEN_UNINITIALISED:
+      return String(F("The Touchscreen failed to initialise!"));
     default:
       return String(F("An undefined error occurred!"));
   }

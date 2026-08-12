@@ -38,6 +38,13 @@ struct SensorState {
   static inline float esc_temp = 34;        // Temperature of ESC MOSFET Chips
   //* GPS
   static inline uint8_t visible_satellites = 11;  // Number of satellites currently in view
+  //* Timing
+  static inline String currentTime = "8:58pm";
+  static inline String splitDiff = "+00:06:42";
+  //* Battery
+  static inline String battery_stats = "65% 104m";
+  static inline float battery_percentage_remaining = 0;  // Battery percentage remaining estimate
+  static inline float battery_time_remaining = 0;        // Time estimate remaining in seconds
   //* System Stats
   static inline uint16_t ram_free_bytes_minimum = 0;  // Least recorded available ram
   static inline uint32_t longest_scheduler_isr = 0;   // Longest recorded scheduler ISR
