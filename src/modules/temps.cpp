@@ -2,9 +2,8 @@
 
 #include "state.h"
 #include "utils/errors.h"
+#include "utils/logging.h"
 
-// TODO have interface for enumerating and selecting and storing which temp probes are available and which is which
-// TODO have setpoints in settings that show temps as red, yellow, green depending on temp
 IntervalMetric TEMPS::dataRequestTime = IntervalMetric();
 IntervalMetric TEMPS::dataAcquisitionTime = IntervalMetric();
 IntervalMetric TEMPS::dataProcessTime = IntervalMetric();
@@ -66,8 +65,13 @@ void TEMPS::run() {
     if (tempC == DEVICE_DISCONNECTED_C) {
       Errors::logError(Error::TEMP_UNREADABLE);
     } else {
-      SensorState::temp_motor_front = tempC;  // TODO set according to current_address + mapping setting
-      // SensorState::temp_motor_back = tempC;
+      if (current_address == 0) {
+        SensorState::temp_motor_1 = tempC;
+        Logging::logDebug(F("Temp Probe 1: "), tempC);
+      } else if (current_address == 1) {
+        SensorState::temp_motor_2 = tempC;
+        Logging::logDebug(F("Temp Probe 2: "), tempC);
+      }
     }
 
     current_address++;

@@ -35,12 +35,12 @@ ScheduledTask tasks[] = {
     // ScheduledTask(100, 0, readGPS),
     // ScheduledTask(500, 0, displayBattStats),
     // ScheduledTask(20, 0, SPEED::update),
-    // ScheduledTask(100, 0, VESC::update),
-    ScheduledTask(500, 0, RTC::update),
+    ScheduledTask(500, 0, VESC::update),
     ScheduledTask(500, 100, ATH::update),
     ScheduledTask(500, 200, BMP::update),
+    ScheduledTask(500, 300, TEMPS::update),
     ScheduledTask(500, 300, setspeed),
-    // ScheduledTask(500, 300, TEMPS::update),
+    ScheduledTask(1000, 0, RTC::update),
     // ScheduledTask(500, 400, logData),
 };
 
@@ -62,7 +62,7 @@ void loop() {
   mainLoopTime.start();  // TODO maybe have a minimum threshold on this? So a busy-wait isn't included
   Scheduler::runTasks();
   HARDWARE::run();
-  // TEMPS::run();
+  TEMPS::run();
   IMU::run();  // Internally scheduled via data ready interrupt
   Display::run();
 

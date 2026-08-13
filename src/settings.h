@@ -13,7 +13,7 @@ struct SettingsBlock {
 
 class SETTINGS {
  public:
-  static constexpr uint8_t SETTINGS_BLOCK_VERSION = 1;  // Bump every time the SettingsBlock object gets modified!
+  static constexpr uint8_t SETTINGS_BLOCK_VERSION = 2;  // Bump every time the SettingsBlock object gets modified!
 
   static void init();
   static SettingsBlock getSettings();

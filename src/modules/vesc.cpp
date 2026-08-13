@@ -2,6 +2,7 @@
 
 #include "state.h"
 #include "utils/errors.h"
+#include "utils/logging.h"
 
 VescUart VESC::vesc = VescUart(10);
 IntervalMetric VESC::dataProcessTime = IntervalMetric();
@@ -18,12 +19,19 @@ void VESC::update() {
     dataProcessTime.start();
     if (vesc.getVescValues()) {
       SensorState::motor_current = vesc.data.avgMotorCurrent;
+      Logging::logDebug(F("VESC Motor Current: "), vesc.data.avgMotorCurrent);
       SensorState::battery_current = vesc.data.avgInputCurrent;
+      Logging::logDebug(F("VESC Battery Current: "), vesc.data.avgInputCurrent);
       SensorState::duty_cycle = vesc.data.dutyCycleNow;
+      Logging::logDebug(F("VESC Duty Cycle: "), vesc.data.dutyCycleNow);
       SensorState::battery_voltage = vesc.data.inpVoltage;
+      Logging::logDebug(F("VESC Battery Voltage: "), vesc.data.inpVoltage);
       SensorState::watts_used = vesc.data.wattHours;
+      Logging::logDebug(F("VESC Watts Used: "), vesc.data.wattHours);
       SensorState::watts_charged = vesc.data.wattHoursCharged;
+      Logging::logDebug(F("VESC Watts Charged: "), vesc.data.wattHoursCharged);
       SensorState::esc_temp = vesc.data.tempMosfet;
+      Logging::logDebug(F("VESC Temp: "), vesc.data.tempMosfet);
 
       if (vesc.data.error) {  // Errors should be uncommon, avoid unnecessarily setting up jump table
         // TODO need a way to log additional error data like code

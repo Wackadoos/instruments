@@ -47,12 +47,14 @@ void HARDWARE::init() {
   BMP::init(&Wire);
   ATH::init(&Wire);
   IMU::init(&Wire);
-  // VESC::init(&VESC_SERIAL_PORT, state);
 
   Wire.setClock(400000);  // Must be set after device init!
 
   //* OneWire Devices
-  // TEMPS::init(&oneWire, state);
+  TEMPS::init(&oneWire);
+
+  //* Serial Devices
+  VESC::init(&VESC_SERIAL_PORT);
 
   //* SPI Devices
   Display::init(&SPI);

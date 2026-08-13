@@ -27,10 +27,11 @@ void RTC::update() {
   if (enabled) {
     dataProcessTime.start();
     if (needs_adjust) {
-      // TODO
-      rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-      // adjust();
+      adjust();
     }
+    char buffer[] = "hh:mmap";
+    // SensorState::currentTime = (rtc.now() + TimeSpan(0, SETTINGS::getSettings().timezone_offset / 4, (SETTINGS::getSettings().timezone_offset % 4) * 15, 0)).toString(buffer);
+    SensorState::currentTime = rtc.now().toString(buffer);
     Logging::logDebug(F("RTC Time: "), rtc.now().timestamp(DateTime::TIMESTAMP_FULL));
     dataProcessTime.stop();
   }
@@ -38,8 +39,8 @@ void RTC::update() {
 
 void RTC::adjust() {
   // TODO make this only work validly if GPS lock is acquired
-  SETTINGS::getSettings().timezone_offset;
   rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+  needs_adjust = false;
 }
 
 // TODO have a warning on screen if RTC was too far out of sync when GPS time acquired. (Also have temporary time correction seconds popup?). That way we know when battery isn't working.

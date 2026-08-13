@@ -25,6 +25,17 @@
 #define TOUCH_MAP_X2 150
 #define TOUCH_MAP_Y1 3850
 #define TOUCH_MAP_Y2 100
+//* Setpoint thresholds (warning/error) for SetpointWidgets
+inline float POWER_WARNING_SETPOINT = 250.0f;
+inline float POWER_ERROR_SETPOINT = 500.0f;
+inline float TEMP1_WARNING_SETPOINT = 35.0f;
+inline float TEMP1_ERROR_SETPOINT = 45.0f;
+inline float ESC_TEMP_WARNING_SETPOINT = 60.0f;
+inline float ESC_TEMP_ERROR_SETPOINT = 80.0f;
+inline float MOTOR_TEMP_WARNING_SETPOINT = 50.0f;
+inline float MOTOR_TEMP_ERROR_SETPOINT = 65.0f;
+inline uint8_t GPS_WARNING_SETPOINT = 6;
+inline uint8_t GPS_ERROR_SETPOINT = 3;
 
 class HARDWARE {
  public:

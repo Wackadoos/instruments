@@ -49,7 +49,7 @@ void SETTINGS::apply() {
 SettingsBlock SETTINGS::defaultSettings() {
   auto default_block = SettingsBlock{
       ._version = SETTINGS::SETTINGS_BLOCK_VERSION,
-      .timezone_offset = 0,
+      .timezone_offset = 40,
       .speed_sensor_wheel_circumference = 1596,  // 20" Wheel
       .speed_sensor_pulses_per_revolution = 4,
       ._checksum = 0,

@@ -2,37 +2,28 @@
 
 #include <Arduino.h>
 
+#include "hardware.h"
 #include "modules/display.h"
 #include "state.h"
 
 //* Centre
 static inline auto BATT_WIDGET = Widget(&SensorState::battery_stats, {240, 40, TextAlign::CENTER, RGB565_AZURE, 3});
 static inline auto SPEED_WIDGET = Widget(&SensorState::kilometers_per_hour, {240, 70, TextAlign::CENTER, RGB565_ORANGE, 14, 0, {"Km/h", 2, 0, 12}});
-static inline float POWER_WARNING_SETPOINT = 250.0f;
-static inline float POWER_ERROR_SETPOINT = 500.0f;
 static inline auto POWER_WIDGET = SetpointWidget(&SensorState::battery_power, {240, 184, TextAlign::CENTER, RGB565_AQUA, 9, 0, {"W", 2, 2, 7}}, &POWER_WARNING_SETPOINT, &POWER_ERROR_SETPOINT, RGB565_AQUA, RGB565_YELLOW, RGB565_RED);
 
 //* Bottom Row
 static inline auto AMBIENT_TEMP_TEXT_WIDGET = StaticWidget("Ambient", {0, 275, TextAlign::LEFT, RGB565_WHITESMOKE, 2});
-static inline float TEMP1_WARNING_SETPOINT = 35.0f;
-static inline float TEMP1_ERROR_SETPOINT = 45.0f;
 static inline auto TEMP1_WIDGET = SetpointWidget(&SensorState::ambient_temperature, {0, 295, TextAlign::LEFT, RGB565_LIGHTGREEN, 3}, &TEMP1_WARNING_SETPOINT, &TEMP1_ERROR_SETPOINT, RGB565_LIGHTGREEN, RGB565_YELLOW, RGB565_RED);
 static inline auto TEMP2_WIDGET = SetpointWidget(&SensorState::ambient_temperature_2, {60, 295, TextAlign::LEFT, RGB565_LIGHTGREEN, 3}, &TEMP1_WARNING_SETPOINT, &TEMP1_ERROR_SETPOINT, RGB565_LIGHTGREEN, RGB565_YELLOW, RGB565_RED);
 static inline auto ESC_TEMP_TEXT_WIDGET = StaticWidget("ESC", {120, 275, TextAlign::LEFT, RGB565_WHITESMOKE, 2});
-static inline float ESC_TEMP_WARNING_SETPOINT = 60.0f;
-static inline float ESC_TEMP_ERROR_SETPOINT = 80.0f;
 static inline auto ESC_TEMP_WIDGET = SetpointWidget(&SensorState::esc_temp, {120, 295, TextAlign::LEFT, RGB565_LIGHTGREEN, 3}, &ESC_TEMP_WARNING_SETPOINT, &ESC_TEMP_ERROR_SETPOINT, RGB565_LIGHTGREEN, RGB565_YELLOW, RGB565_RED);
 static inline auto MOTOR_TEMP_TEXT_WIDGET = StaticWidget("Motor", {180, 275, TextAlign::LEFT, RGB565_WHITESMOKE, 2});
-static inline float MOTOR_TEMP_WARNING_SETPOINT = 50.0f;
-static inline float MOTOR_TEMP_ERROR_SETPOINT = 65.0f;
-static inline auto MOTOR_TEMP1_WIDGET = SetpointWidget(&SensorState::temp_motor_front, {180, 295, TextAlign::LEFT, RGB565_LIGHTGREEN, 3}, &MOTOR_TEMP_WARNING_SETPOINT, &MOTOR_TEMP_ERROR_SETPOINT, RGB565_LIGHTGREEN, RGB565_YELLOW, RGB565_RED);
-static inline auto MOTOR_TEMP2_WIDGET = SetpointWidget(&SensorState::temp_motor_back, {240, 295, TextAlign::LEFT, RGB565_LIGHTGREEN, 3}, &MOTOR_TEMP_WARNING_SETPOINT, &MOTOR_TEMP_ERROR_SETPOINT, RGB565_LIGHTGREEN, RGB565_YELLOW, RGB565_RED);
+static inline auto MOTOR_TEMP1_WIDGET = SetpointWidget(&SensorState::temp_motor_1, {180, 295, TextAlign::LEFT, RGB565_LIGHTGREEN, 3}, &MOTOR_TEMP_WARNING_SETPOINT, &MOTOR_TEMP_ERROR_SETPOINT, RGB565_LIGHTGREEN, RGB565_YELLOW, RGB565_RED);
+static inline auto MOTOR_TEMP2_WIDGET = SetpointWidget(&SensorState::temp_motor_2, {240, 295, TextAlign::LEFT, RGB565_LIGHTGREEN, 3}, &MOTOR_TEMP_WARNING_SETPOINT, &MOTOR_TEMP_ERROR_SETPOINT, RGB565_LIGHTGREEN, RGB565_YELLOW, RGB565_RED);
 
 //* Top Row
 static inline auto TIME_WIDGET = Widget(&SensorState::currentTime, {0, 0, TextAlign::LEFT, RGB565_DARKORANGE, 3});
 static inline auto LAP_TIME_WIDGET = Widget(&SensorState::splitDiff, {0, 30, TextAlign::LEFT, RGB565_MEDIUMSPRINGGREEN, 2});
-static inline uint8_t GPS_WARNING_SETPOINT = 6;
-static inline uint8_t GPS_ERROR_SETPOINT = 3;
 static inline auto GPS_WIDGET = SetpointWidget(&SensorState::visible_satellites, {480, 0, TextAlign::RIGHT, RGB565_BLUE, 3}, &GPS_WARNING_SETPOINT, &GPS_ERROR_SETPOINT, RGB565_BLUE, RGB565_YELLOW, RGB565_RED, true);
 
 static inline void onSettingsPagePress();
