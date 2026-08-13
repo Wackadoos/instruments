@@ -112,10 +112,10 @@ class TextWidget : public WidgetBase {
   void pressed(TS_Point point) override {};
 };
 
-template <typename T>
-class StaticWidget : public TextWidget<T> {
+class StaticWidget : public TextWidget<const char*> {
  public:
-  constexpr StaticWidget(T* data, const TextConfig& cfg) : TextWidget<T>(data, cfg) {}
+  constexpr StaticWidget(const char* text, const TextConfig& cfg)
+      : TextWidget<const char*>(&storedText, cfg), storedText(text) {}
 
   void draw() override {
     if (firstDraw) {
@@ -130,6 +130,7 @@ class StaticWidget : public TextWidget<T> {
   }
 
  private:
+  const char* storedText;
   bool firstDraw = true;
 };
 
