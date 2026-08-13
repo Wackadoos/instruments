@@ -61,29 +61,93 @@ void Page::pressed(TS_Point point) {
   }
 }
 
-void WidgetBase::textAnchor(const char* text, int16_t x, int16_t y, TextAlign align, int16_t& outX, int16_t& outY,
-                            uint16_t& w, uint16_t& h) {
-  int16_t x1, y1;
-  Display::screen.getTextBounds(text, x, y, &x1, &y1, &w, &h);
+void WidgetBase::textBlockBounds(const char* text, int16_t x, int16_t y, uint8_t textSize, uint8_t linePad,
+                                 int16_t& outX, int16_t& outY, uint16_t& w, uint16_t& h) {
+  Display::screen.setTextSize(textSize);
+
+  char buf[32];
+  strncpy(buf, text, sizeof(buf) - 1);
+  buf[sizeof(buf) - 1] = '\0';
+
+  uint16_t lineHeight = 8 * textSize;
+  uint16_t lineCount = 1;
+  uint16_t maxW = 0;
+  char* line = buf;
+  for (char* p = buf;; p++) {
+    if (*p == '\n' || *p == '\0') {
+      bool last = (*p == '\0');
+      *p = '\0';
+      int16_t lx1, ly1;
+      uint16_t lw, lh;
+      Display::screen.getTextBounds(line, x, y, &lx1, &ly1, &lw, &lh);
+      if (lw > maxW) {
+        maxW = lw;
+      }
+      if (last) {
+        break;
+      }
+      lineCount++;
+      line = p + 1;
+    }
+  }
 
   outX = x;
+  outY = y;
+  w = maxW;
+  h = lineCount * lineHeight + (lineCount - 1) * linePad;
+}
+
+void WidgetBase::textAnchor(const char* text, int16_t x, int16_t y, TextAlign align, uint8_t textSize, uint8_t linePad,
+                            int16_t& outX, int16_t& outY, uint16_t& w, uint16_t& h) {
+  textBlockBounds(text, x, y, textSize, linePad, outX, outY, w, h);
+
   if (align == TextAlign::CENTER) {
     outX = x - static_cast<int16_t>(w) / 2;
   } else if (align == TextAlign::RIGHT) {
     outX = x - static_cast<int16_t>(w);
   }
-  outY = y;
 }
 
-void WidgetBase::drawText(const char* text, int16_t x, int16_t y, TextAlign align, uint8_t textSize, uint16_t color) {
+void WidgetBase::drawText(const char* text, int16_t x, int16_t y, TextAlign align, uint8_t textSize, uint16_t color,
+                          uint8_t linePad) {
   int16_t calcX, calcY;
   uint16_t w, h;
-  Display::screen.setTextSize(textSize);
-  textAnchor(text, x, y, align, calcX, calcY, w, h);
+  textBlockBounds(text, x, y, textSize, linePad, calcX, calcY, w, h);
 
   Display::screen.setTextColor(color, RGB565_BLACK);
-  Display::screen.setCursor(calcX, calcY);
-  Display::screen.println(text);
+
+  char buf[32];
+  strncpy(buf, text, sizeof(buf) - 1);
+  buf[sizeof(buf) - 1] = '\0';
+
+  uint16_t lineHeight = 8 * textSize;
+  char* line = buf;
+  uint16_t i = 0;
+  for (char* p = buf;; p++) {
+    if (*p == '\n' || *p == '\0') {
+      bool last = (*p == '\0');
+      *p = '\0';
+
+      int16_t lx1, ly1;
+      uint16_t lw, lh;
+      Display::screen.getTextBounds(line, x, y, &lx1, &ly1, &lw, &lh);
+      int16_t lineX = x;
+      if (align == TextAlign::CENTER) {
+        lineX = x - static_cast<int16_t>(lw) / 2;
+      } else if (align == TextAlign::RIGHT) {
+        lineX = x - static_cast<int16_t>(lw);
+      }
+      int16_t lineY = y + static_cast<int16_t>(i * (lineHeight + linePad));
+
+      Display::screen.setCursor(lineX, lineY);
+      Display::screen.println(line);
+      if (last) {
+        break;
+      }
+      i++;
+      line = p + 1;
+    }
+  }
 }
 
 void WidgetBase::drawTrailing(const char* mainText, int16_t x, int16_t y, TextAlign align, uint8_t mainTextSize,
@@ -94,12 +158,12 @@ void WidgetBase::drawTrailing(const char* mainText, int16_t x, int16_t y, TextAl
 
   int16_t mainX, mainY;
   uint16_t w, h;
-  textAnchor(mainText, x, y, align, mainX, mainY, w, h);
+  textAnchor(mainText, x, y, align, mainTextSize, 0, mainX, mainY, w, h);
 
   Display::screen.setTextSize(trailing.size);
   int16_t tx, ty;
   uint16_t tw, th;
-  textAnchor(trailing.text, mainX + static_cast<int16_t>(w), y, TextAlign::LEFT, tx, ty, tw, th);
+  textAnchor(trailing.text, mainX + static_cast<int16_t>(w), y, TextAlign::LEFT, trailing.size, 0, tx, ty, tw, th);
 
   int16_t tX = mainX + static_cast<int16_t>(w) + static_cast<int16_t>(trailing.gap);
   int16_t tY = y + static_cast<int16_t>(h) - static_cast<int16_t>(th) - static_cast<int16_t>(trailing.verticalPad);

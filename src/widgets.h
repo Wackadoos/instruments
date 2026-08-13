@@ -22,35 +22,28 @@ static inline auto MOTOR_TEMP2_WIDGET = Widget(&SensorState::temp_motor_back, {2
 
 //* Top Row
 static inline auto TIME_WIDGET = Widget(&SensorState::currentTime, {0, 0, TextAlign::LEFT, RGB565_DARKORANGE, 3});
-static inline auto LAP_TIME_WIDGET = Widget(&SensorState::splitDiff, {0, 30, TextAlign::LEFT, RGB565_GREEN, 2});
+static inline auto LAP_TIME_WIDGET = Widget(&SensorState::splitDiff, {0, 30, TextAlign::LEFT, RGB565_MEDIUMSPRINGGREEN, 2});
 static inline auto GPS_WIDGET = Widget(&SensorState::visible_satellites, {480, 0, TextAlign::RIGHT, RGB565_BLUE, 3});
 
 //* Buttons
-const inline char SETTINGS_TEXT[] = "SETTINGS";
-const inline char* SETTINGS_TEXT_PTR = SETTINGS_TEXT;
-static inline auto SETTINGS_BUTTON = Button(&SETTINGS_TEXT_PTR, {410, 285, TextAlign::CENTER, RGB565_BLUE, 2}, 140, 50, 12);
-const inline char RACE_TEXT[] = "";
-const inline char* RACE_TEXT_PTR = RACE_TEXT;
-static inline auto RACE_BUTTON = Button(&RACE_TEXT_PTR, {425, 215, TextAlign::CENTER, RGB565_BLUEVIOLET, 2}, 100, 80, 12);
-static inline auto RACE_BUTTON2 = StaticWidget("START", {425, 200, TextAlign::CENTER, RGB565_BLUEVIOLET, 2});
-static inline auto RACE_BUTTON3 = StaticWidget("RACE", {425, 220, TextAlign::CENTER, RGB565_BLUEVIOLET, 2});
+static inline auto SETTINGS_BUTTON = Button("SETTINGS", {410, 285, TextAlign::CENTER, RGB565_BLUE, 2}, 140, 50, 12);
+static inline auto RACE_BUTTON =
+    Button("START\nRACE", {430, 210, TextAlign::CENTER, RGB565_BLUEVIOLET, 2}, 100, 70, 12, 4);
 
 static inline WidgetBase* RACE_PAGE_WIDGETS[] = {&BATT_WIDGET,
-                                                       &SPEED_WIDGET,
-                                                       &POWER_WIDGET,
-                                                       &AMBIENT_TEMP_TEXT_WIDGET,
-                                                       &TEMP1_WIDGET,
-                                                       &TEMP2_WIDGET,
-                                                       &ESC_TEMP_WIDGET,
-                                                       &ESC_TEMP_TEXT_WIDGET,
-                                                       &MOTOR_TEMP_TEXT_WIDGET,
-                                                       &MOTOR_TEMP1_WIDGET,
-                                                       &MOTOR_TEMP2_WIDGET,
-                                                       &TIME_WIDGET,
-                                                       &LAP_TIME_WIDGET,
-                                                       &GPS_WIDGET,
-                                                       &SETTINGS_BUTTON,
-                                                       &RACE_BUTTON,
-                                                       &RACE_BUTTON2,
-                                                       &RACE_BUTTON3};
+                                                 &SPEED_WIDGET,
+                                                 &POWER_WIDGET,
+                                                 &AMBIENT_TEMP_TEXT_WIDGET,
+                                                 &TEMP1_WIDGET,
+                                                 &TEMP2_WIDGET,
+                                                 &ESC_TEMP_WIDGET,
+                                                 &ESC_TEMP_TEXT_WIDGET,
+                                                 &MOTOR_TEMP_TEXT_WIDGET,
+                                                 &MOTOR_TEMP1_WIDGET,
+                                                 &MOTOR_TEMP2_WIDGET,
+                                                 &TIME_WIDGET,
+                                                 &LAP_TIME_WIDGET,
+                                                 &GPS_WIDGET,
+                                                 &SETTINGS_BUTTON,
+                                                 &RACE_BUTTON};
 static inline Page RACE_PAGE = Page(RACE_PAGE_WIDGETS);

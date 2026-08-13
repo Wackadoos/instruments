@@ -55,9 +55,12 @@ class WidgetBase {
   virtual ~WidgetBase() = default;
   constexpr WidgetBase() = default;
 
-  static void textAnchor(const char* text, int16_t x, int16_t y, TextAlign align, int16_t& outX, int16_t& outY,
-                         uint16_t& w, uint16_t& h);
-  static void drawText(const char* text, int16_t x, int16_t y, TextAlign align, uint8_t textSize, uint16_t color);
+  static void textBlockBounds(const char* text, int16_t x, int16_t y, uint8_t textSize, uint8_t linePad,
+                              int16_t& outX, int16_t& outY, uint16_t& w, uint16_t& h);
+  static void textAnchor(const char* text, int16_t x, int16_t y, TextAlign align, uint8_t textSize, uint8_t linePad,
+                         int16_t& outX, int16_t& outY, uint16_t& w, uint16_t& h);
+  static void drawText(const char* text, int16_t x, int16_t y, TextAlign align, uint8_t textSize, uint16_t color,
+                       uint8_t linePad = 0);
   static void drawTrailing(const char* mainText, int16_t x, int16_t y, TextAlign align, uint8_t mainTextSize,
                            const TrailingText& trailing);
 };
@@ -158,50 +161,50 @@ class Widget : public TextWidget<T> {
   bool firstDraw = true;
 };
 
-template <typename T>
-class Button : public TextWidget<T> {
+class Button : public TextWidget<const char*> {
  public:
-  constexpr Button(T* data, const TextConfig& cfg, uint16_t rectWidth, uint16_t rectHeight, int16_t radius)
-      : TextWidget<T>(data, cfg), rectWidth(rectWidth), rectHeight(rectHeight), radius(radius) {
+  constexpr Button(const char* text, const TextConfig& cfg, uint16_t rectWidth, uint16_t rectHeight, int16_t radius,
+                   uint8_t linePad = 0)
+      : TextWidget<const char*>(&storedText, cfg),
+        storedText(text),
+        rectWidth(rectWidth),
+        rectHeight(rectHeight),
+        radius(radius),
+        linePad(linePad) {
     this->cfg.align = TextAlign::CENTER;
   }
 
   void draw() override {
     if (firstDraw) {
-      char buf[32];
-      WidgetPrinter::format(*this->data, buf, sizeof(buf), this->cfg.decimalDigits);
-
       int16_t x1, y1;
       uint16_t w, h;
-      Display::screen.setTextSize(this->cfg.size);
-      Display::screen.getTextBounds(buf, this->cfg.x, this->cfg.y, &x1, &y1, &w, &h);
+      WidgetBase::textBlockBounds(storedText, this->cfg.x, this->cfg.y, this->cfg.size, linePad, x1, y1, w, h);
       int16_t rectX = x1 - static_cast<int16_t>(rectWidth) / 2;
       int16_t rectY = y1 + (static_cast<int16_t>(h) - static_cast<int16_t>(rectHeight)) / 2;
-      this->render(*this->data, this->cfg.color);
+      WidgetBase::drawText(storedText, this->cfg.x, this->cfg.y, this->cfg.align, this->cfg.size, this->cfg.color,
+                           linePad);
       Display::screen.drawRoundRect(rectX, rectY, rectWidth, rectHeight, radius, this->cfg.color);
       firstDraw = false;
     }
   }
 
   void clear() override {
-    char buf[32];
-    WidgetPrinter::format(*this->data, buf, sizeof(buf), this->cfg.decimalDigits);
-
     int16_t x1, y1;
     uint16_t w, h;
-    Display::screen.setTextSize(this->cfg.size);
-    Display::screen.getTextBounds(buf, this->cfg.x, this->cfg.y, &x1, &y1, &w, &h);
+    WidgetBase::textBlockBounds(storedText, this->cfg.x, this->cfg.y, this->cfg.size, linePad, x1, y1, w, h);
     int16_t rectX = x1 - static_cast<int16_t>(rectWidth) / 2;
     int16_t rectY = y1 + (static_cast<int16_t>(h) - static_cast<int16_t>(rectHeight)) / 2;
-    this->render(*this->data, RGB565_BLACK);
+    WidgetBase::drawText(storedText, this->cfg.x, this->cfg.y, this->cfg.align, this->cfg.size, RGB565_BLACK, linePad);
     Display::screen.drawRoundRect(rectX, rectY, rectWidth, rectHeight, radius, RGB565_BLACK);
     firstDraw = true;
   }
 
  private:
+  const char* storedText;
   uint16_t rectWidth;
   uint16_t rectHeight;
   int16_t radius;
+  uint8_t linePad;
   bool firstDraw = true;
 };
 
