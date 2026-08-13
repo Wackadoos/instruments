@@ -80,3 +80,31 @@ void WidgetBase::writeText(const char* text, int16_t x, int16_t y, TextAlign ali
   Display::screen.setCursor(calcX, calcY);
   Display::screen.println(text);
 }
+
+void WidgetBase::drawTrailing(const char* mainText, const char* trailingText, int16_t x, int16_t y, TextAlign align,
+                              uint8_t trailingTextSize, uint8_t trailingGap, uint8_t trailingVerticalPad) {
+  if (trailingText == nullptr || trailingTextSize == 0) {
+    return;
+  }
+
+  int16_t x1, y1;
+  uint16_t w, h;
+  Display::screen.getTextBounds(mainText, x, y, &x1, &y1, &w, &h);
+
+  int16_t mainX = x;
+  if (align == TextAlign::CENTER) {
+    mainX = x - static_cast<int16_t>(w) / 2;
+  } else if (align == TextAlign::RIGHT) {
+    mainX = x - static_cast<int16_t>(w);
+  }
+
+  Display::screen.setTextSize(trailingTextSize);
+  int16_t tx1, ty1;
+  uint16_t tw, th;
+  Display::screen.getTextBounds(trailingText, mainX + w, y, &tx1, &ty1, &tw, &th);
+
+  int16_t tX = mainX + static_cast<int16_t>(w) + static_cast<int16_t>(trailingGap);
+  int16_t tY = y + static_cast<int16_t>(h) - static_cast<int16_t>(th) - static_cast<int16_t>(trailingVerticalPad);
+  Display::screen.setCursor(tX, tY);
+  Display::screen.println(trailingText);
+}

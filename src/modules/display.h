@@ -36,6 +36,8 @@ class WidgetBase {
   virtual void clear() = 0;
   virtual void pressed(TS_Point point) = 0;
   static void writeText(const char* text, int16_t x, int16_t y, TextAlign align);
+  static void drawTrailing(const char* mainText, const char* trailingText, int16_t x, int16_t y, TextAlign align,
+                           uint8_t trailingTextSize, uint8_t trailingGap, uint8_t trailingVerticalPad);
   virtual ~WidgetBase() = default;
 };
 
@@ -46,10 +48,12 @@ struct WidgetPrinter {
     String(value).toCharArray(buf, len);
   }
 
-  static void print(T value, int16_t x, int16_t y, TextAlign align = TextAlign::LEFT, uint8_t decimalDigits = 0) {
+  static void print(T value, int16_t x, int16_t y, TextAlign align = TextAlign::LEFT, uint8_t decimalDigits = 0,
+                    const char* trailingText = nullptr, uint8_t trailingTextSize = 0, uint8_t trailingGap = 2, uint8_t trailingVerticalPad = 0) {
     char buf[32];
     format(value, buf, sizeof(buf), decimalDigits);
     WidgetBase::writeText(buf, x, y, align);
+    WidgetBase::drawTrailing(buf, trailingText, x, y, align, trailingTextSize, trailingGap, trailingVerticalPad);
   }
 };
 
@@ -59,10 +63,12 @@ struct WidgetPrinter<float> {
     dtostrf(value, 0, decimalDigits, buf);  // width 0 = no padding, just decimalDigits precision
   }
 
-  static void print(float value, int16_t x, int16_t y, TextAlign align = TextAlign::LEFT, uint8_t decimalDigits = 0) {
+  static void print(float value, int16_t x, int16_t y, TextAlign align = TextAlign::LEFT, uint8_t decimalDigits = 0,
+                    const char* trailingText = nullptr, uint8_t trailingTextSize = 0, uint8_t trailingGap = 2, uint8_t trailingVerticalPad = 0) {
     char buf[32];
     format(value, buf, sizeof(buf), decimalDigits);
     WidgetBase::writeText(buf, x, y, align);
+    WidgetBase::drawTrailing(buf, trailingText, x, y, align, trailingTextSize, trailingGap, trailingVerticalPad);
   }
 };
 
@@ -73,8 +79,10 @@ struct WidgetPrinter<const char*> {
     buf[len - 1] = '\0';
   }
 
-  static void print(const char* value, int16_t x, int16_t y, TextAlign align = TextAlign::LEFT, uint8_t decimalDigits = 0) {
+  static void print(const char* value, int16_t x, int16_t y, TextAlign align = TextAlign::LEFT, uint8_t decimalDigits = 0,
+                    const char* trailingText = nullptr, uint8_t trailingTextSize = 0, uint8_t trailingGap = 2, uint8_t trailingVerticalPad = 0) {
     WidgetBase::writeText(value, x, y, align);
+    WidgetBase::drawTrailing(value, trailingText, x, y, align, trailingTextSize, trailingGap, trailingVerticalPad);
   }
 };
 
@@ -196,9 +204,25 @@ class Widget : public WidgetBase {
   uint16_t textColor;
   uint8_t textSize;
   uint8_t decimalDigits;  // only meaningful for float, harmless otherwise
+  const char* trailingText;
+  uint8_t trailingTextSize;
+  uint8_t trailingGap;
+  uint8_t trailingVerticalPad;
 
-  Widget(T* data, int16_t cursorX, int16_t cursorY, TextAlign align, uint16_t textColor, uint8_t textSize, uint8_t decimalDigits = 0)
-      : data(data), cursorX(cursorX), cursorY(cursorY), align(align), textColor(textColor), textSize(textSize), decimalDigits(decimalDigits) {}
+  Widget(T* data, int16_t cursorX, int16_t cursorY, TextAlign align, uint16_t textColor, uint8_t textSize,
+         uint8_t decimalDigits = 0, const char* trailingText = nullptr, uint8_t trailingTextSize = 0, uint8_t trailingGap = 2,
+         uint8_t trailingVerticalPad = 0)
+      : data(data),
+        cursorX(cursorX),
+        cursorY(cursorY),
+        align(align),
+        textColor(textColor),
+        textSize(textSize),
+        decimalDigits(decimalDigits),
+        trailingText(trailingText),
+        trailingTextSize(trailingTextSize),
+        trailingGap(trailingGap),
+        trailingVerticalPad(trailingVerticalPad) {}
 
   void draw() override {
     if (prevData != *data || firstDraw) {
@@ -206,7 +230,7 @@ class Widget : public WidgetBase {
       Display::screen.setTextColor(textColor, RGB565_BLACK);
       Display::screen.setTextSize(textSize);
       prevData = *data;
-      WidgetPrinter<T>::print(prevData, cursorX, cursorY, align, decimalDigits);
+      WidgetPrinter<T>::print(prevData, cursorX, cursorY, align, decimalDigits, trailingText, trailingTextSize, trailingGap, trailingVerticalPad);
       firstDraw = false;
     }
   }
@@ -215,7 +239,7 @@ class Widget : public WidgetBase {
     Display::screen.setCursor(cursorX, cursorY);
     Display::screen.setTextColor(RGB565_BLACK);
     Display::screen.setTextSize(textSize);
-    WidgetPrinter<T>::print(prevData, cursorX, cursorY, align, decimalDigits);
+    WidgetPrinter<T>::print(prevData, cursorX, cursorY, align, decimalDigits, trailingText, trailingTextSize, trailingGap, trailingVerticalPad);
     prevData = T();
     firstDraw = true;
   }
