@@ -97,19 +97,7 @@ void WidgetBase::textBlockBounds(const char* text, int16_t x, int16_t y, uint8_t
   h = lineCount * lineHeight + (lineCount - 1) * linePad;
 }
 
-void WidgetBase::textAnchor(const char* text, int16_t x, int16_t y, TextAlign align, uint8_t textSize, uint8_t linePad,
-                            int16_t& outX, int16_t& outY, uint16_t& w, uint16_t& h) {
-  textBlockBounds(text, x, y, textSize, linePad, outX, outY, w, h);
-
-  if (align == TextAlign::CENTER) {
-    outX = x - static_cast<int16_t>(w) / 2;
-  } else if (align == TextAlign::RIGHT) {
-    outX = x - static_cast<int16_t>(w);
-  }
-}
-
-void WidgetBase::drawText(const char* text, int16_t x, int16_t y, TextAlign align, uint8_t textSize, uint16_t color,
-                          uint8_t linePad) {
+void WidgetBase::drawText(const char* text, int16_t x, int16_t y, TextAlign align, uint8_t textSize, uint16_t color, uint8_t linePad) {
   int16_t calcX, calcY;
   uint16_t w, h;
   textBlockBounds(text, x, y, textSize, linePad, calcX, calcY, w, h);
@@ -150,24 +138,60 @@ void WidgetBase::drawText(const char* text, int16_t x, int16_t y, TextAlign alig
   }
 }
 
+void WidgetBase::textRegion(const char* text, int16_t x, int16_t y, TextAlign align, uint8_t textSize, uint8_t linePad,
+                            TextRegion& out) {
+  textBlockBounds(text, x, y, textSize, linePad, out.x, out.y, out.w, out.h);
+  if (align == TextAlign::CENTER) {
+    out.x = x - static_cast<int16_t>(out.w) / 2;
+  } else if (align == TextAlign::RIGHT) {
+    out.x = x - static_cast<int16_t>(out.w);
+  }
+}
+
+void WidgetBase::trailingRegion(const TrailingText& trailing, const TextRegion& main, TextRegion& out) {
+  textRegion(trailing.text, main.x + static_cast<int16_t>(main.w) + static_cast<int16_t>(trailing.gap), main.y,
+             TextAlign::LEFT, trailing.size, 0, out);
+  out.y = main.y + static_cast<int16_t>(main.h) - static_cast<int16_t>(out.h) -
+          static_cast<int16_t>(trailing.verticalPad);
+}
+
+void WidgetBase::eraseStale(const TextRegion& oldR, const TextRegion& newR) {
+  int16_t oldRight = oldR.x + static_cast<int16_t>(oldR.w);
+  int16_t oldBottom = oldR.y + static_cast<int16_t>(oldR.h);
+  int16_t newRight = newR.x + static_cast<int16_t>(newR.w);
+  int16_t newBottom = newR.y + static_cast<int16_t>(newR.h);
+
+  int16_t leftW = newR.x - oldR.x;
+  if (leftW > 0) {
+    Display::screen.fillRect(oldR.x, oldR.y, leftW, oldR.h, RGB565_BLACK);
+  }
+  int16_t rightW = oldRight - newRight;
+  if (rightW > 0) {
+    Display::screen.fillRect(newRight, oldR.y, rightW, oldR.h, RGB565_BLACK);
+  }
+  int16_t topH = newR.y - oldR.y;
+  if (topH > 0) {
+    Display::screen.fillRect(newR.x, oldR.y, newR.w, topH, RGB565_BLACK);
+  }
+  int16_t bottomH = oldBottom - newBottom;
+  if (bottomH > 0) {
+    Display::screen.fillRect(newR.x, newBottom, newR.w, bottomH, RGB565_BLACK);
+  }
+}
+
 void WidgetBase::drawTrailing(const char* mainText, int16_t x, int16_t y, TextAlign align, uint8_t mainTextSize,
                               const TrailingText& trailing) {
   if (trailing.text == nullptr || trailing.size == 0) {
     return;
   }
 
-  int16_t mainX, mainY;
-  uint16_t w, h;
-  textAnchor(mainText, x, y, align, mainTextSize, 0, mainX, mainY, w, h);
+  TextRegion main;
+  textRegion(mainText, x, y, align, mainTextSize, 0, main);
 
-  Display::screen.setTextSize(trailing.size);
-  int16_t tx, ty;
-  uint16_t tw, th;
-  textAnchor(trailing.text, mainX + static_cast<int16_t>(w), y, TextAlign::LEFT, trailing.size, 0, tx, ty, tw, th);
+  TextRegion t;
+  trailingRegion(trailing, main, t);
 
-  int16_t tX = mainX + static_cast<int16_t>(w) + static_cast<int16_t>(trailing.gap);
-  int16_t tY = y + static_cast<int16_t>(h) - static_cast<int16_t>(th) - static_cast<int16_t>(trailing.verticalPad);
-  Display::screen.setCursor(tX, tY);
+  Display::screen.setCursor(t.x, t.y);
   Display::screen.println(trailing.text);
 
   Display::screen.setTextSize(mainTextSize);

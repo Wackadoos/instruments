@@ -47,6 +47,13 @@ struct TextConfig {
   TrailingText trailing;
 };
 
+struct TextRegion {
+  int16_t x = 0;
+  int16_t y = 0;
+  uint16_t w = 0;
+  uint16_t h = 0;
+};
+
 class WidgetBase {
  public:
   virtual void draw() = 0;
@@ -57,12 +64,14 @@ class WidgetBase {
 
   static void textBlockBounds(const char* text, int16_t x, int16_t y, uint8_t textSize, uint8_t linePad,
                               int16_t& outX, int16_t& outY, uint16_t& w, uint16_t& h);
-  static void textAnchor(const char* text, int16_t x, int16_t y, TextAlign align, uint8_t textSize, uint8_t linePad,
-                         int16_t& outX, int16_t& outY, uint16_t& w, uint16_t& h);
   static void drawText(const char* text, int16_t x, int16_t y, TextAlign align, uint8_t textSize, uint16_t color,
                        uint8_t linePad = 0);
   static void drawTrailing(const char* mainText, int16_t x, int16_t y, TextAlign align, uint8_t mainTextSize,
                            const TrailingText& trailing);
+  static void textRegion(const char* text, int16_t x, int16_t y, TextAlign align, uint8_t textSize, uint8_t linePad,
+                         TextRegion& out);
+  static void trailingRegion(const TrailingText& trailing, const TextRegion& main, TextRegion& out);
+  static void eraseStale(const TextRegion& oldR, const TextRegion& newR);
 };
 
 struct WidgetPrinter {
@@ -144,6 +153,36 @@ class Widget : public TextWidget<T> {
 
   void draw() override {
     if (prevData != *this->data || firstDraw) {
+      char buf[32];
+      WidgetPrinter::format(*this->data, buf, sizeof(buf), this->cfg.decimalDigits);
+
+      TextRegion main;
+      WidgetBase::textRegion(buf, this->cfg.x, this->cfg.y, this->cfg.align, this->cfg.size, 0, main);
+
+      if (!firstDraw) {
+        TextRegion oldR;
+        oldR.x = this->cfg.x;
+        oldR.y = this->cfg.y;
+        oldR.w = prevW;
+        oldR.h = prevH;
+        if (this->cfg.align == TextAlign::CENTER) {
+          oldR.x -= static_cast<int16_t>(prevW / 2);
+        } else if (this->cfg.align == TextAlign::RIGHT) {
+          oldR.x -= static_cast<int16_t>(prevW);
+        }
+        WidgetBase::eraseStale(oldR, main);
+
+        if (this->cfg.trailing.text != nullptr && this->cfg.trailing.size != 0) {
+          TextRegion oldTrailing, newTrailing;
+          WidgetBase::trailingRegion(this->cfg.trailing, oldR, oldTrailing);
+          WidgetBase::trailingRegion(this->cfg.trailing, main, newTrailing);
+          WidgetBase::eraseStale(oldTrailing, newTrailing);
+        }
+      }
+
+      prevW = main.w;
+      prevH = main.h;
+
       prevData = *this->data;
       this->render(prevData, this->cfg.color);
       firstDraw = false;
@@ -153,11 +192,15 @@ class Widget : public TextWidget<T> {
   void clear() override {
     this->render(prevData, RGB565_BLACK);
     prevData = T();
+    prevW = 0;
+    prevH = 0;
     firstDraw = true;
   }
 
  private:
   T prevData = T();
+  uint16_t prevW = 0;
+  uint16_t prevH = 0;
   bool firstDraw = true;
 };
 
@@ -225,9 +268,9 @@ class Page {
   size_t count;
 };
 
-// TODO when text width drops, ensure overwrite old space with black
 // TODO display errors on screen?
 // TODO Display average watts while driving, maybe 1min rolling average or something? Or exponential decay?
+// TODO display battery voltage
 // TODO  Display class should use widgets with local state of last update (to update only if different - after decimal precision cutoff etc) and all widgets implement an erase function that redraws value in black to erase from screen using just those pixels. Will this cause problems with antialiasing on text?
 // TODO Widgets get enabled/disabled per page. Page class calls initial draw and erase on exit. Widgets keep updating during when modified
 // TODO Render one widget at a time and return. Avoid long contiguous render blocks as this will block sensor data acquisition. Have a selector that iterates through widgets yielding after one renders, to avoid prioritization and starving later widgets from rendering even under heavy contention.

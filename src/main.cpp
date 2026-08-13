@@ -22,6 +22,16 @@ IntervalMetric mainLoopTime = IntervalMetric();
 
 void logData();
 
+void setspeed() {
+  SensorState::kilometers_per_hour = random(max(0, SensorState::kilometers_per_hour - 2), min(99, SensorState::kilometers_per_hour + 2));
+  Serial.print("Speed: ");
+  Serial.println(SensorState::kilometers_per_hour);
+  // Serial.print("writetime: ");
+  // Serial.println(Display::dataProcessTime.average());
+  // Serial.print("writetimelongest: ");
+  // Serial.println(Display::dataProcessTime.longest());
+}
+
 ScheduledTask tasks[] = {
     // ScheduledTask(25, 0, displayCritical),
     // ScheduledTask(50, 0, readTouchScreen),
@@ -32,6 +42,7 @@ ScheduledTask tasks[] = {
     ScheduledTask(500, 0, RTC::update),
     ScheduledTask(500, 100, ATH::update),
     ScheduledTask(500, 200, BMP::update),
+    ScheduledTask(500, 300, setspeed),
     // ScheduledTask(500, 300, TEMPS::update),
     // ScheduledTask(500, 400, logData),
 };
