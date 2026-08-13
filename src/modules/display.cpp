@@ -65,7 +65,7 @@ void WidgetBase::textBlockBounds(const char* text, int16_t x, int16_t y, uint8_t
                                  int16_t& outX, int16_t& outY, uint16_t& w, uint16_t& h) {
   Display::screen.setTextSize(textSize);
 
-  char buf[32];
+  char buf[TEXT_BUFFER_SIZE];
   strncpy(buf, text, sizeof(buf) - 1);
   buf[sizeof(buf) - 1] = '\0';
 
@@ -104,7 +104,7 @@ void WidgetBase::drawText(const char* text, int16_t x, int16_t y, TextAlign alig
 
   Display::screen.setTextColor(color, RGB565_BLACK);
 
-  char buf[32];
+  char buf[TEXT_BUFFER_SIZE];
   strncpy(buf, text, sizeof(buf) - 1);
   buf[sizeof(buf) - 1] = '\0';
 

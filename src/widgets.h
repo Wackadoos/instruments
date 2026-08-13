@@ -7,7 +7,7 @@
 
 //* Centre
 static inline auto BATT_WIDGET = Widget(&SensorState::battery_stats, {240, 40, TextAlign::CENTER, RGB565_AZURE, 3});
-static inline auto SPEED_WIDGET = Widget(&SensorState::temp_motor_back, {240, 70, TextAlign::CENTER, RGB565_ORANGE, 14, 0, {"Km/h", 2, 0, 12}});
+static inline auto SPEED_WIDGET = Widget(&SensorState::kilometers_per_hour, {240, 70, TextAlign::CENTER, RGB565_ORANGE, 14, 0, {"Km/h", 2, 0, 12}});
 static inline auto POWER_WIDGET = Widget(&SensorState::battery_power, {240, 180, TextAlign::CENTER, RGB565_GOLDENROD, 9, 0, {"W", 2, 2, 7}});
 
 //* Bottom Row

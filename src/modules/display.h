@@ -6,6 +6,8 @@
 
 #include "utils/metrics.h"
 
+#define TEXT_BUFFER_SIZE 16
+
 class Page;
 
 class Display {
@@ -104,7 +106,7 @@ struct WidgetPrinter {
 
   template <typename T>
   static void print(T value, const TextConfig& cfg, uint16_t color) {
-    char buf[32];
+    char buf[TEXT_BUFFER_SIZE];
     format(value, buf, sizeof(buf), cfg.decimalDigits);
     WidgetBase::drawText(buf, cfg.x, cfg.y, cfg.align, cfg.size, color);
     WidgetBase::drawTrailing(buf, cfg.x, cfg.y, cfg.align, cfg.size, cfg.trailing);
@@ -152,12 +154,15 @@ class Widget : public TextWidget<T> {
   constexpr Widget(T* data, const TextConfig& cfg) : TextWidget<T>(data, cfg) {}
 
   void draw() override {
-    if (prevData != *this->data || firstDraw) {
-      char buf[32];
-      WidgetPrinter::format(*this->data, buf, sizeof(buf), this->cfg.decimalDigits);
+    char buf[TEXT_BUFFER_SIZE];
+    WidgetPrinter::format(*this->data, buf, sizeof(buf), this->cfg.decimalDigits);
 
+    if (firstDraw || strcmp(buf, prevString) != 0) {
       TextRegion main;
       WidgetBase::textRegion(buf, this->cfg.x, this->cfg.y, this->cfg.align, this->cfg.size, 0, main);
+
+      bool sizeChanged = firstDraw || main.w != prevW || main.h != prevH;
+      bool hasTrailing = this->cfg.trailing.text != nullptr && this->cfg.trailing.size != 0;
 
       if (!firstDraw) {
         TextRegion oldR;
@@ -172,7 +177,7 @@ class Widget : public TextWidget<T> {
         }
         WidgetBase::eraseStale(oldR, main);
 
-        if (this->cfg.trailing.text != nullptr && this->cfg.trailing.size != 0) {
+        if (hasTrailing && sizeChanged) {
           TextRegion oldTrailing, newTrailing;
           WidgetBase::trailingRegion(this->cfg.trailing, oldR, oldTrailing);
           WidgetBase::trailingRegion(this->cfg.trailing, main, newTrailing);
@@ -182,23 +187,28 @@ class Widget : public TextWidget<T> {
 
       prevW = main.w;
       prevH = main.h;
+      strncpy(prevString, buf, sizeof(prevString) - 1);
+      prevString[sizeof(prevString) - 1] = '\0';
 
-      prevData = *this->data;
-      this->render(prevData, this->cfg.color);
+      WidgetBase::drawText(buf, this->cfg.x, this->cfg.y, this->cfg.align, this->cfg.size, this->cfg.color);
+      if (hasTrailing && sizeChanged) {
+        WidgetBase::drawTrailing(buf, this->cfg.x, this->cfg.y, this->cfg.align, this->cfg.size, this->cfg.trailing);
+      }
       firstDraw = false;
     }
   }
 
   void clear() override {
-    this->render(prevData, RGB565_BLACK);
-    prevData = T();
+    WidgetBase::drawText(prevString, this->cfg.x, this->cfg.y, this->cfg.align, this->cfg.size, RGB565_BLACK);
+    WidgetBase::drawTrailing(prevString, this->cfg.x, this->cfg.y, this->cfg.align, this->cfg.size, this->cfg.trailing);
+    prevString[0] = '\0';
     prevW = 0;
     prevH = 0;
     firstDraw = true;
   }
 
  private:
-  T prevData = T();
+  char prevString[TEXT_BUFFER_SIZE] = "";
   uint16_t prevW = 0;
   uint16_t prevH = 0;
   bool firstDraw = true;
@@ -271,6 +281,3 @@ class Page {
 // TODO display errors on screen?
 // TODO Display average watts while driving, maybe 1min rolling average or something? Or exponential decay?
 // TODO display battery voltage
-// TODO  Display class should use widgets with local state of last update (to update only if different - after decimal precision cutoff etc) and all widgets implement an erase function that redraws value in black to erase from screen using just those pixels. Will this cause problems with antialiasing on text?
-// TODO Widgets get enabled/disabled per page. Page class calls initial draw and erase on exit. Widgets keep updating during when modified
-// TODO Render one widget at a time and return. Avoid long contiguous render blocks as this will block sensor data acquisition. Have a selector that iterates through widgets yielding after one renders, to avoid prioritization and starving later widgets from rendering even under heavy contention.
