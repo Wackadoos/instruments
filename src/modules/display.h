@@ -30,230 +30,184 @@ enum class TextAlign : uint8_t { LEFT,
                                  CENTER,
                                  RIGHT };
 
+struct TrailingText {
+  const char* text = nullptr;
+  uint8_t size = 0;
+  uint8_t gap = 2;
+  uint8_t verticalPad = 0;
+};
+
+struct TextConfig {
+  int16_t x = 0;
+  int16_t y = 0;
+  TextAlign align = TextAlign::LEFT;
+  int16_t color = RGB565_WHITE;  // RGB565 macros are signed int on AVR; bits are preserved when converted to uint16_t at draw time
+  uint8_t size = 1;
+  uint8_t decimalDigits = 0;
+  TrailingText trailing;
+};
+
 class WidgetBase {
  public:
   virtual void draw() = 0;
   virtual void clear() = 0;
   virtual void pressed(TS_Point point) = 0;
-  static void writeText(const char* text, int16_t x, int16_t y, TextAlign align);
-  static void drawTrailing(const char* mainText, const char* trailingText, int16_t x, int16_t y, TextAlign align,
-                           uint8_t trailingTextSize, uint8_t trailingGap, uint8_t trailingVerticalPad);
   virtual ~WidgetBase() = default;
+  constexpr WidgetBase() = default;
+
+  static void textAnchor(const char* text, int16_t x, int16_t y, TextAlign align, int16_t& outX, int16_t& outY,
+                         uint16_t& w, uint16_t& h);
+  static void drawText(const char* text, int16_t x, int16_t y, TextAlign align, uint8_t textSize, uint16_t color);
+  static void drawTrailing(const char* mainText, int16_t x, int16_t y, TextAlign align, uint8_t mainTextSize,
+                           const TrailingText& trailing);
 };
 
-template <typename T>
 struct WidgetPrinter {
-  static void format(T value, char* buf, size_t len, uint8_t decimalDigits = 0) {
-    // works for int, long, etc. via Arduino's String; adjust if you need bases other than base-10
-    String(value).toCharArray(buf, len);
-  }
-
-  static void print(T value, int16_t x, int16_t y, TextAlign align = TextAlign::LEFT, uint8_t decimalDigits = 0,
-                    const char* trailingText = nullptr, uint8_t trailingTextSize = 0, uint8_t trailingGap = 2, uint8_t trailingVerticalPad = 0) {
-    char buf[32];
-    format(value, buf, sizeof(buf), decimalDigits);
-    WidgetBase::writeText(buf, x, y, align);
-    WidgetBase::drawTrailing(buf, trailingText, x, y, align, trailingTextSize, trailingGap, trailingVerticalPad);
-  }
-};
-
-template <>
-struct WidgetPrinter<float> {
-  static void format(float value, char* buf, size_t len, uint8_t decimalDigits = 0) {
+  static void formatValue(float value, char* buf, size_t len, uint8_t decimalDigits) {
     dtostrf(value, 0, decimalDigits, buf);  // width 0 = no padding, just decimalDigits precision
   }
 
-  static void print(float value, int16_t x, int16_t y, TextAlign align = TextAlign::LEFT, uint8_t decimalDigits = 0,
-                    const char* trailingText = nullptr, uint8_t trailingTextSize = 0, uint8_t trailingGap = 2, uint8_t trailingVerticalPad = 0) {
-    char buf[32];
-    format(value, buf, sizeof(buf), decimalDigits);
-    WidgetBase::writeText(buf, x, y, align);
-    WidgetBase::drawTrailing(buf, trailingText, x, y, align, trailingTextSize, trailingGap, trailingVerticalPad);
+  static void formatValue(double value, char* buf, size_t len, uint8_t decimalDigits) {
+    dtostrf(value, 0, decimalDigits, buf);
   }
-};
 
-template <>
-struct WidgetPrinter<const char*> {
-  static void format(const char* value, char* buf, size_t len, uint8_t decimalDigits = 0) {
+  static void formatValue(const char* value, char* buf, size_t len, uint8_t) {
     strncpy(buf, value, len - 1);
     buf[len - 1] = '\0';
   }
 
-  static void print(const char* value, int16_t x, int16_t y, TextAlign align = TextAlign::LEFT, uint8_t decimalDigits = 0,
-                    const char* trailingText = nullptr, uint8_t trailingTextSize = 0, uint8_t trailingGap = 2, uint8_t trailingVerticalPad = 0) {
-    WidgetBase::writeText(value, x, y, align);
-    WidgetBase::drawTrailing(value, trailingText, x, y, align, trailingTextSize, trailingGap, trailingVerticalPad);
+  static void formatValue(char* value, char* buf, size_t len, uint8_t decimalDigits) {
+    formatValue(static_cast<const char*>(value), buf, len, decimalDigits);
+  }
+
+  template <typename T>
+  static void formatValue(T value, char* buf, size_t len, uint8_t) {
+    String(value).toCharArray(buf, len);
+  }
+
+  template <typename T>
+  static void format(T value, char* buf, size_t len, uint8_t decimalDigits = 0) {
+    formatValue(value, buf, len, decimalDigits);
+  }
+
+  template <typename T>
+  static void print(T value, const TextConfig& cfg, uint16_t color) {
+    char buf[32];
+    format(value, buf, sizeof(buf), cfg.decimalDigits);
+    WidgetBase::drawText(buf, cfg.x, cfg.y, cfg.align, cfg.size, color);
+    WidgetBase::drawTrailing(buf, cfg.x, cfg.y, cfg.align, cfg.size, cfg.trailing);
   }
 };
 
 template <typename T>
-class StaticWidget : public WidgetBase {
+class TextWidget : public WidgetBase {
  public:
   T* data;
-  int16_t cursorX;
-  int16_t cursorY;
-  TextAlign align;
-  uint16_t textColor;
-  uint8_t textSize;
-  uint8_t decimalDigits;  // only meaningful for float, harmless otherwise
+  TextConfig cfg;
 
-  StaticWidget(T* data, int16_t cursorX, int16_t cursorY, TextAlign align, uint16_t textColor, uint8_t textSize, uint8_t decimalDigits = 0)
-      : data(data), cursorX(cursorX), cursorY(cursorY), align(align), textColor(textColor), textSize(textSize), decimalDigits(decimalDigits) {}
+  constexpr TextWidget(T* data, const TextConfig& cfg) : data(data), cfg(cfg) {}
+
+  void render(T value, uint16_t color) { WidgetPrinter::print(value, cfg, color); }
+
+  void pressed(TS_Point point) override {};
+};
+
+template <typename T>
+class StaticWidget : public TextWidget<T> {
+ public:
+  constexpr StaticWidget(T* data, const TextConfig& cfg) : TextWidget<T>(data, cfg) {}
 
   void draw() override {
     if (firstDraw) {
-      Display::screen.setCursor(cursorX, cursorY);
-      Display::screen.setTextColor(textColor, RGB565_BLACK);
-      Display::screen.setTextSize(textSize);
-      WidgetPrinter<T>::print(*data, cursorX, cursorY, align, decimalDigits);
+      this->render(*this->data, this->cfg.color);
       firstDraw = false;
     }
   }
 
   void clear() override {
-    Display::screen.setCursor(cursorX, cursorY);
-    Display::screen.setTextColor(RGB565_BLACK);
-    Display::screen.setTextSize(textSize);
-    WidgetPrinter<T>::print(*data, cursorX, cursorY, align, decimalDigits);
+    this->render(*this->data, RGB565_BLACK);
     firstDraw = true;
   }
-
-  void pressed(TS_Point point) override {};
-  // TODO debounce presses to avoid multiple triggers within 1s window
 
  private:
   bool firstDraw = true;
 };
 
 template <typename T>
-class Button : public WidgetBase {
+class Widget : public TextWidget<T> {
  public:
-  T* data;
-  int16_t cursorX;
-  int16_t cursorY;
-  uint16_t rectWidth;
-  uint16_t rectHeight;
-  int16_t radius;
-  uint16_t textColor;
-  uint8_t textSize;
-  uint8_t decimalDigits;  // only meaningful for float, harmless otherwise
+  constexpr Widget(T* data, const TextConfig& cfg) : TextWidget<T>(data, cfg) {}
 
-  Button(T* data, int16_t x, int16_t y, uint16_t rectWidth, uint16_t rectHeight, int16_t radius, uint16_t textColor, uint8_t textSize, uint8_t decimalDigits = 0)
-      : data(data),
-        cursorX(x),
-        cursorY(y),
-        rectWidth(rectWidth),
-        rectHeight(rectHeight),
-        radius(radius),
-        textColor(textColor),
-        textSize(textSize),
-        decimalDigits(decimalDigits) {}
+  void draw() override {
+    if (prevData != *this->data || firstDraw) {
+      prevData = *this->data;
+      this->render(prevData, this->cfg.color);
+      firstDraw = false;
+    }
+  }
+
+  void clear() override {
+    this->render(prevData, RGB565_BLACK);
+    prevData = T();
+    firstDraw = true;
+  }
+
+ private:
+  T prevData = T();
+  bool firstDraw = true;
+};
+
+template <typename T>
+class Button : public TextWidget<T> {
+ public:
+  constexpr Button(T* data, const TextConfig& cfg, uint16_t rectWidth, uint16_t rectHeight, int16_t radius)
+      : TextWidget<T>(data, cfg), rectWidth(rectWidth), rectHeight(rectHeight), radius(radius) {
+    this->cfg.align = TextAlign::CENTER;
+  }
 
   void draw() override {
     if (firstDraw) {
       char buf[32];
-      WidgetPrinter<T>::format(*data, buf, sizeof(buf), decimalDigits);
+      WidgetPrinter::format(*this->data, buf, sizeof(buf), this->cfg.decimalDigits);
 
       int16_t x1, y1;
       uint16_t w, h;
-      Display::screen.setTextSize(textSize);
-      Display::screen.getTextBounds(buf, cursorX, cursorY, &x1, &y1, &w, &h);
+      Display::screen.setTextSize(this->cfg.size);
+      Display::screen.getTextBounds(buf, this->cfg.x, this->cfg.y, &x1, &y1, &w, &h);
       int16_t rectX = x1 - static_cast<int16_t>(rectWidth) / 2;
       int16_t rectY = y1 + (static_cast<int16_t>(h) - static_cast<int16_t>(rectHeight)) / 2;
-      Display::screen.setCursor(cursorX, cursorY);
-      Display::screen.setTextColor(textColor, RGB565_BLACK);
-      WidgetPrinter<T>::print(*data, cursorX, cursorY, TextAlign::CENTER, decimalDigits);
-      Display::screen.drawRoundRect(rectX, rectY, rectWidth, rectHeight, radius, textColor);
+      this->render(*this->data, this->cfg.color);
+      Display::screen.drawRoundRect(rectX, rectY, rectWidth, rectHeight, radius, this->cfg.color);
       firstDraw = false;
     }
   }
 
   void clear() override {
     char buf[32];
-    WidgetPrinter<T>::format(*data, buf, sizeof(buf), decimalDigits);
+    WidgetPrinter::format(*this->data, buf, sizeof(buf), this->cfg.decimalDigits);
 
     int16_t x1, y1;
     uint16_t w, h;
-    Display::screen.setTextSize(textSize);
-    Display::screen.getTextBounds(buf, cursorX, cursorY, &x1, &y1, &w, &h);
+    Display::screen.setTextSize(this->cfg.size);
+    Display::screen.getTextBounds(buf, this->cfg.x, this->cfg.y, &x1, &y1, &w, &h);
     int16_t rectX = x1 - static_cast<int16_t>(rectWidth) / 2;
     int16_t rectY = y1 + (static_cast<int16_t>(h) - static_cast<int16_t>(rectHeight)) / 2;
-    Display::screen.setCursor(cursorX, cursorY);
-    Display::screen.setTextColor(RGB565_BLACK);
-    WidgetPrinter<T>::print(*data, cursorX, cursorY, TextAlign::CENTER, decimalDigits);
+    this->render(*this->data, RGB565_BLACK);
     Display::screen.drawRoundRect(rectX, rectY, rectWidth, rectHeight, radius, RGB565_BLACK);
     firstDraw = true;
   }
 
-  void pressed(TS_Point point) override {
-    // TODO if point is within rect, run callback
-  };
-
  private:
-  bool firstDraw = true;
-};
-
-template <typename T>
-class Widget : public WidgetBase {
- public:
-  T* data;
-  T prevData;
-  int16_t cursorX;
-  int16_t cursorY;
-  TextAlign align;
-  uint16_t textColor;
-  uint8_t textSize;
-  uint8_t decimalDigits;  // only meaningful for float, harmless otherwise
-  const char* trailingText;
-  uint8_t trailingTextSize;
-  uint8_t trailingGap;
-  uint8_t trailingVerticalPad;
-
-  Widget(T* data, int16_t cursorX, int16_t cursorY, TextAlign align, uint16_t textColor, uint8_t textSize,
-         uint8_t decimalDigits = 0, const char* trailingText = nullptr, uint8_t trailingTextSize = 0, uint8_t trailingGap = 2,
-         uint8_t trailingVerticalPad = 0)
-      : data(data),
-        cursorX(cursorX),
-        cursorY(cursorY),
-        align(align),
-        textColor(textColor),
-        textSize(textSize),
-        decimalDigits(decimalDigits),
-        trailingText(trailingText),
-        trailingTextSize(trailingTextSize),
-        trailingGap(trailingGap),
-        trailingVerticalPad(trailingVerticalPad) {}
-
-  void draw() override {
-    if (prevData != *data || firstDraw) {
-      Display::screen.setCursor(cursorX, cursorY);
-      Display::screen.setTextColor(textColor, RGB565_BLACK);
-      Display::screen.setTextSize(textSize);
-      prevData = *data;
-      WidgetPrinter<T>::print(prevData, cursorX, cursorY, align, decimalDigits, trailingText, trailingTextSize, trailingGap, trailingVerticalPad);
-      firstDraw = false;
-    }
-  }
-
-  void clear() override {
-    Display::screen.setCursor(cursorX, cursorY);
-    Display::screen.setTextColor(RGB565_BLACK);
-    Display::screen.setTextSize(textSize);
-    WidgetPrinter<T>::print(prevData, cursorX, cursorY, align, decimalDigits, trailingText, trailingTextSize, trailingGap, trailingVerticalPad);
-    prevData = T();
-    firstDraw = true;
-  }
-
-  void pressed(TS_Point point) override {};
-
- private:
+  uint16_t rectWidth;
+  uint16_t rectHeight;
+  int16_t radius;
   bool firstDraw = true;
 };
 
 class Page {
  public:
   template <size_t N>
-  Page(const WidgetBase* (&widgets)[N]) : widgets(widgets), count(N) {}
+  Page(WidgetBase* const (&widgets)[N]) : widgets(widgets), count(N) {}
 
   size_t size() const { return count; }
   const WidgetBase* operator[](size_t i) const { return widgets[i]; }

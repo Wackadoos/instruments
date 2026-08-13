@@ -61,50 +61,50 @@ void Page::pressed(TS_Point point) {
   }
 }
 
-void WidgetBase::writeText(const char* text, int16_t x, int16_t y, TextAlign align = TextAlign::LEFT) {
-  int16_t calcX = x;
-  int16_t calcY = y;
+void WidgetBase::textAnchor(const char* text, int16_t x, int16_t y, TextAlign align, int16_t& outX, int16_t& outY,
+                            uint16_t& w, uint16_t& h) {
+  int16_t x1, y1;
+  Display::screen.getTextBounds(text, x, y, &x1, &y1, &w, &h);
 
-  if (align != TextAlign::LEFT) {
-    int16_t x1, y1;
-    uint16_t w, h;
-    Display::screen.getTextBounds(text, x, y, &x1, &y1, &w, &h);
-
-    if (align == TextAlign::CENTER) {
-      calcX = x - w / 2;
-    } else if (align == TextAlign::RIGHT) {
-      calcX = x - w;
-    }
+  outX = x;
+  if (align == TextAlign::CENTER) {
+    outX = x - static_cast<int16_t>(w) / 2;
+  } else if (align == TextAlign::RIGHT) {
+    outX = x - static_cast<int16_t>(w);
   }
+  outY = y;
+}
 
+void WidgetBase::drawText(const char* text, int16_t x, int16_t y, TextAlign align, uint8_t textSize, uint16_t color) {
+  int16_t calcX, calcY;
+  uint16_t w, h;
+  Display::screen.setTextSize(textSize);
+  textAnchor(text, x, y, align, calcX, calcY, w, h);
+
+  Display::screen.setTextColor(color, RGB565_BLACK);
   Display::screen.setCursor(calcX, calcY);
   Display::screen.println(text);
 }
 
-void WidgetBase::drawTrailing(const char* mainText, const char* trailingText, int16_t x, int16_t y, TextAlign align,
-                              uint8_t trailingTextSize, uint8_t trailingGap, uint8_t trailingVerticalPad) {
-  if (trailingText == nullptr || trailingTextSize == 0) {
+void WidgetBase::drawTrailing(const char* mainText, int16_t x, int16_t y, TextAlign align, uint8_t mainTextSize,
+                              const TrailingText& trailing) {
+  if (trailing.text == nullptr || trailing.size == 0) {
     return;
   }
 
-  int16_t x1, y1;
+  int16_t mainX, mainY;
   uint16_t w, h;
-  Display::screen.getTextBounds(mainText, x, y, &x1, &y1, &w, &h);
+  textAnchor(mainText, x, y, align, mainX, mainY, w, h);
 
-  int16_t mainX = x;
-  if (align == TextAlign::CENTER) {
-    mainX = x - static_cast<int16_t>(w) / 2;
-  } else if (align == TextAlign::RIGHT) {
-    mainX = x - static_cast<int16_t>(w);
-  }
-
-  Display::screen.setTextSize(trailingTextSize);
-  int16_t tx1, ty1;
+  Display::screen.setTextSize(trailing.size);
+  int16_t tx, ty;
   uint16_t tw, th;
-  Display::screen.getTextBounds(trailingText, mainX + w, y, &tx1, &ty1, &tw, &th);
+  textAnchor(trailing.text, mainX + static_cast<int16_t>(w), y, TextAlign::LEFT, tx, ty, tw, th);
 
-  int16_t tX = mainX + static_cast<int16_t>(w) + static_cast<int16_t>(trailingGap);
-  int16_t tY = y + static_cast<int16_t>(h) - static_cast<int16_t>(th) - static_cast<int16_t>(trailingVerticalPad);
+  int16_t tX = mainX + static_cast<int16_t>(w) + static_cast<int16_t>(trailing.gap);
+  int16_t tY = y + static_cast<int16_t>(h) - static_cast<int16_t>(th) - static_cast<int16_t>(trailing.verticalPad);
   Display::screen.setCursor(tX, tY);
-  Display::screen.println(trailingText);
+  Display::screen.println(trailing.text);
+
+  Display::screen.setTextSize(mainTextSize);
 }
