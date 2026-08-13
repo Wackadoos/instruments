@@ -156,12 +156,14 @@ class Widget : public TextWidget<T> {
   void draw() override {
     char buf[TEXT_BUFFER_SIZE];
     WidgetPrinter::format(*this->data, buf, sizeof(buf), this->cfg.decimalDigits);
+    uint16_t color = colorFor(*this->data);
 
-    if (firstDraw || strcmp(buf, prevString) != 0) {
+    if (firstDraw || strcmp(buf, prevString) != 0 || color != prevColor) {
       TextRegion main;
       WidgetBase::textRegion(buf, this->cfg.x, this->cfg.y, this->cfg.align, this->cfg.size, 0, main);
 
       bool sizeChanged = firstDraw || main.w != prevW || main.h != prevH;
+      bool colorChanged = color != prevColor;
       bool hasTrailing = this->cfg.trailing.text != nullptr && this->cfg.trailing.size != 0;
 
       if (!firstDraw) {
@@ -190,10 +192,11 @@ class Widget : public TextWidget<T> {
       strncpy(prevString, buf, sizeof(prevString) - 1);
       prevString[sizeof(prevString) - 1] = '\0';
 
-      WidgetBase::drawText(buf, this->cfg.x, this->cfg.y, this->cfg.align, this->cfg.size, this->cfg.color);
-      if (hasTrailing && sizeChanged) {
+      WidgetBase::drawText(buf, this->cfg.x, this->cfg.y, this->cfg.align, this->cfg.size, color);
+      if (hasTrailing && (sizeChanged || colorChanged)) {
         WidgetBase::drawTrailing(buf, this->cfg.x, this->cfg.y, this->cfg.align, this->cfg.size, this->cfg.trailing);
       }
+      prevColor = color;
       firstDraw = false;
     }
   }
@@ -204,14 +207,53 @@ class Widget : public TextWidget<T> {
     prevString[0] = '\0';
     prevW = 0;
     prevH = 0;
+    prevColor = 0;
     firstDraw = true;
   }
+
+ protected:
+  virtual uint16_t colorFor(T value) { return static_cast<uint16_t>(this->cfg.color); }
 
  private:
   char prevString[TEXT_BUFFER_SIZE] = "";
   uint16_t prevW = 0;
   uint16_t prevH = 0;
+  uint16_t prevColor = 0;
   bool firstDraw = true;
+};
+
+template <typename T>
+class SetpointWidget : public Widget<T> {
+ public:
+  constexpr SetpointWidget(T* data, const TextConfig& cfg, const T* warningSetpoint, const T* errorSetpoint,
+                           uint16_t baseColor, uint16_t warningColor, uint16_t errorColor, bool lowEscalates = false)
+      : Widget<T>(data, cfg),
+        warningSetpoint(warningSetpoint),
+        errorSetpoint(errorSetpoint),
+        baseColor(baseColor),
+        warningColor(warningColor),
+        errorColor(errorColor),
+        lowEscalates(lowEscalates) {}
+
+ protected:
+  uint16_t colorFor(T value) override {
+    if (lowEscalates) {
+      if (errorSetpoint && value <= *errorSetpoint) return errorColor;
+      if (warningSetpoint && value <= *warningSetpoint) return warningColor;
+    } else {
+      if (errorSetpoint && value >= *errorSetpoint) return errorColor;
+      if (warningSetpoint && value >= *warningSetpoint) return warningColor;
+    }
+    return baseColor;
+  }
+
+ private:
+  const T* warningSetpoint;
+  const T* errorSetpoint;
+  uint16_t baseColor;
+  uint16_t warningColor;
+  uint16_t errorColor;
+  bool lowEscalates;
 };
 
 class Button : public TextWidget<const char*> {

@@ -11,8 +11,8 @@ enum class AppState : uint8_t {
 struct SensorState {
  public:
   //* DS18B20 Temp Sensors (Motor)
-  static inline float temp_motor_front = 48;  // Motor temp (front probe) in degrees C
-  static inline float temp_motor_back = 32;   // Motor temp (back probe) in degrees C
+  static inline float temp_motor_front = 78;  // Motor temp (front probe) in degrees C
+  static inline float temp_motor_back = 52;   // Motor temp (back probe) in degrees C
   //* Inertial Measurement Unit Accelerations & Temp
   static inline float imu_accel_x = 0;          // Acceleration in the X axis (m/s/s)
   static inline float imu_accel_y = 0;          // Acceleration in the Y axis (m/s/s)

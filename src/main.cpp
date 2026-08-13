@@ -22,7 +22,7 @@ void logData();
 
 void setspeed() {
   SensorState::kilometers_per_hour = random(max(0, SensorState::kilometers_per_hour - 2), min(99, SensorState::kilometers_per_hour + 2));
-  Serial.println(SensorState::kilometers_per_hour);
+  SensorState::battery_power = random(max(-500, SensorState::battery_power - 50), min(1500, SensorState::battery_power + 50));
   // Serial.print("writetime: ");
   // Serial.println(Display::dataProcessTime.average());
   // Serial.print("writetimelongest: ");
