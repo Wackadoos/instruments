@@ -19,6 +19,12 @@
 #define DISPLAY_CHIP_SELECT_PIN 53
 #define EEPROM_I2C_ADDR 0x57
 #define IMU_I2C_ADDR bfs::Mpu6500::I2C_ADDR_SEC
+//* Touchscreen Calibration (resolved via Arduino_GFX TouchCalibration example)
+#define TOUCH_SWAP_XY false
+#define TOUCH_MAP_X1 3950
+#define TOUCH_MAP_X2 150
+#define TOUCH_MAP_Y1 3850
+#define TOUCH_MAP_Y2 100
 
 class HARDWARE {
  public:

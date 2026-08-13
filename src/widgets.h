@@ -8,7 +8,7 @@
 //* Centre
 static inline auto BATT_WIDGET = Widget(&SensorState::battery_stats, {240, 40, TextAlign::CENTER, RGB565_AZURE, 3});
 static inline auto SPEED_WIDGET = Widget(&SensorState::kilometers_per_hour, {240, 70, TextAlign::CENTER, RGB565_ORANGE, 14, 0, {"Km/h", 2, 0, 12}});
-static inline auto POWER_WIDGET = Widget(&SensorState::battery_power, {240, 180, TextAlign::CENTER, RGB565_GOLDENROD, 9, 0, {"W", 2, 2, 7}});
+static inline auto POWER_WIDGET = Widget(&SensorState::battery_power, {240, 184, TextAlign::CENTER, RGB565_GOLDENROD, 9, 0, {"W", 2, 2, 7}});
 
 //* Bottom Row
 static inline auto AMBIENT_TEMP_TEXT_WIDGET = StaticWidget("Ambient", {0, 275, TextAlign::LEFT, RGB565_WHITESMOKE, 2});
@@ -25,10 +25,12 @@ static inline auto TIME_WIDGET = Widget(&SensorState::currentTime, {0, 0, TextAl
 static inline auto LAP_TIME_WIDGET = Widget(&SensorState::splitDiff, {0, 30, TextAlign::LEFT, RGB565_MEDIUMSPRINGGREEN, 2});
 static inline auto GPS_WIDGET = Widget(&SensorState::visible_satellites, {480, 0, TextAlign::RIGHT, RGB565_BLUE, 3});
 
-//* Buttons
-static inline auto SETTINGS_BUTTON = Button("SETTINGS", {410, 285, TextAlign::CENTER, RGB565_BLUE, 2}, 140, 50, 12);
-static inline auto RACE_BUTTON =
-    Button("START\nRACE", {430, 210, TextAlign::CENTER, RGB565_BLUEVIOLET, 2}, 100, 70, 12, 4);
+static inline void onSettingsPagePress();
+static inline void onRacePagePress();
+static inline void onRacePress();
+
+static inline auto SETTINGS_BUTTON = Button("SETTINGS", {410, 285, TextAlign::CENTER, RGB565_BLUE, 2}, 140, 50, 12, 0, &onSettingsPagePress);
+static inline auto RACE_BUTTON = Button("START\nRACE", {430, 210, TextAlign::CENTER, RGB565_BLUEVIOLET, 2}, 100, 70, 12, 4, &onRacePress);
 
 static inline WidgetBase* RACE_PAGE_WIDGETS[] = {&BATT_WIDGET,
                                                  &SPEED_WIDGET,
@@ -47,3 +49,21 @@ static inline WidgetBase* RACE_PAGE_WIDGETS[] = {&BATT_WIDGET,
                                                  &SETTINGS_BUTTON,
                                                  &RACE_BUTTON};
 static inline Page RACE_PAGE = Page(RACE_PAGE_WIDGETS);
+
+static inline auto HOME_PAGE_BUTTON = Button("HOME", {410, 285, TextAlign::CENTER, RGB565_BLUE, 2}, 140, 50, 12, 0,
+                                             &onRacePagePress);
+
+static inline WidgetBase* SETTINGS_PAGE_WIDGETS[] = {&HOME_PAGE_BUTTON};
+static inline Page SETTINGS_PAGE = Page(SETTINGS_PAGE_WIDGETS);
+
+//* Buttons
+static inline void onSettingsPagePress() {
+  Display::changePage(&SETTINGS_PAGE);
+}
+
+static inline void onRacePagePress() {
+  Display::changePage(&RACE_PAGE);
+}
+
+static inline void onRacePress() {
+}

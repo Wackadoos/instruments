@@ -1,7 +1,5 @@
 #include "main.h"
 
-#include <Wire.h>
-
 #include "hardware.h"
 #include "modules/ath20.h"
 #include "modules/bmp280.h"
@@ -24,7 +22,6 @@ void logData();
 
 void setspeed() {
   SensorState::kilometers_per_hour = random(max(0, SensorState::kilometers_per_hour - 2), min(99, SensorState::kilometers_per_hour + 2));
-  Serial.print("Speed: ");
   Serial.println(SensorState::kilometers_per_hour);
   // Serial.print("writetime: ");
   // Serial.println(Display::dataProcessTime.average());

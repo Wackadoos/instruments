@@ -7,6 +7,7 @@
 #include "utils/metrics.h"
 
 #define TEXT_BUFFER_SIZE 16
+#define DEBOUNCE_PERIOD 800
 
 class Page;
 
@@ -15,6 +16,7 @@ class Display {
   static void init(SPIClass* spi);
   static void run();
   static inline bool isEnabled() { return enabled; };
+  static void changePage(Page* page);
 
   static Arduino_ILI9488_18bit screen;
   static XPT2046_Touchscreen touch;
@@ -22,10 +24,8 @@ class Display {
  private:
   static IntervalMetric dataProcessTime;
   inline static bool enabled = false;
-
-  static Page* currentPage;
-
   static Arduino_HWSPI bus;
+  static Page* currentPage;
 };
 
 enum class TextAlign : uint8_t { LEFT,
@@ -216,48 +216,77 @@ class Widget : public TextWidget<T> {
 
 class Button : public TextWidget<const char*> {
  public:
+  using PressCallback = void (*)();
+
   constexpr Button(const char* text, const TextConfig& cfg, uint16_t rectWidth, uint16_t rectHeight, int16_t radius,
-                   uint8_t linePad = 0)
+                   uint8_t linePad = 0, PressCallback onPress = nullptr)
       : TextWidget<const char*>(&storedText, cfg),
         storedText(text),
         rectWidth(rectWidth),
         rectHeight(rectHeight),
         radius(radius),
-        linePad(linePad) {
+        linePad(linePad),
+        onPress(onPress) {
     this->cfg.align = TextAlign::CENTER;
   }
 
   void draw() override {
     if (firstDraw) {
-      int16_t x1, y1;
-      uint16_t w, h;
-      WidgetBase::textBlockBounds(storedText, this->cfg.x, this->cfg.y, this->cfg.size, linePad, x1, y1, w, h);
-      int16_t rectX = x1 - static_cast<int16_t>(rectWidth) / 2;
-      int16_t rectY = y1 + (static_cast<int16_t>(h) - static_cast<int16_t>(rectHeight)) / 2;
+      int16_t rectX, rectY;
+      uint16_t rw, rh;
+      rectBounds(rectX, rectY, rw, rh);
       WidgetBase::drawText(storedText, this->cfg.x, this->cfg.y, this->cfg.align, this->cfg.size, this->cfg.color,
                            linePad);
-      Display::screen.drawRoundRect(rectX, rectY, rectWidth, rectHeight, radius, this->cfg.color);
+      Display::screen.drawRoundRect(rectX, rectY, rw, rh, radius, this->cfg.color);
       firstDraw = false;
     }
   }
 
   void clear() override {
-    int16_t x1, y1;
-    uint16_t w, h;
-    WidgetBase::textBlockBounds(storedText, this->cfg.x, this->cfg.y, this->cfg.size, linePad, x1, y1, w, h);
-    int16_t rectX = x1 - static_cast<int16_t>(rectWidth) / 2;
-    int16_t rectY = y1 + (static_cast<int16_t>(h) - static_cast<int16_t>(rectHeight)) / 2;
+    int16_t rectX, rectY;
+    uint16_t rw, rh;
+    rectBounds(rectX, rectY, rw, rh);
     WidgetBase::drawText(storedText, this->cfg.x, this->cfg.y, this->cfg.align, this->cfg.size, RGB565_BLACK, linePad);
-    Display::screen.drawRoundRect(rectX, rectY, rectWidth, rectHeight, radius, RGB565_BLACK);
+    Display::screen.drawRoundRect(rectX, rectY, rw, rh, radius, RGB565_BLACK);
     firstDraw = true;
   }
 
+  void pressed(TS_Point point) override {
+    if (onPress == nullptr) {
+      return;
+    }
+    uint32_t now = millis();
+    if (now - lastPressMs < DEBOUNCE_PERIOD) {
+      return;
+    }
+    int16_t rectX, rectY;
+    uint16_t rw, rh;
+    rectBounds(rectX, rectY, rw, rh);
+    if (point.x >= rectX && point.x < rectX + static_cast<int16_t>(rw) && point.y >= rectY &&
+        point.y < rectY + static_cast<int16_t>(rh)) {
+      lastPressMs = now;
+      onPress();
+    }
+  }
+
  private:
+  void rectBounds(int16_t& outX, int16_t& outY, uint16_t& outW, uint16_t& outH) const {
+    int16_t x1, y1;
+    uint16_t w, h;
+    WidgetBase::textBlockBounds(storedText, this->cfg.x, this->cfg.y, this->cfg.size, linePad, x1, y1, w, h);
+    outX = x1 - static_cast<int16_t>(rectWidth) / 2;
+    outY = y1 + (static_cast<int16_t>(h) - static_cast<int16_t>(rectHeight)) / 2;
+    outW = rectWidth;
+    outH = rectHeight;
+  }
+
   const char* storedText;
   uint16_t rectWidth;
   uint16_t rectHeight;
   int16_t radius;
   uint8_t linePad;
+  PressCallback onPress;
+  uint32_t lastPressMs = 0;
   bool firstDraw = true;
 };
 

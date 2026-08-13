@@ -33,14 +33,25 @@ void Display::run() {
   if (enabled) {
     dataProcessTime.start();
     currentPage->refresh();
-    if (touch.tirqTouched()) {
-      if (touch.touched()) {
-        TS_Point p = touch.getPoint();
-        currentPage->pressed(touch.getPoint());
+    if (touch.tirqTouched() && touch.touched()) {
+      TS_Point p = touch.getPoint();
+      int16_t px, py;
+      if (TOUCH_SWAP_XY) {
+        px = map(p.y, TOUCH_MAP_X1, TOUCH_MAP_X2, 0, screen.width() - 1);
+        py = map(p.x, TOUCH_MAP_Y1, TOUCH_MAP_Y2, 0, screen.height() - 1);
+      } else {
+        px = map(p.x, TOUCH_MAP_X1, TOUCH_MAP_X2, 0, screen.width() - 1);
+        py = map(p.y, TOUCH_MAP_Y1, TOUCH_MAP_Y2, 0, screen.height() - 1);
       }
+      currentPage->pressed(TS_Point(px, py, p.z));
     }
     dataProcessTime.stop();
   }
+}
+
+void Display::changePage(Page* page) {
+  currentPage->clear();
+  currentPage = page;
 }
 
 void Page::refresh() {

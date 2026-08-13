@@ -17,5 +17,3 @@ class BMP {
 
   inline static bool enabled = false;
 };
-
-// TODO Calibrate barometric pressure using GPS altitude?
