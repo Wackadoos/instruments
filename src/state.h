@@ -39,7 +39,7 @@ struct SensorState {
   //* GPS
   static inline uint8_t visible_satellites = 11;  // Number of satellites currently in view
   //* Timing
-  static inline String currentTime = "8:58pm";
+  static inline String currentTime = "";
   static inline String splitDiff = "+00:06:42";
   //* Battery
   static inline String battery_stats = "65% 104m";

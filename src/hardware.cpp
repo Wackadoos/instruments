@@ -54,6 +54,7 @@ void HARDWARE::init() {
   TEMPS::init(&oneWire);
 
   //* Serial Devices
+  VESC_SERIAL_PORT.begin(250000);
   VESC::init(&VESC_SERIAL_PORT);
 
   //* SPI Devices
