@@ -332,9 +332,8 @@
 //       associated TIMER frequency, calculate the elapsed time
 //       since the PPS edge, and add that to the current micros().
 
-// #define NMEAGPS_TIMESTAMP_FROM_PPS
+#define NMEAGPS_TIMESTAMP_FROM_PPS
 
-// TODO
 #if defined(NMEAGPS_TIMESTAMP_FROM_INTERVAL) & \
     defined(NMEAGPS_TIMESTAMP_FROM_PPS)
 #error You cannot enable both TIMESTAMP_FROM_INTERVAL and PPS in NMEAGPS_cfg.h!

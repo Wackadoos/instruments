@@ -37,8 +37,13 @@ struct SensorState {
   static inline float watts_charged = 0;    // Total WH charged
   static inline float esc_temp = 0;         // Temperature of ESC MOSFET Chips
   //* GPS
-  static inline uint8_t visible_satellites = 0;  // Number of satellites currently in view
-  static inline uint8_t fix_satellites = 0;      // Number of satellites used in fix
+  static inline int32_t latitude = 0;                        // GPS Lat, scaled by 10,000,000
+  static inline int32_t longitude = 0;                       // GPS Long, scaled by 10,000,000
+  static inline int32_t altitude = 0;                        // GPS Alt in cm
+  static inline float gps_speed = 0;                         // GPS Speed in km/h
+  static inline float heading = 0;                           // GPS Heading in km/h
+  static inline uint8_t visible_satellites = 0;              // Number of satellites currently in view
+  static inline uint8_t fix_satellites = 0;                  // Number of satellites used in fix
   static inline String sat_string = "";
   //* Timing
   static inline String currentTime = "";

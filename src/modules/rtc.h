@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include <RTClib.h>
+#undef SECONDS_PER_DAY // Fix collision with NeoGPS
 
 #include "utils/metrics.h"
 
@@ -19,5 +20,3 @@ class RTC {
   inline static bool enabled = false;
   inline static bool needs_adjust = false;
 };
-
-// TODO Only adjust time when not in race mode and avoid updating too frequently!

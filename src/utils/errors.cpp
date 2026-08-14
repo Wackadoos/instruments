@@ -32,6 +32,8 @@ String Errors::errorDescription(Error error) {
       return String(F("The Realtime Clock failed to initialise!"));
     case Error::RTC_LOST_POWER:
       return String(F("The Realtime Clock lost power. Time is inaccurate!"));
+    case Error::RTC_OUT_OF_SYNC:
+      return String(F("The Realtime Clock > 10s out of sync with GPS time!"));
     case Error::IMU_UNINITIALISED:
       return String(F("The IMU failed to initialise!"));
     case Error::IMU_SAMPLE_RATE_ERR:
@@ -89,6 +91,8 @@ String Errors::errorDescription(Error error) {
       return String(F("The Display failed to initialise!"));
     case Error::TOUCHSCREEN_UNINITIALISED:
       return String(F("The Touchscreen failed to initialise!"));
+    case Error::GPS_OVERRUN:
+      return String(F("GPS data overrun, not read frequently enough!"));
     default:
       return String(F("An undefined error occurred!"));
   }
