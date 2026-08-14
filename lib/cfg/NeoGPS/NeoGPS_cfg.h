@@ -83,8 +83,8 @@
 //  The bad news is that it introduces a new language keyword, and the old
 //  code raises an error.
 //
-//  TODO: Evaluate the requirement for the "static" keyword.
-//  TODO: Evaluate using a C++ version preprocessor symbol for the #if.
+//  To Do: Evaluate the requirement for the "static" keyword.
+//  To Do: Evaluate using a C++ version preprocessor symbol for the #if.
 //          #if __cplusplus >= 201103L  (from XBee.h)
 //
 //  The CONST_CLASS_DATA define will expand to the appropriate keywords.

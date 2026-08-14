@@ -1,5 +1,3 @@
-// TODO task prioritization? Scheduling?
-
 // ============================================================
 //  Cooperative Multitasking Demo for Arduino
 //

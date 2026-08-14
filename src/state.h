@@ -55,5 +55,4 @@ struct SensorState {
   //* System Stats
   static inline uint16_t ram_free_bytes_minimum = 0;  // Least recorded available ram
   static inline uint32_t longest_scheduler_isr = 0;   // Longest recorded scheduler ISR
-  // TODO logging of percentages cpu used by each task & longest task executions before yield
 };

@@ -33,8 +33,8 @@ void reportRam() {
 }
 
 ScheduledTask tasks[] = {
-    // ScheduledTask(100, 0, readGPS),
     // ScheduledTask(500, 0, displayBattStats),
+    // ScheduledTask(500, 0, displayLapTiming),
     ScheduledTask(200, 0, reportRam),
     ScheduledTask(100, 5, SPEED::update),
     ScheduledTask(250, 10, VESC::update),
@@ -67,7 +67,7 @@ void loop() {
   HARDWARE::run();
   TEMPS::run();  // Runs once conversion is complete
   IMU::run();    // Internally scheduled via data ready interrupt
-  GPS::run();   // Runs when new fix available
+  GPS::run();    // Runs when new fix available
   Display::run();
 
   switch (currentState) {
