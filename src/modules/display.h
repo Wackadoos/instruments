@@ -34,9 +34,19 @@ enum class TextAlign : uint8_t { LEFT,
 
 struct TrailingText {
   const char* text = nullptr;
+  String* str = nullptr;
   uint8_t size = 0;
   uint8_t gap = 2;
   uint8_t verticalPad = 0;
+
+  constexpr TrailingText() = default;
+  constexpr TrailingText(const char* t, uint8_t s = 0, uint8_t g = 2, uint8_t v = 0)
+      : text(t), str(nullptr), size(s), gap(g), verticalPad(v) {}
+  TrailingText(String* s, uint8_t size = 0, uint8_t gap = 2, uint8_t verticalPad = 0)
+      : text(nullptr), str(s), size(size), gap(gap), verticalPad(verticalPad) {}
+
+  bool present() const { return size != 0 && (text != nullptr || str != nullptr); }
+  const char* current() const { return str ? str->c_str() : text; }
 };
 
 struct TextConfig {
@@ -69,11 +79,12 @@ class WidgetBase {
   static void drawText(const char* text, int16_t x, int16_t y, TextAlign align, uint8_t textSize, uint16_t color,
                        uint8_t linePad = 0);
   static void drawTrailing(const char* mainText, int16_t x, int16_t y, TextAlign align, uint8_t mainTextSize,
-                           const TrailingText& trailing);
+                           uint16_t color, const TrailingText& trailing);
   static void textRegion(const char* text, int16_t x, int16_t y, TextAlign align, uint8_t textSize, uint8_t linePad,
                          TextRegion& out);
-  static void trailingRegion(const TrailingText& trailing, const TextRegion& main, TextRegion& out);
+  static void trailingRegion(const char* text, const TrailingText& trailing, const TextRegion& main, TextRegion& out);
   static void eraseStale(const TextRegion& oldR, const TextRegion& newR);
+  static int16_t mainAnchorX(int16_t x, const char* trailingText, const TrailingText& trailing, TextAlign align);
 };
 
 struct WidgetPrinter {
@@ -108,8 +119,10 @@ struct WidgetPrinter {
   static void print(T value, const TextConfig& cfg, uint16_t color) {
     char buf[TEXT_BUFFER_SIZE];
     format(value, buf, sizeof(buf), cfg.decimalDigits);
-    WidgetBase::drawText(buf, cfg.x, cfg.y, cfg.align, cfg.size, color);
-    WidgetBase::drawTrailing(buf, cfg.x, cfg.y, cfg.align, cfg.size, cfg.trailing);
+    int16_t x = WidgetBase::mainAnchorX(cfg.x, cfg.trailing.present() ? cfg.trailing.current() : nullptr, cfg.trailing,
+                                        cfg.align);
+    WidgetBase::drawText(buf, x, cfg.y, cfg.align, cfg.size, color);
+    WidgetBase::drawTrailing(buf, x, cfg.y, cfg.align, cfg.size, color, cfg.trailing);
   }
 };
 
@@ -158,53 +171,76 @@ class Widget : public TextWidget<T> {
     WidgetPrinter::format(*this->data, buf, sizeof(buf), this->cfg.decimalDigits);
     uint16_t color = colorFor(*this->data);
 
-    if (firstDraw || strcmp(buf, prevString) != 0 || color != prevColor) {
-      TextRegion main;
-      WidgetBase::textRegion(buf, this->cfg.x, this->cfg.y, this->cfg.align, this->cfg.size, 0, main);
+    bool hasTrailing = this->cfg.trailing.present();
+    const char* trailingStr = hasTrailing ? this->cfg.trailing.current() : "";
+    bool trailingChanged = hasTrailing && this->cfg.trailing.str != nullptr &&
+                           strcmp(trailingStr, prevTrailing) != 0;
 
-      bool sizeChanged = firstDraw || main.w != prevW || main.h != prevH;
-      bool colorChanged = color != prevColor;
-      bool hasTrailing = this->cfg.trailing.text != nullptr && this->cfg.trailing.size != 0;
+    bool textChanged = strcmp(buf, prevString) != 0;
+    bool colorChanged = color != prevColor;
+    bool needMain = firstDraw || textChanged || colorChanged;
 
-      if (!firstDraw) {
-        TextRegion oldR;
-        oldR.x = this->cfg.x;
-        oldR.y = this->cfg.y;
-        oldR.w = prevW;
-        oldR.h = prevH;
-        if (this->cfg.align == TextAlign::CENTER) {
-          oldR.x -= static_cast<int16_t>(prevW / 2);
-        } else if (this->cfg.align == TextAlign::RIGHT) {
-          oldR.x -= static_cast<int16_t>(prevW);
-        }
-        WidgetBase::eraseStale(oldR, main);
+    if (!needMain && !trailingChanged) {
+      return;
+    }
 
-        if (hasTrailing && sizeChanged) {
-          TextRegion oldTrailing, newTrailing;
-          WidgetBase::trailingRegion(this->cfg.trailing, oldR, oldTrailing);
-          WidgetBase::trailingRegion(this->cfg.trailing, main, newTrailing);
-          WidgetBase::eraseStale(oldTrailing, newTrailing);
-        }
+    int16_t mainX = WidgetBase::mainAnchorX(this->cfg.x, trailingStr, this->cfg.trailing, this->cfg.align);
+
+    TextRegion main;
+    WidgetBase::textRegion(buf, mainX, this->cfg.y, this->cfg.align, this->cfg.size, 0, main);
+
+    bool sizeChanged = firstDraw || main.w != prevW || main.h != prevH;
+
+    TextRegion oldR;
+    if (!firstDraw) {
+      int16_t oldX = WidgetBase::mainAnchorX(this->cfg.x, prevTrailing, this->cfg.trailing, this->cfg.align);
+      oldR.x = oldX;
+      oldR.y = this->cfg.y;
+      oldR.w = prevW;
+      oldR.h = prevH;
+      if (this->cfg.align == TextAlign::CENTER) {
+        oldR.x -= static_cast<int16_t>(prevW / 2);
+      } else if (this->cfg.align == TextAlign::RIGHT) {
+        oldR.x -= static_cast<int16_t>(prevW);
       }
+    }
 
+    if (needMain) {
+      if (!firstDraw) {
+        WidgetBase::eraseStale(oldR, main);
+      }
       prevW = main.w;
       prevH = main.h;
       strncpy(prevString, buf, sizeof(prevString) - 1);
       prevString[sizeof(prevString) - 1] = '\0';
-
-      WidgetBase::drawText(buf, this->cfg.x, this->cfg.y, this->cfg.align, this->cfg.size, color);
-      if (hasTrailing && (sizeChanged || colorChanged)) {
-        WidgetBase::drawTrailing(buf, this->cfg.x, this->cfg.y, this->cfg.align, this->cfg.size, this->cfg.trailing);
-      }
-      prevColor = color;
-      firstDraw = false;
+      WidgetBase::drawText(buf, mainX, this->cfg.y, this->cfg.align, this->cfg.size, color);
     }
+
+    if (hasTrailing && (sizeChanged || colorChanged || trailingChanged)) {
+      TextRegion newTrailing;
+      WidgetBase::trailingRegion(trailingStr, this->cfg.trailing, main, newTrailing);
+      if (!firstDraw) {
+        TextRegion oldTrailing;
+        WidgetBase::trailingRegion(prevTrailing, this->cfg.trailing, oldR, oldTrailing);
+        WidgetBase::eraseStale(oldTrailing, newTrailing);
+      }
+      WidgetBase::drawTrailing(buf, mainX, this->cfg.y, this->cfg.align, this->cfg.size, color, this->cfg.trailing);
+      strncpy(prevTrailing, trailingStr, sizeof(prevTrailing) - 1);
+      prevTrailing[sizeof(prevTrailing) - 1] = '\0';
+    }
+
+    prevColor = color;
+    firstDraw = false;
   }
 
   void clear() override {
-    WidgetBase::drawText(prevString, this->cfg.x, this->cfg.y, this->cfg.align, this->cfg.size, RGB565_BLACK);
-    WidgetBase::drawTrailing(prevString, this->cfg.x, this->cfg.y, this->cfg.align, this->cfg.size, this->cfg.trailing);
+    int16_t mainX = WidgetBase::mainAnchorX(this->cfg.x, this->cfg.trailing.present() ? prevTrailing : nullptr,
+                                            this->cfg.trailing, this->cfg.align);
+    WidgetBase::drawText(prevString, mainX, this->cfg.y, this->cfg.align, this->cfg.size, RGB565_BLACK);
+    WidgetBase::drawTrailing(prevString, mainX, this->cfg.y, this->cfg.align, this->cfg.size, RGB565_BLACK,
+                             this->cfg.trailing);
     prevString[0] = '\0';
+    prevTrailing[0] = '\0';
     prevW = 0;
     prevH = 0;
     prevColor = 0;
@@ -216,6 +252,7 @@ class Widget : public TextWidget<T> {
 
  private:
   char prevString[TEXT_BUFFER_SIZE] = "";
+  char prevTrailing[TEXT_BUFFER_SIZE] = "";
   uint16_t prevW = 0;
   uint16_t prevH = 0;
   uint16_t prevColor = 0;

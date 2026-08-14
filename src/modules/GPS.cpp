@@ -39,7 +39,7 @@ void GPS::run() {
     SensorState::visible_satellites = gps.sat_count;
     SensorState::fix_satellites = fix.satellites;
     char buf[16];
-    sprintf(buf, "%d / %d", fix.satellites, gps.sat_count);
+    sprintf(buf, " / %d", gps.sat_count);
     SensorState::sat_string = buf;
     // Logging::logDebug(F("ATH Humidity: "), humidity.relative_humidity);
     dataProcessTime.stop();

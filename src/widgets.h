@@ -24,8 +24,7 @@ static inline auto MOTOR_TEMP2_WIDGET = SetpointWidget(&SensorState::temp_motor_
 //* Top Row
 static inline auto TIME_WIDGET = Widget(&SensorState::currentTime, {0, 0, TextAlign::LEFT, RGB565_DARKORANGE, 3});
 static inline auto LAP_TIME_WIDGET = Widget(&SensorState::splitDiff, {0, 30, TextAlign::LEFT, RGB565_MEDIUMSPRINGGREEN, 2});
-static inline auto GPS_WIDGET = SetpointWidget(&SensorState::visible_satellites, {480, 0, TextAlign::RIGHT, RGB565_BLUE, 3}, &GPS_WARNING_SETPOINT, &GPS_ERROR_SETPOINT, RGB565_BLUE, RGB565_YELLOW, RGB565_RED, true);
-// static inline auto GPS_WIDGET = SetpointWidget(&SensorState::visible_satellites, {480, 0, TextAlign::RIGHT, RGB565_BLUE, 3, 0, {&SensorState::sat_string, 3, 0, 0}}, &GPS_WARNING_SETPOINT, &GPS_ERROR_SETPOINT, RGB565_BLUE, RGB565_YELLOW, RGB565_RED, true); // TODO
+static inline auto GPS_WIDGET = SetpointWidget(&SensorState::fix_satellites, {480, 0, TextAlign::RIGHT, RGB565_BLUE, 3, 0, {&SensorState::sat_string, 3, 0, 0}}, &GPS_WARNING_SETPOINT, &GPS_ERROR_SETPOINT, RGB565_BLUE, RGB565_YELLOW, RGB565_RED, true); // TODO
 
 static inline void onSettingsPagePress();
 static inline void onRacePagePress();

@@ -159,11 +159,20 @@ void WidgetBase::textRegion(const char* text, int16_t x, int16_t y, TextAlign al
   }
 }
 
-void WidgetBase::trailingRegion(const TrailingText& trailing, const TextRegion& main, TextRegion& out) {
-  textRegion(trailing.text, main.x + static_cast<int16_t>(main.w) + static_cast<int16_t>(trailing.gap), main.y,
+void WidgetBase::trailingRegion(const char* text, const TrailingText& trailing, const TextRegion& main, TextRegion& out) {
+  textRegion(text, main.x + static_cast<int16_t>(main.w) + static_cast<int16_t>(trailing.gap), main.y,
              TextAlign::LEFT, trailing.size, 0, out);
   out.y = main.y + static_cast<int16_t>(main.h) - static_cast<int16_t>(out.h) -
           static_cast<int16_t>(trailing.verticalPad);
+}
+
+int16_t WidgetBase::mainAnchorX(int16_t x, const char* trailingText, const TrailingText& trailing, TextAlign align) {
+  if (align != TextAlign::RIGHT || trailingText == nullptr || !trailing.present()) {
+    return x;
+  }
+  TextRegion t;
+  textRegion(trailingText, 0, 0, TextAlign::LEFT, trailing.size, 0, t);
+  return x - static_cast<int16_t>(t.w) - static_cast<int16_t>(trailing.gap);
 }
 
 void WidgetBase::eraseStale(const TextRegion& oldR, const TextRegion& newR) {
@@ -191,8 +200,8 @@ void WidgetBase::eraseStale(const TextRegion& oldR, const TextRegion& newR) {
 }
 
 void WidgetBase::drawTrailing(const char* mainText, int16_t x, int16_t y, TextAlign align, uint8_t mainTextSize,
-                              const TrailingText& trailing) {
-  if (trailing.text == nullptr || trailing.size == 0) {
+                              uint16_t color, const TrailingText& trailing) {
+  if (!trailing.present()) {
     return;
   }
 
@@ -200,10 +209,11 @@ void WidgetBase::drawTrailing(const char* mainText, int16_t x, int16_t y, TextAl
   textRegion(mainText, x, y, align, mainTextSize, 0, main);
 
   TextRegion t;
-  trailingRegion(trailing, main, t);
+  trailingRegion(trailing.current(), trailing, main, t);
 
+  Display::screen.setTextColor(color, RGB565_BLACK);
   Display::screen.setCursor(t.x, t.y);
-  Display::screen.println(trailing.text);
+  Display::screen.println(trailing.current());
 
   Display::screen.setTextSize(mainTextSize);
 }
