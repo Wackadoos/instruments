@@ -12,7 +12,7 @@ Arduino_DataBus* bus = new Arduino_HWSPI(TFT_DC,TFT_CS);
 Arduino_GFX* gfx = new Arduino_ILI9488_18bit(bus, TFT_RST, 1 /* rotation */, false /* IPS */);
 
 void setup(void) {
-  Serial.begin(115200);
+  Serial.begin(500000);
   pinMode(48, OUTPUT);
   digitalWrite(48, HIGH);
   pinMode(49, OUTPUT);

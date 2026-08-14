@@ -16,7 +16,7 @@ void setup() {
   pinMode(53, OUTPUT);
   digitalWrite(53, HIGH);
 
-  Serial.begin(115200);
+  Serial.begin(500000);
   delay(3000);
   ts.begin();
   // ts.begin(SPI1); // use alternate SPI port

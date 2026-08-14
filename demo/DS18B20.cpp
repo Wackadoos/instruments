@@ -22,7 +22,7 @@ void printAddress(DeviceAddress deviceAddress) {
 }
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(500000);
   while (!Serial)
     delay(100);  // wait for native usb
   delay(3000);

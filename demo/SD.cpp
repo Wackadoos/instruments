@@ -69,7 +69,7 @@ void reformatMsg() {
 }
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(500000);
   delay(3000);
 
   // Wait for USB Serial

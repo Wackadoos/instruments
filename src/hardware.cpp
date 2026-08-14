@@ -1,5 +1,6 @@
 #include "hardware.h"
 
+#include "modules/GPS.h"
 #include "modules/ath20.h"
 #include "modules/bmp280.h"
 #include "modules/display.h"
@@ -35,7 +36,7 @@ void HARDWARE::init() {
   digitalWrite(DISPLAY_CHIP_SELECT_PIN, HIGH);      //* SPI Chip Select uses LOW to select a device
 
 #ifdef DEBUG_LOGGING
-  Serial.begin(115200);
+  Serial.begin(500000);
   delay(3000);
 #endif
 
@@ -57,6 +58,7 @@ void HARDWARE::init() {
   //* Serial Devices
   VESC_SERIAL_PORT.begin(250000);
   VESC::init(&VESC_SERIAL_PORT);
+  GPS::init();
 
   //* SPI Devices
   Display::init(&SPI);
