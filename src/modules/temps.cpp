@@ -51,15 +51,17 @@ void TEMPS::update() {
   if (enabled) {
     dataRequestTime.start();
     sensors.requestTemperaturesByAddress(addresses[current_address]);
+    newData = true;
     dataRequestTime.stop();
     dataAcquisitionTime.start();
   }
 }
 
 void TEMPS::run() {
-  if (enabled && sensors.isConversionComplete()) {  // isConversionComplete reads i2c bit which has micros waits. Could check this less often for efficiency!
+  if (enabled && newData && sensors.isConversionComplete()) {  // isConversionComplete reads i2c bit which has micros waits. Could check this less often for efficiency!
     dataAcquisitionTime.stop();
     dataProcessTime.start();
+    newData = false;
     float tempC = sensors.getTempC(addresses[current_address]);
 
     if (tempC == DEVICE_DISCONNECTED_C) {
