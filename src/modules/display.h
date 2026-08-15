@@ -309,25 +309,50 @@ class Button : public TextWidget<const char*> {
     this->cfg.align = TextAlign::CENTER;
   }
 
+  void setText(const char* text) {
+    if (text == storedText) return;
+    if (storedText != nullptr && text != nullptr && strcmp(storedText, text) == 0) return;
+    storedText = text;
+    dirty = true;
+  }
+
+  void setColor(int16_t color) {
+    if (this->cfg.color == color) return;
+    this->cfg.color = color;
+    dirty = true;
+  }
+
   void draw() override {
-    if (firstDraw) {
+    if (firstDraw || dirty) {
+      if (dirty && !firstDraw) {
+        int16_t rectX, rectY;
+        uint16_t rw, rh;
+        rectBounds(prevText, rectX, rectY, rw, rh);
+        WidgetBase::drawText(prevText, this->cfg.x, this->cfg.y, this->cfg.align, this->cfg.size, RGB565_BLACK, linePad);
+        Display::screen.drawRoundRect(rectX, rectY, rw, rh, radius, RGB565_BLACK);
+      }
       int16_t rectX, rectY;
       uint16_t rw, rh;
-      rectBounds(rectX, rectY, rw, rh);
+      rectBounds(storedText, rectX, rectY, rw, rh);
       WidgetBase::drawText(storedText, this->cfg.x, this->cfg.y, this->cfg.align, this->cfg.size, this->cfg.color,
                            linePad);
       Display::screen.drawRoundRect(rectX, rectY, rw, rh, radius, this->cfg.color);
+      prevText = storedText;
       firstDraw = false;
+      dirty = false;
     }
   }
 
   void clear() override {
+    const char* text = (prevText != nullptr) ? prevText : storedText;
     int16_t rectX, rectY;
     uint16_t rw, rh;
-    rectBounds(rectX, rectY, rw, rh);
-    WidgetBase::drawText(storedText, this->cfg.x, this->cfg.y, this->cfg.align, this->cfg.size, RGB565_BLACK, linePad);
+    rectBounds(text, rectX, rectY, rw, rh);
+    WidgetBase::drawText(text, this->cfg.x, this->cfg.y, this->cfg.align, this->cfg.size, RGB565_BLACK, linePad);
     Display::screen.drawRoundRect(rectX, rectY, rw, rh, radius, RGB565_BLACK);
     firstDraw = true;
+    dirty = false;
+    prevText = nullptr;
   }
 
   void pressed(TS_Point point) override {
@@ -340,7 +365,7 @@ class Button : public TextWidget<const char*> {
     }
     int16_t rectX, rectY;
     uint16_t rw, rh;
-    rectBounds(rectX, rectY, rw, rh);
+    rectBounds(storedText, rectX, rectY, rw, rh);
     if (point.x >= rectX && point.x < rectX + static_cast<int16_t>(rw) && point.y >= rectY &&
         point.y < rectY + static_cast<int16_t>(rh)) {
       lastPressMs = now;
@@ -349,10 +374,10 @@ class Button : public TextWidget<const char*> {
   }
 
  private:
-  void rectBounds(int16_t& outX, int16_t& outY, uint16_t& outW, uint16_t& outH) const {
+  void rectBounds(const char* text, int16_t& outX, int16_t& outY, uint16_t& outW, uint16_t& outH) const {
     int16_t x1, y1;
     uint16_t w, h;
-    WidgetBase::textBlockBounds(storedText, this->cfg.x, this->cfg.y, this->cfg.size, linePad, x1, y1, w, h);
+    WidgetBase::textBlockBounds(text, this->cfg.x, this->cfg.y, this->cfg.size, linePad, x1, y1, w, h);
     outX = x1 - static_cast<int16_t>(rectWidth) / 2;
     outY = y1 + (static_cast<int16_t>(h) - static_cast<int16_t>(rectHeight)) / 2;
     outW = rectWidth;
@@ -360,6 +385,7 @@ class Button : public TextWidget<const char*> {
   }
 
   const char* storedText;
+  const char* prevText = nullptr;
   uint16_t rectWidth;
   uint16_t rectHeight;
   int16_t radius;
@@ -367,6 +393,7 @@ class Button : public TextWidget<const char*> {
   PressCallback onPress;
   uint32_t lastPressMs = 0;
   bool firstDraw = true;
+  bool dirty = false;
 };
 
 class Page {

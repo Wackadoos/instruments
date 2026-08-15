@@ -68,10 +68,10 @@ void TEMPS::run() {
       Errors::logError(Error::TEMP_UNREADABLE);
     } else {
       if (current_address == 0) {
-        SensorState::temp_motor_1 = tempC;
+        State::temp_motor_1 = tempC;
         Logging::logDebug(F("Temp Probe 1: "), tempC);
       } else if (current_address == 1) {
-        SensorState::temp_motor_2 = tempC;
+        State::temp_motor_2 = tempC;
         Logging::logDebug(F("Temp Probe 2: "), tempC);
       }
     }

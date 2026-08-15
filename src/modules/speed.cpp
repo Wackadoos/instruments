@@ -36,7 +36,7 @@ void SPEED::update() {
     auto microsElapsed = time - previousMicros;  // Note! This correctly handles rollover (as long as less than ~71 mins)
     previousMicros = time;
 
-    SensorState::kilometers_per_hour = coefficient * pulsesRecorded / microsElapsed;
+    State::kilometers_per_hour = coefficient * pulsesRecorded / microsElapsed;
     dataProcessTime.stop();
   }
 }

@@ -40,8 +40,7 @@ enum class Error : uint8_t {
 
 struct ErrorEvent {
   Error type;
-  unsigned long board_time_ms;
-  // TODO use wall time
+  unsigned long seconds_epoch_time;
 };
 
 class Errors {

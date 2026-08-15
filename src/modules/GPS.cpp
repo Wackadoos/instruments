@@ -45,26 +45,26 @@ void GPS::run() {
     // Print all the things!
     fix = gps.read();
     if (fix.valid.location) {
-      SensorState::latitude = fix.latitudeL();
-      SensorState::longitude = fix.longitudeL();
+      State::latitude = fix.latitudeL();
+      State::longitude = fix.longitudeL();
     } else {
-      SensorState::latitude = 0;
-      SensorState::longitude = 0;
+      State::latitude = 0;
+      State::longitude = 0;
     }
     if (fix.valid.altitude) {
-      SensorState::altitude = fix.altitude_cm();
+      State::altitude = fix.altitude_cm();
     } else {
-      SensorState::altitude = 0;
+      State::altitude = 0;
     }
     if (fix.valid.speed) {
-      SensorState::gps_speed = fix.speed_kph();
+      State::gps_speed = fix.speed_kph();
     } else {
-      SensorState::gps_speed = 0;
+      State::gps_speed = 0;
     }
     if (fix.valid.heading) {
-      SensorState::heading = fix.heading();
+      State::heading = fix.heading();
     } else {
-      SensorState::heading = 0;
+      State::heading = 0;
     }
     if (fix.valid.date && fix.valid.time && setSubSecond) {
       dateTimeCalibrated = true;
@@ -72,15 +72,15 @@ void GPS::run() {
       dateTimeCalibrated = false;
     }
     if (fix.valid.satellites) {
-      SensorState::visible_satellites = gps.sat_count;
-      SensorState::fix_satellites = fix.satellites;
+      State::visible_satellites = gps.sat_count;
+      State::fix_satellites = fix.satellites;
     } else {
-      SensorState::visible_satellites = 0;
-      SensorState::fix_satellites = 0;
+      State::visible_satellites = 0;
+      State::fix_satellites = 0;
     }
     char buf[16];
-    sprintf(buf, " / %d", SensorState::visible_satellites);
-    SensorState::sat_string = buf;
+    sprintf(buf, " / %d", State::visible_satellites);
+    State::sat_string = buf;
 #ifdef DEBUG_LOGGING
     trace_all(DEBUG_PORT, gps, fix);
 #endif

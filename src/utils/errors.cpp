@@ -1,5 +1,6 @@
 #include "utils/errors.h"
 
+#include "modules/rtc.h"
 #include "utils/logging.h"
 
 // TODO extend to have info logging as well, ie log "TIME UPDATED FROM GPS etc"
@@ -10,7 +11,7 @@ void Errors::init() {
 }
 
 void Errors::logError(Error error) {
-  errors[errors_head] = ErrorEvent{error, millis()};
+  errors[errors_head] = ErrorEvent{error, RTC::clock.now().secondstime()};
 
   flushToLogfile(errors[errors_head]);
 

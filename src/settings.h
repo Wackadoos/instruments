@@ -8,12 +8,17 @@ struct SettingsBlock {
   int8_t timezone_offset;                      // Timezone offset from UTC. 15min increments.
   uint16_t speed_sensor_wheel_circumference;   // Circumference of wheel in mm
   uint8_t speed_sensor_pulses_per_revolution;  // Number of pulses per revolution
-  uint16_t _checksum;                          //* Checksum of settings. Must always be last!
+  // Persisted Data
+  uint32_t race_mode_last_save_seconds;  // Time of last save (seconds since 2000/1/1)
+  float battery_I_avg;                   // Average battery current
+  float totalDischargedWh_calibration;   // Previous value of dischargedWH
+  float totalChargedWh_calibration;      // Previous value of chargedWH
+  uint16_t _checksum;                    //* Checksum of settings. Must always be last!
 };
 
 class SETTINGS {
  public:
-  static constexpr uint8_t SETTINGS_BLOCK_VERSION = 2;  // Bump every time the SettingsBlock object gets modified!
+  static constexpr uint8_t SETTINGS_BLOCK_VERSION = 3;  // Bump every time the SettingsBlock object gets modified!
 
   static void init();
   static SettingsBlock getSettings();

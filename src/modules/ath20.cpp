@@ -22,9 +22,9 @@ void ATH::update() {
     dataProcessTime.start();
     sensors_event_t humidity, temp;
     ath20.getEvent(&humidity, &temp);
-    SensorState::relative_humidity = humidity.relative_humidity;
+    State::relative_humidity = humidity.relative_humidity;
     Logging::logDebug(F("ATH Humidity: "), humidity.relative_humidity);
-    SensorState::ambient_temperature_2 = temp.temperature;
+    State::ambient_temperature_2 = temp.temperature;
     Logging::logDebug(F("ATH Temp: "), temp.temperature);
     dataProcessTime.stop();
   }

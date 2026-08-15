@@ -5,6 +5,8 @@
 
 #include "utils/metrics.h"
 
+#define VOLTAGE_CALIBRATION 0.2f
+
 class VESC {
  public:
   static void init(Stream* port);

@@ -15,7 +15,6 @@
 #include "utils/errors.h"
 #include "utils/scheduler.h"
 
-AppState currentState = AppState::IDLE;
 IntervalMetric mainLoopTime = IntervalMetric();
 
 extern char* __brkval;
@@ -42,6 +41,7 @@ ScheduledTask tasks[] = {
     ScheduledTask(500, 200, BMP::update),
     ScheduledTask(500, 300, TEMPS::update),
     ScheduledTask(1000, 15, RTC::update),
+    ScheduledTask(10000, 37, State::saveRaceState),
     // ScheduledTask(500, 400, logData),
 };
 
@@ -55,6 +55,8 @@ void setup() {
   SETTINGS::init();
 
   SPEED::configure(SETTINGS::getSettings().speed_sensor_wheel_circumference, SETTINGS::getSettings().speed_sensor_pulses_per_revolution);
+
+  State::tryResumeRace();
 
   mainLoopTime.init(F("Main Loop"), F("Interval measurement of main loop"));
 
@@ -70,14 +72,7 @@ void loop() {
   GPS::run();    // Runs when new fix available
   Display::run();
 
-  switch (currentState) {
-    case AppState::IDLE:
-      break;
-    case AppState::RACE:
-      break;
-    case AppState::DEBUG:
-      break;
-  }
+  State::runMode();
   // for dev track framerate of display updates for different values?
   mainLoopTime.stop();
 }

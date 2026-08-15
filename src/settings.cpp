@@ -52,6 +52,10 @@ SettingsBlock SETTINGS::defaultSettings() {
       .timezone_offset = 40,
       .speed_sensor_wheel_circumference = 1596,  // 20" Wheel
       .speed_sensor_pulses_per_revolution = 4,
+      .race_mode_last_save_seconds = 0,
+      .battery_I_avg = 0,
+      .totalDischargedWh_calibration = 0,
+      .totalChargedWh_calibration = 0,
       ._checksum = 0,
   };
   default_block._checksum = SETTINGS::checksum(default_block);

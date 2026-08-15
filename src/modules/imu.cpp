@@ -35,14 +35,14 @@ void IMU::run() {
     dataReady = false;
     dataProcessTime.start();
     if (imu.Read()) {
-      SensorState::imu_accel_x = imu.accel_x_mps2();
-      SensorState::imu_accel_y = imu.accel_y_mps2();
-      SensorState::imu_accel_z = imu.accel_z_mps2();
-      SensorState::imu_die_temp = imu.die_temp_c();
+      State::imu_accel_x = imu.accel_x_mps2();
+      State::imu_accel_y = imu.accel_y_mps2();
+      State::imu_accel_z = imu.accel_z_mps2();
+      State::imu_die_temp = imu.die_temp_c();
 
 #ifdef DEBUG_LOGGING
       static uint8_t counter = 0;
-      if (counter == 25) {
+      if (counter >= 24) {
         Logging::logDebug(F("IMU x: "), imu.accel_x_mps2());
         Logging::logDebug(F("IMU y: "), imu.accel_y_mps2());
         Logging::logDebug(F("IMU z: "), imu.accel_z_mps2());

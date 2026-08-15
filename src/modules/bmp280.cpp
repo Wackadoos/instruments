@@ -29,10 +29,10 @@ void BMP::update() {
   if (enabled) {
     dataProcessTime.start();
     auto temp = bmp280.readTemperature();
-    SensorState::ambient_temperature = temp;
+    State::ambient_temperature = temp;
     Logging::logDebug(F("BMP Temp: "), temp);
     auto alt = bmp280.readAltitude();
-    SensorState::uncalibrated_altitude = alt;
+    State::uncalibrated_altitude = alt;
     Logging::logDebug(F("BMP Alt: "), alt);
     // bmp280.readPressure();
     dataProcessTime.stop();

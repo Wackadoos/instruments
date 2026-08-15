@@ -1,5 +1,6 @@
 #include "vesc.h"
 
+#include "modules/battery.h"
 #include "state.h"
 #include "utils/errors.h"
 #include "utils/logging.h"
@@ -18,25 +19,35 @@ void VESC::update() {
   if (enabled) {
     dataProcessTime.start();
     if (vesc.getVescValues()) {
-      SensorState::motor_current = vesc.data.avgMotorCurrent;
-      SensorState::battery_current = vesc.data.avgInputCurrent;
-      SensorState::duty_cycle = vesc.data.dutyCycleNow;
-      SensorState::battery_voltage = vesc.data.inpVoltage;
-      SensorState::watts_used = vesc.data.wattHours;
-      SensorState::watts_charged = vesc.data.wattHoursCharged;
-      SensorState::esc_temp = vesc.data.tempMosfet;
-      SensorState::battery_power = vesc.data.inpVoltage * vesc.data.avgInputCurrent;
+      State::motor_current = vesc.data.avgMotorCurrent;
+      State::battery_current = vesc.data.avgInputCurrent;
+      State::duty_cycle = vesc.data.dutyCycleNow;
+      State::battery_voltage = vesc.data.inpVoltage + VOLTAGE_CALIBRATION;
+      State::watts_used = vesc.data.wattHours;
+      State::watts_charged = vesc.data.wattHoursCharged;
+      State::esc_temp = vesc.data.tempMosfet;
+      State::battery_power = State::battery_voltage * State::battery_current;
 
       static uint8_t counter = 0;
-      if (counter == 4) {
-        Logging::logDebug(F("VESC Motor Current: "), vesc.data.avgMotorCurrent);
-        Logging::logDebug(F("VESC Battery Current: "), vesc.data.avgInputCurrent);
-        Logging::logDebug(F("VESC Duty Cycle: "), vesc.data.dutyCycleNow);
-        Logging::logDebug(F("VESC Battery Voltage: "), vesc.data.inpVoltage);
-        Logging::logDebug(F("VESC Watts Used: "), vesc.data.wattHours);
-        Logging::logDebug(F("VESC Watts Charged: "), vesc.data.wattHoursCharged);
-        Logging::logDebug(F("VESC Temp: "), vesc.data.tempMosfet);
-        Logging::logDebug(F("VESC Power: "), SensorState::battery_power);
+      if (counter >= 3) {  // every 4th VESC read = 1.0s @ 250ms task, so 60 window samples = 1 min
+        BatteryEstimator::updateEWMA(vesc.data.avgInputCurrent);
+        State::battery_soc_compensated = BatteryEstimator::estimateSOC(vesc.data.wattHours, vesc.data.wattHoursCharged, State::ambient_temperature_2);
+        State::battery_time_remaining_mins = BatteryEstimator::estimateTimeRemainingMinutes();
+        char buf[24];
+        char fbuf1[8], fbuf2[8];
+        dtostrf(State::battery_soc_compensated, 3, 0, fbuf1);  // width 3, 0 decimal
+        dtostrf(State::battery_time_remaining_mins, 3, 0, fbuf2);
+        sprintf(buf, "%s%% %sm", fbuf1, fbuf2);
+        State::battery_stats = buf;
+
+        Logging::logDebug(F("VESC Motor Current: "), State::motor_current);
+        Logging::logDebug(F("VESC Battery Current: "), State::battery_current);
+        Logging::logDebug(F("VESC Duty Cycle: "), State::duty_cycle);
+        Logging::logDebug(F("VESC Battery Voltage: "), State::battery_voltage);
+        Logging::logDebug(F("VESC Watts Used: "), State::watts_used);
+        Logging::logDebug(F("VESC Watts Charged: "), State::watts_charged);
+        Logging::logDebug(F("VESC Temp: "), State::esc_temp);
+        Logging::logDebug(F("VESC Power: "), State::battery_power);
         counter = 0;
       } else {
         counter++;
