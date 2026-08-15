@@ -7,7 +7,10 @@
 #include "utils/metrics.h"
 
 #define TEXT_BUFFER_SIZE 16
-#define DEBOUNCE_PERIOD 800
+#define DEBOUNCE_PERIOD 300          // Guards bounce/fast double-taps now that presses are edge-triggered
+#define TOUCH_HOLD_DELAY_MS 600      // Hold time before a press starts repeating
+#define TOUCH_REPEAT_PERIOD_MS 400   // Interval between hold repeats
+#define TOUCH_REPEAT_RADIUS_PX 30    // Max finger drift from touch-down that still allows repeat
 
 class Page;
 struct DebugLine;
@@ -29,6 +32,12 @@ class Display {
   static Page* currentPage;
   static Page* pendingPage;   // Target page during a non-blocking switch
   static bool switching;      // True while the old page is being torn down
+  inline static bool touchWasDown = false;   // Previous sample's touched state (edge detection)
+  inline static int16_t touchDownX = 0;      // Mapped screen point where the current touch landed
+  inline static int16_t touchDownY = 0;
+  inline static unsigned long touchDownMs = 0;  // Touch-down timestamp (hold timer base)
+  inline static unsigned long lastRepeatMs = 0; // Timestamp of the last hold repeat
+  inline static Page* touchDownPage = nullptr;  // Page the current touch landed on (repeats stop on switch)
 };
 
 enum class TextAlign : uint8_t { LEFT,

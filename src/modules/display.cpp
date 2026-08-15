@@ -45,7 +45,14 @@ void Display::run() {
     } else {
       currentPage->refresh();
     }
-    if (!switching && touch.tirqTouched() && touch.touched()) {
+    // Edge-triggered touch dispatch: a press fires exactly once, on the rising edge, so a
+    // single touch can never trigger a neighbouring button via sample jitter or finger drift.
+    // Holding still repeats the SAME button (same touch-down point) for settings +/- style
+    // controls, but only while the finger stays within TOUCH_REPEAT_RADIUS_PX of where it
+    // landed and the page hasn't changed. touchWasDown is tracked even during switching so a
+    // press that began mid-teardown can't fire once the new page appears.
+    bool nowTouched = touch.tirqTouched() && touch.touched();
+    if (nowTouched) {
       TS_Point p = touch.getPoint();
       int16_t px, py;
       if (TOUCH_SWAP_XY) {
@@ -55,8 +62,25 @@ void Display::run() {
         px = map(p.x, TOUCH_MAP_X1, TOUCH_MAP_X2, 0, screen.width() - 1);
         py = map(p.y, TOUCH_MAP_Y1, TOUCH_MAP_Y2, 0, screen.height() - 1);
       }
-      currentPage->pressed(TS_Point(px, py, p.z));
+      if (!touchWasDown) {
+        touchDownX = px;
+        touchDownY = py;
+        touchDownMs = millis();
+        lastRepeatMs = touchDownMs;
+        touchDownPage = currentPage;
+        if (!switching) {
+          currentPage->pressed(TS_Point(px, py, p.z));
+        }
+      } else if (!switching && currentPage == touchDownPage) {
+        unsigned long now = millis();
+        if (now - touchDownMs >= TOUCH_HOLD_DELAY_MS && now - lastRepeatMs >= TOUCH_REPEAT_PERIOD_MS &&
+            abs(px - touchDownX) <= TOUCH_REPEAT_RADIUS_PX && abs(py - touchDownY) <= TOUCH_REPEAT_RADIUS_PX) {
+          lastRepeatMs = now;
+          currentPage->pressed(TS_Point(touchDownX, touchDownY, 0));
+        }
+      }
     }
+    touchWasDown = nowTouched;
     dataProcessTime.stop();
   }
 }
