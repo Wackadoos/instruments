@@ -110,6 +110,18 @@ const __FlashStringHelper* Errors::errorDescription(Error error) {
       return F("The Touchscreen failed to initialise!");
     case Error::GPS_OVERRUN:
       return F("GPS data overrun, not read frequently enough!");
+    case Error::SD_UNINITIALISED:
+      return F("The SD card failed to initialise!");
+    case Error::SD_OPEN_FAILED:
+      return F("Failed to create the SD log file!");
+    case Error::SD_PREALLOCATE_FAILED:
+      return F("Failed to preallocate space on the SD card!");
+    case Error::SD_WRITE_FAILED:
+      return F("Failed to write data to the SD card!");
+    case Error::SD_LOG_OVERRUN:
+      return F("SD card too busy - log frames were dropped!");
+    case Error::SD_STALLED:
+      return F("SD card is not responding - logging stopped!");
     default:
       return F("An undefined error occurred!");
   }

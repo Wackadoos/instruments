@@ -7,6 +7,7 @@
 #include "modules/eeprom.h"
 #include "modules/imu.h"
 #include "modules/rtc.h"
+#include "modules/sd.h"
 #include "modules/speed.h"
 #include "modules/temps.h"
 #include "modules/vesc.h"
@@ -42,6 +43,7 @@ void HARDWARE::init() {
 
   //* SPI Devices
   Display::init(&SPI);  // Display has long blocking setup, do first
+  SD::init();           // SD shares the SPI bus via its own chip select
 
   //* I2C Devices
   Wire.begin();

@@ -1,7 +1,10 @@
 [project]
 name = "instruments"
 version = "0.1.0"
-description = "Add your description here"
+description = "Decode and plot binary data logs recorded by the instruments firmware (run: uv run main.py)"
 readme = "README.md"
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "numpy>=2.0",
+    "matplotlib>=3.10",
+]

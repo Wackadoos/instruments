@@ -2,6 +2,7 @@
 
 #include "modules/battery.h"
 #include "modules/rtc.h"
+#include "modules/sd.h"
 #include "settings.h"
 #include "widgets.h"
 
@@ -16,6 +17,7 @@ void State::enterMode(AppMode next) {
   currentMode = next;
 
   if (next == AppMode::RACE) {
+    SD::startLog();  // Open <date-time>.bin and preallocate log space
     RaceButton::button.setText("STOP\nRACE");
     RaceButton::button.setColor(RGB565_BROWN);
   } else {
@@ -24,6 +26,7 @@ void State::enterMode(AppMode next) {
   }
 
   if (leavingRace) {
+    SD::stopLog();  // Flush, truncate and close the log file
     auto settings = SETTINGS::getSettings();
     settings.race_mode_last_save_seconds = 0;
     SETTINGS::pushSetting(settings);

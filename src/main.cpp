@@ -7,6 +7,7 @@
 #include "modules/display.h"
 #include "modules/imu.h"
 #include "modules/rtc.h"
+#include "modules/sd.h"
 #include "modules/speed.h"
 #include "modules/temps.h"
 #include "modules/vesc.h"
@@ -18,7 +19,6 @@
 
 IntervalMetric mainLoopTime = IntervalMetric();
 
-void logData();
 void reportRam() {
   Serial.print(F("Free RAM = "));  // F function does the same and is now a built in library, in IDE > 1.0.0
   Serial.println(State::ram_free_bytes);  // print how much RAM is available in bytes.
@@ -33,9 +33,9 @@ ScheduledTask tasks[] = {
     ScheduledTask(500, 100, ATH::update),
     ScheduledTask(500, 200, BMP::update),
     ScheduledTask(500, 300, TEMPS::update),
+    ScheduledTask(500, 400, SD::logFrame),
     ScheduledTask(1000, 15, RTC::update),
     ScheduledTask(10000, 37, State::saveRaceState),
-    // ScheduledTask(500, 400, logData),
 };
 
 void setup() {
@@ -69,6 +69,7 @@ void loop() {
   IMU::run();    // Internally scheduled via data ready interrupt
   GPS::run();    // Runs when new fix available
   Display::run();
+  SD::run();     // Drains the log ring buffer when the card is idle
 
   State::runMode();
   // for dev track framerate of display updates for different values?
