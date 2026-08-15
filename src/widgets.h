@@ -35,6 +35,13 @@ struct RaceButton {
 };
 
 extern Button HOME_PAGE_BUTTON;
+extern Button DEBUG_BUTTON;
+
+extern DebugText DEBUG_PAGE_TEXT;
+extern Button DEBUG_PREV_BUTTON;
+extern Button DEBUG_NEXT_BUTTON;
+extern Button DEBUG_HOME_BUTTON;
 
 extern Page RACE_PAGE;
 extern Page SETTINGS_PAGE;
+extern Page DEBUG_PAGE;

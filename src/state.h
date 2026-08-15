@@ -64,5 +64,6 @@ struct State {
   static inline float battery_time_remaining_mins = 0;  // Time estimate remaining in minutes
   static inline char battery_stats[12] = "~% ~m";       // Battery Stats String, e.g. "100% 120m"
   //* System Stats
-  static inline uint16_t ram_free_bytes_minimum = 0;  // Least recorded available ram
+  static inline uint16_t ram_free_bytes = 0;          // Free RAM measured at a fixed point (top of loop())
+  static inline uint16_t ram_free_bytes_minimum = 8192;  // Least recorded available ram. Seed at full ram
 };

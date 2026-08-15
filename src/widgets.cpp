@@ -29,6 +29,19 @@ static void onRacePagePress() {
   Display::changePage(&RACE_PAGE);
 }
 
+static void onDebugPagePress() {
+  DEBUG_PAGE_TEXT.reset();
+  Display::changePage(&DEBUG_PAGE);
+}
+
+static void onDebugPrevPress() {
+  DEBUG_PAGE_TEXT.prev();
+}
+
+static void onDebugNextPress() {
+  DEBUG_PAGE_TEXT.next();
+}
+
 static void onRacePress() {
   State::enterMode(State::currentMode == AppMode::RACE ? AppMode::IDLE : AppMode::RACE);
 }
@@ -65,6 +78,13 @@ static void onTimezoneDec() { changeTimezone(-1); }
 Button SETTINGS_BUTTON("SETTINGS", {410, 285, TextAlign::CENTER, RGB565_BLUE, 2}, 140, 50, 12, 0, &onSettingsPagePress);
 Button RaceButton::button = Button("START\nRACE", {430, 210, TextAlign::CENTER, RGB565_BLUEVIOLET, 2}, 100, 70, 12, 4, &onRacePress);
 Button HOME_PAGE_BUTTON("HOME", {410, 285, TextAlign::CENTER, RGB565_BLUE, 2}, 140, 50, 12, 0, &onRacePagePress);
+Button DEBUG_BUTTON("DEBUG", {250, 285, TextAlign::CENTER, RGB565_CYAN, 2}, 140, 50, 12, 0, &onDebugPagePress);
+
+//* Debug Page
+DebugText DEBUG_PAGE_TEXT(0, 0, 10, 23, RGB565_WHITE);
+Button DEBUG_PREV_BUTTON("PREV", {80, 285, TextAlign::CENTER, RGB565_WHITE, 2}, 120, 40, 12, 0, &onDebugPrevPress);
+Button DEBUG_NEXT_BUTTON("NEXT", {400, 285, TextAlign::CENTER, RGB565_WHITE, 2}, 120, 40, 12, 0, &onDebugNextPress);
+Button DEBUG_HOME_BUTTON("HOME", {240, 285, TextAlign::CENTER, RGB565_BLUE, 2}, 120, 40, 12, 0, &onRacePagePress);
 
 //* Settings Page: Wheel circumference (mm)
 StaticWidget WHEEL_LABEL_WIDGET("WHEEL", {0, 55, TextAlign::LEFT, RGB565_WHITESMOKE, 2});
@@ -114,5 +134,9 @@ static WidgetBase* SETTINGS_PAGE_WIDGETS[] = {&WHEEL_LABEL_WIDGET,
                                               &TIMEZONE_VALUE_WIDGET,
                                               &TIMEZONE_MINUS_BUTTON,
                                               &TIMEZONE_PLUS_BUTTON,
-                                              &HOME_PAGE_BUTTON};
+                                              &HOME_PAGE_BUTTON,
+                                              &DEBUG_BUTTON};
 Page SETTINGS_PAGE = Page(SETTINGS_PAGE_WIDGETS);
+
+static WidgetBase* DEBUG_PAGE_WIDGETS[] = {&DEBUG_PAGE_TEXT, &DEBUG_PREV_BUTTON, &DEBUG_NEXT_BUTTON, &DEBUG_HOME_BUTTON};
+Page DEBUG_PAGE = Page(DEBUG_PAGE_WIDGETS);

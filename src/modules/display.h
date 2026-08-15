@@ -433,3 +433,40 @@ class Page {
 // TODO display errors on screen?
 // TODO Display average watts while driving, maybe 1min rolling average or something? Or exponential decay?
 // TODO display battery voltage
+
+//* Debug page: single widget rendering a paginated list of flash-resident debug lines.
+//* Labels are drawn once per page; only the changed value tail re-renders (never the leading text).
+#define DEBUG_MAX_LINES 24   // Max content lines per page
+#define DEBUG_LINE_BUF 64    // Longest rendered line (error descriptions)
+#define DEBUG_LABEL_GAP 4    // Pixels between label and value
+
+class DebugText : public WidgetBase {
+ public:
+  DebugText(int16_t x, int16_t y, uint8_t linePitch, uint8_t contentLines, uint16_t color);
+
+  void draw() override;
+  void clear() override;
+  void pressed(TS_Point point) override {}
+
+  void prev();  // Wrap backwards
+  void next();  // Wrap forwards
+  void reset();  // Back to page 0 + full redraw
+
+ private:
+  void drawLine(const char* text, int16_t lx, int16_t ly, uint16_t col) const;
+  uint16_t textWidth(const char* text) const;
+  void drawHeader();
+
+  int16_t x;
+  int16_t y;
+  uint8_t linePitch;
+  uint8_t contentLines;
+  uint16_t color;
+  uint8_t page = 0;
+  uint8_t drawnPage = 0xFF;
+  bool firstDraw = true;
+  int16_t valueX[DEBUG_MAX_LINES];  // Start x of the value segment (label + gap)
+  uint16_t hash[DEBUG_MAX_LINES];   // FNV-16 of the last rendered value segment
+  uint8_t prevW[DEBUG_MAX_LINES];   // Pixel width of the last rendered value segment
+  uint8_t present[DEBUG_MAX_LINES]; // Line currently drawn
+};

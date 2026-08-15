@@ -11,8 +11,8 @@ class IntervalMetric {
   uint32_t maxTime = 0;                    // Maximum recorded time in microseconds. Starts at minimum
   uint32_t totalTime = 0;                  // Total time in microseconds / 8 (~9hr rollover, sufficient for use case)
   uint32_t count = 0;                      // Number of measurements taken
-  const __FlashStringHelper* name;         // Name of the interval
-  const __FlashStringHelper* description;  // Description of the interval
+  const __FlashStringHelper* name_;        // Name of the interval
+  const __FlashStringHelper* description_; // Description of the interval
 
  public:
   IntervalMetric() = default;
@@ -24,11 +24,15 @@ class IntervalMetric {
   inline uint32_t shortest() const { return minTime; };
   inline uint32_t longest() const { return maxTime; };
   inline uint32_t total() const { return totalTime; };
+  inline uint32_t sampleCount() const { return count; };
+  inline const __FlashStringHelper* name() const { return name_; };
 };
 
 class METRICS {
  public:
   static void addMetric(IntervalMetric* metric);
+  static uint8_t count();
+  static IntervalMetric* get(uint8_t index);
 
  private:
   static LinkedList<IntervalMetric*> metrics;

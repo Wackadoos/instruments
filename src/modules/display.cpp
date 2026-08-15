@@ -1,6 +1,7 @@
 #include "display.h"
 
 #include "hardware.h"
+#include "utils/debug.h"
 #include "utils/errors.h"
 #include "widgets.h"
 
@@ -245,4 +246,124 @@ void WidgetBase::drawTrailing(const char* mainText, int16_t x, int16_t y, TextAl
   Display::screen.println(trailing.current());
 
   Display::screen.setTextSize(mainTextSize);
+}
+
+// ---- DebugText ----
+
+static uint16_t fnv16(const char* s) {
+  uint32_t h = 0x811C9DC5u;
+  while (*s) {
+    h ^= (uint8_t)(*s++);
+    h *= 0x01000193u;
+  }
+  return (uint16_t)h;
+}
+
+DebugText::DebugText(int16_t x, int16_t y, uint8_t linePitch, uint8_t contentLines, uint16_t color)
+    : x(x), y(y), linePitch(linePitch), contentLines(contentLines), color(color) {
+  memset(valueX, 0, sizeof(valueX));
+  memset(hash, 0, sizeof(hash));
+  memset(prevW, 0, sizeof(prevW));
+  memset(present, 0, sizeof(present));
+}
+
+void DebugText::clear() {
+  Display::screen.fillRect(x, y, Display::screen.width(), (contentLines + 1) * linePitch, RGB565_BLACK);
+  firstDraw = true;
+  memset(hash, 0, sizeof(hash));
+  memset(prevW, 0, sizeof(prevW));
+  memset(present, 0, sizeof(present));
+}
+
+void DebugText::prev() {
+  uint8_t total = debugPageCount();
+  page = (page == 0) ? total - 1 : page - 1;
+}
+
+void DebugText::next() {
+  uint8_t total = debugPageCount();
+  page = (page + 1 >= total) ? 0 : page + 1;
+}
+
+void DebugText::reset() {
+  page = 0;
+  firstDraw = true;
+}
+
+void DebugText::drawLine(const char* text, int16_t lx, int16_t ly, uint16_t col) const {
+  Display::screen.setTextSize(1);
+  Display::screen.setTextColor(col, RGB565_BLACK);
+  Display::screen.setCursor(lx, ly);
+  Display::screen.print(text);
+}
+
+uint16_t DebugText::textWidth(const char* text) const {
+  int16_t x1, y1;
+  uint16_t w, h;
+  Display::screen.setTextSize(1);
+  Display::screen.getTextBounds(text, 0, 0, &x1, &y1, &w, &h);
+  return w;
+}
+
+void DebugText::drawHeader() {
+  char hdr[] = "DEBUG 0/0";  // page+1 and total are single digits (3 pages)
+  hdr[6] = (char)('0' + page + 1);
+  hdr[8] = (char)('0' + debugPageCount());
+  drawLine(hdr, x, y, color);
+}
+
+void DebugText::draw() {
+  if (firstDraw || page != drawnPage) {
+    Display::screen.fillRect(x, y, Display::screen.width(), (contentLines + 1) * linePitch, RGB565_BLACK);
+    drawnPage = page;
+    drawHeader();
+    firstDraw = true;  // Force label + value redraw for every line on the new page
+  }
+
+  char buf[DEBUG_LINE_BUF];
+  char labelBuf[16];
+  for (uint8_t cl = 0; cl < contentLines; cl++) {
+    int16_t lineY = y + (int16_t)(cl + 1) * linePitch;
+    DebugLine dl;
+    if (!debugItem(page, cl, dl, buf, sizeof(buf))) {
+      if (present[cl]) {
+        Display::screen.fillRect(x, lineY, Display::screen.width(), linePitch, RGB565_BLACK);
+        present[cl] = 0;
+        hash[cl] = 0;
+      }
+      continue;
+    }
+
+    uint16_t h = fnv16(buf);
+    if (!firstDraw && present[cl] && h == hash[cl]) {
+      continue;
+    }
+
+    if (firstDraw || !present[cl] || dl.wholeLine) {
+      // Full redraw of this line (labels re-rendered on page activation)
+      Display::screen.fillRect(x, lineY, Display::screen.width(), linePitch, RGB565_BLACK);
+      if (dl.wholeLine) {
+        drawLine(buf, x, lineY, color);
+        valueX[cl] = x;
+      } else {
+        WidgetBase::copyString(dl.label, labelBuf, sizeof(labelBuf));
+        drawLine(labelBuf, x, lineY, color);
+        valueX[cl] = x + (int16_t)textWidth(labelBuf) + DEBUG_LABEL_GAP;
+        drawLine(buf, valueX[cl], lineY, color);
+      }
+      prevW[cl] = (uint8_t)textWidth(buf);
+    } else {
+      // Value-only: erase the shrunk tail past the new value, redraw the value. Label untouched.
+      uint16_t newW = textWidth(buf);
+      if (prevW[cl] > newW) {
+        Display::screen.fillRect(valueX[cl] + newW, lineY, prevW[cl] - newW, linePitch, RGB565_BLACK);
+      }
+      drawLine(buf, valueX[cl], lineY, color);
+      prevW[cl] = (uint8_t)newW;
+    }
+
+    hash[cl] = h;
+    present[cl] = 1;
+  }
+  firstDraw = false;
 }

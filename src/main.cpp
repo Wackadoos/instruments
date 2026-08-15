@@ -13,22 +13,15 @@
 #include "settings.h"
 #include "state.h"
 #include "utils/errors.h"
+#include "utils/memory.h"
 #include "utils/scheduler.h"
 
 IntervalMetric mainLoopTime = IntervalMetric();
 
-extern char* __brkval;
-extern char __heap_start;
-
-int freeMemory() {
-  char top;
-  return __brkval ? &top - __brkval : &top - &__heap_start;
-}
-
 void logData();
 void reportRam() {
   Serial.print(F("Free RAM = "));  // F function does the same and is now a built in library, in IDE > 1.0.0
-  Serial.println(freeMemory());    // print how much RAM is available in bytes.
+  Serial.println(State::ram_free_bytes);  // print how much RAM is available in bytes.
 }
 
 ScheduledTask tasks[] = {
@@ -64,6 +57,11 @@ void setup() {
 }
 
 void loop() {
+  State::ram_free_bytes = freeMemory();  // Fixed measurement point so all consumers agree (display, serial, min)
+  if (State::ram_free_bytes < State::ram_free_bytes_minimum) {
+    State::ram_free_bytes_minimum = State::ram_free_bytes;
+  }
+
   mainLoopTime.start();  // TODO maybe have a minimum threshold on this? So a busy-wait isn't included
   Scheduler::runTasks();
   HARDWARE::run();

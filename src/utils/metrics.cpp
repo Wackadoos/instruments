@@ -3,8 +3,8 @@
 LinkedList<IntervalMetric*> METRICS::metrics = LinkedList<IntervalMetric*>();
 
 void IntervalMetric::init(const __FlashStringHelper* name, const __FlashStringHelper* description) {
-  this->name = name;
-  this->description = description;
+  name_ = name;
+  description_ = description;
   METRICS::addMetric(this);
 };
 
@@ -29,4 +29,15 @@ uint32_t IntervalMetric::average() const {
 
 void METRICS::addMetric(IntervalMetric* metric) {
   metrics.add(metric);
+}
+
+uint8_t METRICS::count() {
+  return (uint8_t)metrics.size();
+}
+
+IntervalMetric* METRICS::get(uint8_t index) {
+  if (index >= metrics.size()) {
+    return nullptr;
+  }
+  return metrics.get(index);
 }

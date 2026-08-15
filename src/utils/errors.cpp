@@ -21,6 +21,22 @@ void Errors::logError(Error error) {
   }
 }
 
+ErrorEvent Errors::newestError(uint8_t index) {
+  uint8_t n = 0;
+  for (uint8_t i = 0; i < CACHED_ERRORS; i++) {
+    uint8_t j = (uint8_t)((errors_head + CACHED_ERRORS - 1 - i) % CACHED_ERRORS);
+    ErrorEvent e = errors[j];
+    if (e.type == Error::UNKNOWN) {
+      continue;
+    }
+    if (n == index) {
+      return e;
+    }
+    n++;
+  }
+  return ErrorEvent{Error::UNKNOWN, 0};
+}
+
 const __FlashStringHelper* Errors::errorDescription(Error error) {
   switch (error) {
     case Error::UNKNOWN:

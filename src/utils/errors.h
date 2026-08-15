@@ -50,6 +50,7 @@ class Errors {
   static void init();
   static void logError(Error error);
   static const __FlashStringHelper* errorDescription(Error error);
+  static ErrorEvent newestError(uint8_t index);  // Newest-first, skipping UNKNOWN; {UNKNOWN, 0} past the end
 
  private:
   inline static uint8_t errors_head = 0;
