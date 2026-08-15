@@ -18,5 +18,3 @@ void EEPROM::init(TwoWire* wire) {
 
   enabled = true;
 }
-
-// TODO Make sure battery capacity and current discharge metrics are persisted in short power outages. Actually just make race mode not disengage unless more than 60 mins passed. How to deal with no rtc on reboot?

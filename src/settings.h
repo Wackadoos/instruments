@@ -20,13 +20,21 @@ class SETTINGS {
  public:
   static constexpr uint8_t SETTINGS_BLOCK_VERSION = 3;  // Bump every time the SettingsBlock object gets modified!
 
+  //* Edit bounds enforced by the settings page increment/decrement buttons
+  static constexpr uint16_t WHEEL_CIRCUMFERENCE_MIN = 942;
+  static constexpr uint16_t WHEEL_CIRCUMFERENCE_MAX = 1634;
+  static constexpr uint8_t PULSES_PER_REV_MIN = 1;
+  static constexpr uint8_t PULSES_PER_REV_MAX = 100;
+  static constexpr int8_t TIMEZONE_OFFSET_MIN = -48;
+  static constexpr int8_t TIMEZONE_OFFSET_MAX = 48;
+
+  static SettingsBlock settings;  // Live settings; widgets on the settings page read it directly
+
   static void init();
   static SettingsBlock getSettings();
   static void pushSetting(const SettingsBlock& newSettings);
 
  private:
-  static SettingsBlock settings;
-
   static constexpr uint32_t SETTINGS_INDEX = 0;  // Where in the eeprom to store the settings. Typically 0 (the start)
 
   static void apply();

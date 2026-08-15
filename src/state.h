@@ -57,6 +57,8 @@ struct State {
   //* Timing
   static inline String currentTime = "";
   static inline String splitDiff = "+~~:~~:~~";
+  //* Settings
+  static inline String timezone_string = "";  // Timezone offset formatted as ±hh:mm for the settings page
   //* Battery
   static inline float battery_soc_compensated = 0;      // Battery State of Charge accounting for Peukert's Law, Temperature, etc.
   static inline float battery_time_remaining_mins = 0;  // Time estimate remaining in minutes

@@ -2,6 +2,7 @@
 
 #include "modules/eeprom.h"
 #include "modules/speed.h"
+#include "state.h"
 #include "utils/errors.h"
 
 SettingsBlock SETTINGS::settings = SettingsBlock();
@@ -22,6 +23,7 @@ void SETTINGS::init() {
   } else {
     settings = defaultSettings();
     Errors::logError(Error::SETTINGS_VOLATILE);
+    SETTINGS::apply();  // Keep display strings & SPEED consistent even without EEPROM
   }
 }
 
@@ -34,7 +36,7 @@ void SETTINGS::pushSetting(const SettingsBlock& newSettings) {
   settings._checksum = checksum(settings);
 
   if (EEPROM::isEnabled()) {
-    EEPROM::eeprom.put(SETTINGS_INDEX, newSettings);  // This could be optimised to only write the bytes that changed!
+    EEPROM::eeprom.put(SETTINGS_INDEX, settings);  // Write the checksummed copy, not the caller's stale-checksum block!
   }
 
   SETTINGS::apply();
@@ -44,6 +46,12 @@ void SETTINGS::apply() {
   SPEED::configure(
       settings.speed_sensor_wheel_circumference,
       settings.speed_sensor_pulses_per_revolution);
+
+  // Format timezone offset (15-min units) as +hh:mm, e.g. 40 -> "+10:00"
+  int8_t quarters = constrain(settings.timezone_offset, TIMEZONE_OFFSET_MIN, TIMEZONE_OFFSET_MAX);
+  char buf[8];
+  sprintf(buf, "%c%02d:%02d", quarters < 0 ? '-' : '+', abs(quarters) / 4, (abs(quarters) % 4) * 15);
+  State::timezone_string = buf;
 }
 
 SettingsBlock SETTINGS::defaultSettings() {
