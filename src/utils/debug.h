@@ -6,7 +6,8 @@
 
 struct DebugLine {
   const __FlashStringHelper* label = nullptr;  // Flash label for label+value lines (drawn once per page)
-  bool wholeLine = false;                      // true: valueBuf already holds the full line text (errors)
+  bool wholeLine = false;                      // true: valueBuf holds prefix+value; valueOffset splits them
+  uint16_t valueOffset = 0;                    // Byte offset in valueBuf where the variable value segment starts
 };
 
 uint8_t debugPageCount();

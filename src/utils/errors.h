@@ -40,13 +40,13 @@ enum class Error : uint8_t {
 
 struct ErrorEvent {
   Error type;
-  unsigned long seconds_epoch_time;
+  unsigned long seconds_epoch_time;  // Time of the FIRST occurrence
+  uint32_t count;                    // Occurrences since first (1 = first)
 };
 
 class Errors {
  public:
-  inline static uint8_t errorCount = 0;
-  inline static ErrorEvent errors[CACHED_ERRORS] = {};  // Circular buffer of last few errors for display on screen
+  inline static ErrorEvent errors[CACHED_ERRORS] = {};  // Circular buffer of unique errors (each with an occurrence count) for display
   static void init();
   static void logError(Error error);
   static const __FlashStringHelper* errorDescription(Error error);

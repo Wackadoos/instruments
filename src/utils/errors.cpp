@@ -11,7 +11,16 @@ void Errors::init() {
 }
 
 void Errors::logError(Error error) {
-  errors[errors_head] = ErrorEvent{error, RTC::clock.now().secondstime()};
+  // Each error type occupies a single slot; repeat occurrences just bump its count.
+  for (uint8_t i = 0; i < CACHED_ERRORS; i++) {
+    if (errors[i].type == error) {
+      errors[i].count++;
+      return;
+    }
+  }
+
+  // First occurrence: timestamp + log, then advance the head.
+  errors[errors_head] = ErrorEvent{error, RTC::clock.now().secondstime(), 1};
 
   flushToLogfile(errors[errors_head]);
 
@@ -59,12 +68,10 @@ const __FlashStringHelper* Errors::errorDescription(Error error) {
       return F("The IMU failed to enable data interrupt!");
     case Error::IMU_DATA_READ_FAILED:
       return F("An IMU read failed... This may be intermittent.");
-      // TODO this could fire very quickly. Need to have a cap of some kind to not fill up everything.
     case Error::NVRAM_UNINITIALISED:
       return F("The NVRAM failed to initialise!");
     case Error::I2C_TIMEOUT:
       return F("I2C timeout occurred!");
-      // TODO this could fire very quickly. Need to have a cap of some kind to not fill up everything.
     case Error::EEPROM_UNINITIALISED:
       return F("The EEPROM failed to initialise!");
     case Error::SETTINGS_VERSION_CHANGED:
@@ -85,25 +92,18 @@ const __FlashStringHelper* Errors::errorDescription(Error error) {
       return F("DS18B20 sensors detected with duplicate IDs!");
     case Error::TEMP_UNREADABLE:
       return F("DS18B20 sensor temperature unreadable!");
-      // TODO this could fire very quickly. Need to have a cap of some kind to not fill up everything.
     case Error::VESC_DATA_UNAVAILABLE:
       return F("Failed to read data from VESC!");
-    // TODO this could fire very quickly. Need to have a cap of some kind to not fill up everything.
     case Error::VESC_REPORTED_UNCOMMON_ERROR:
       return F("Uncommon/unknown error reported on VESC!");
-    // TODO this could fire very quickly. Need to have a cap of some kind to not fill up everything.
     case Error::VESC_REPORTED_HARDWARE_FAULT:
       return F("Hardware error reported on VESC!");
-    // TODO this could fire very quickly. Need to have a cap of some kind to not fill up everything.
     case Error::VESC_REPORTED_TEMPERATURE_FAULT:
       return F("Temperature error reported on VESC!");
-    // TODO this could fire very quickly. Need to have a cap of some kind to not fill up everything.
     case Error::VESC_REPORTED_VOLTAGE_FAULT:
       return F("Voltage error reported on VESC!");
-    // TODO this could fire very quickly. Need to have a cap of some kind to not fill up everything.
     case Error::VESC_REPORTED_FLASH_CORRUPTION:
       return F("Flash Corruption error reported on VESC!");
-      // TODO this could fire very quickly. Need to have a cap of some kind to not fill up everything.
     case Error::DISPLAY_UNINITIALISED:
       return F("The Display failed to initialise!");
     case Error::TOUCHSCREEN_UNINITIALISED:
@@ -121,6 +121,3 @@ void Errors::flushToLogfile(const ErrorEvent& errorEvent) {
 #endif
   // TODO write out data to logfile in csv
 }
-
-// TODO maybe just do 5s debounce for errors? Log multiple occurrences as a multiplier
-// TODO have logging out to usb serial as idle mode behaviour

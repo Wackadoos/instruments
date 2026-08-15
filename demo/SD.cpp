@@ -18,10 +18,10 @@
 const int8_t DISABLE_CHIP_SELECT = 53;
 const int8_t DISABLE_CHIP_SELECT2 = 49;
 //
-// Test with reduced SPI speed for breadboards.  SD_SCK_MHZ(4) will select
-// the highest speed supported by the board that is not over 4 MHz.
+// Test with reduced SPI speed for breadboards.  SD_SCK_MHZ(8) will select
+// the highest speed supported by the board that is not over 8 MHz.
 // Change SPI_SPEED to SD_SCK_MHZ(50) for best performance.
-#define SPI_SPEED SD_SCK_MHZ(4)
+#define SPI_SPEED SD_SCK_MHZ(8)
 //------------------------------------------------------------------------------
 #if SD_FAT_TYPE == 0
 SdFat sd;
@@ -115,7 +115,7 @@ void loop() {
   pinMode(DISABLE_CHIP_SELECT2, OUTPUT);
   digitalWrite(DISABLE_CHIP_SELECT2, HIGH);
 
-  if (!sd.begin(chipSelect, SPI_SPEED * 2)) {
+  if (!sd.begin(chipSelect, SPI_SPEED)) {
     if (sd.card()->errorCode()) {
       cout << F(
           "\nSD initialization failed.\n"

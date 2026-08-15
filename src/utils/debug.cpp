@@ -233,6 +233,11 @@ static bool debugErrorItem(uint8_t line, DebugLine& out, char* v, size_t len) {
   append2(v, len, (uint8_t)(secs % 60));
   append(v, len, " ");
   appendFlash(v, len, Errors::errorDescription(e.type));
+  if (e.count > 1) {
+    out.valueOffset = (uint16_t)strlen(v);  // Prefix = time + description; value = " xN"
+    append(v, len, " x");
+    appendInt(v, len, (long)e.count);
+  }
   return true;
 }
 

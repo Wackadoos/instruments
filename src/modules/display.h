@@ -10,6 +10,7 @@
 #define DEBOUNCE_PERIOD 800
 
 class Page;
+struct DebugLine;
 
 class Display {
  public:
@@ -474,6 +475,8 @@ class DebugText : public WidgetBase {
   void drawHeader();
   void eraseBand(uint8_t band) const;
   void resetLines();
+  // Draws the fixed prefix (wholeLine: buf[0..valueOffset]; else the label) and returns the value start x.
+  int16_t drawPrefix(char* buf, const DebugLine& dl, const char* labelBuf, int16_t lineY, uint16_t col) const;
 
   int16_t x;
   int16_t y;
@@ -486,8 +489,10 @@ class DebugText : public WidgetBase {
   uint8_t eraseLine = 0;  // Page-transition erasure cursor (band 0 = header, then content lines)
   uint8_t clearLine = 0;  // Teardown erasure cursor (same band indexing)
   uint8_t lineCursor = 0; // Round-robin cursor into content lines (prevents a hot line starving the rest)
-  int16_t valueX[DEBUG_MAX_LINES];  // Start x of the value segment (label + gap)
-  uint16_t hash[DEBUG_MAX_LINES];   // FNV-16 of the last rendered value segment
-  uint8_t prevW[DEBUG_MAX_LINES];   // Pixel width of the last rendered value segment
-  uint8_t present[DEBUG_MAX_LINES]; // Line currently drawn
+  int16_t valueX[DEBUG_MAX_LINES];       // Start x of the value segment (label + gap)
+  uint16_t hash[DEBUG_MAX_LINES];        // FNV-16 of the last rendered debugItem buffer
+  uint16_t prefixHash[DEBUG_MAX_LINES];  // FNV-16 of the last rendered prefix (label / time+description)
+  uint16_t prevFullW[DEBUG_MAX_LINES];   // Pixel width of the whole last-drawn line (prefix + value)
+  uint16_t prevW[DEBUG_MAX_LINES];       // Pixel width of the last rendered value segment
+  uint8_t present[DEBUG_MAX_LINES];      // Line currently drawn
 };

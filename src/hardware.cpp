@@ -40,6 +40,9 @@ void HARDWARE::init() {
   delay(3000);
 #endif
 
+  //* SPI Devices
+  Display::init(&SPI);  // Display has long blocking setup, do first
+
   //* I2C Devices
   Wire.begin();
   Wire.setWireTimeout(25000, true);  // 25ms timeout with auto reset
@@ -59,9 +62,6 @@ void HARDWARE::init() {
   VESC_SERIAL_PORT.begin(250000);
   VESC::init(&VESC_SERIAL_PORT);
   GPS::init();
-
-  //* SPI Devices
-  Display::init(&SPI);
 
   //* Interrupt Devices
   SPEED::init();
