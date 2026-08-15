@@ -109,7 +109,12 @@ static bool debugStateItem(uint8_t idx, DebugLine& out, char* v, size_t len) {
       break;
     case 11:
       out.label = F("IMU MAX1S");
-      appendFloat(v, len, State::max_1s_acceleration);
+      append(v, len, "x:");
+      appendFloat(v, len, State::max_1s_accel_x);
+      append(v, len, " y:");
+      appendFloat(v, len, State::max_1s_accel_y);
+      append(v, len, " z:");
+      appendFloat(v, len, State::max_1s_accel_z);
       break;
     case 12:
       out.label = F("GPS SPD");

@@ -27,7 +27,10 @@ struct State {
   static inline float imu_accel_y = 0;          // Acceleration in the Y axis (m/s/s)
   static inline float imu_accel_z = 0;          // Acceleration in the Z axis (m/s/s)
   static inline float imu_die_temp = 0;         // IMU chip temperature
-  static inline float max_1s_acceleration = 0;  // Max sustained acceleration 1 second
+  static inline float max_1s_acceleration = 0;  // Max sustained acceleration over a 1s window (max of the per-axis peaks)
+  static inline float max_1s_accel_x = 0;       // Peak sustained X accel over a 1s window (m/s/s)
+  static inline float max_1s_accel_y = 0;       // Peak sustained Y accel over a 1s window (m/s/s)
+  static inline float max_1s_accel_z = 0;       // Peak sustained Z accel over a 1s window (m/s/s)
   //* BMP280 Atmospheric Pressure & Temperature Sensor
   static inline float uncalibrated_altitude = 0;  // Altitude assuming a standard day (1013.25 hPa Sea Level)
   static inline float ambient_temperature = 0;    // Ambient temp according to BMP280 in degrees C

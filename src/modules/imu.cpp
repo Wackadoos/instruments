@@ -8,6 +8,11 @@
 bfs::Mpu6500 IMU::imu = bfs::Mpu6500();
 IntervalMetric IMU::dataProcessTime = IntervalMetric();
 
+float IMU::accelBuf[IMU::AXES][IMU::SAMPLES] = {};
+uint8_t IMU::accelMinIdx[IMU::AXES] = {};
+uint8_t IMU::accelHead = 0;
+uint16_t IMU::accelCount = 0;
+
 void IMU::init(TwoWire* wire) {
   imu.Config(wire, IMU_I2C_ADDR);
 
@@ -53,18 +58,69 @@ void IMU::run() {
       }
 #endif
 
-      // TODO SensorState::max_1s_acceleration
-      //  imu.gyro_x_radps();
-      //  imu.gyro_y_radps();
-      //  imu.gyro_z_radps();
-      //  imu.mag_x_ut();
-      //  imu.mag_y_ut();
-      //  imu.mag_z_ut();
+      updateMax1s(0, fabsf(imu.accel_x_mps2()));
+      updateMax1s(1, fabsf(imu.accel_y_mps2()));
+      updateMax1s(2, fabsf(imu.accel_z_mps2()));
     } else {
       Errors::logError(Error::IMU_DATA_READ_FAILED);
     }
     dataProcessTime.stop();
   }
+}
+
+// Tracks the minimum of the last SAMPLES samples per axis (the 1s dwell value) using an
+// incremental running minimum: the whole window is only re-scanned when the evicted sample
+// is the current minimum. The window minimum is promoted to the per-axis peak once the
+// window is full.
+void IMU::updateMax1s(uint8_t axis, float value) {
+  uint8_t evict = accelHead;
+  accelBuf[axis][evict] = value;
+  accelHead = (uint8_t)((accelHead + 1) % SAMPLES);
+
+  if (accelCount < SAMPLES) {
+    accelCount++;
+    if (accelCount == 1 || value < accelBuf[axis][accelMinIdx[axis]]) {
+      accelMinIdx[axis] = evict;
+    }
+    if (accelCount == SAMPLES) {
+      promote(axis, accelBuf[axis][accelMinIdx[axis]]);
+    }
+    return;
+  }
+
+  if (accelMinIdx[axis] == evict) {
+    // The running minimum was evicted: re-scan the whole window.
+    uint8_t minIdx = 0;
+    for (uint8_t i = 1; i < SAMPLES; i++) {
+      if (accelBuf[axis][i] < accelBuf[axis][minIdx]) {
+        minIdx = i;
+      }
+    }
+    accelMinIdx[axis] = minIdx;
+  } else if (value < accelBuf[axis][accelMinIdx[axis]]) {
+    accelMinIdx[axis] = evict;
+  }
+  promote(axis, accelBuf[axis][accelMinIdx[axis]]);
+}
+
+// Promotes a window minimum into the per-axis peak when it beats the stored value, keeping
+// the combined State::max_1s_acceleration in sync as the max of the three peaks.
+void IMU::promote(uint8_t axis, float windowMin) {
+  switch (axis) {
+    case 0:
+      if (windowMin > State::max_1s_accel_x) State::max_1s_accel_x = windowMin;
+      break;
+    case 1:
+      if (windowMin > State::max_1s_accel_y) State::max_1s_accel_y = windowMin;
+      break;
+    case 2:
+      if (windowMin > State::max_1s_accel_z) State::max_1s_accel_z = windowMin;
+      break;
+  }
+  float m = State::max_1s_accel_x;
+  if (State::max_1s_accel_y > m) m = State::max_1s_accel_y;
+  if (State::max_1s_accel_z > m) m = State::max_1s_accel_z;
+  State::max_1s_acceleration = m;
 }
 
 void IMU::imu_isr() {
