@@ -26,6 +26,8 @@ class Display {
   inline static bool enabled = false;
   static Arduino_HWSPI bus;
   static Page* currentPage;
+  static Page* pendingPage;   // Target page during a non-blocking switch
+  static bool switching;      // True while the old page is being torn down
 };
 
 enum class TextAlign : uint8_t { LEFT,
@@ -65,8 +67,10 @@ struct TextRegion {
 
 class WidgetBase {
  public:
-  virtual void draw() = 0;
-  virtual void clear() = 0;
+  // Returns true if a screen write was performed this call.
+  virtual bool draw() = 0;
+  // Returns true if clearing is still in progress (widget will be revisited), false when fully cleared.
+  virtual bool clear() = 0;
   virtual void pressed(TS_Point point) = 0;
   virtual ~WidgetBase() = default;
   constexpr WidgetBase() = default;
@@ -162,16 +166,19 @@ class StaticWidget : public TextWidget<const char*> {
   constexpr StaticWidget(const char* text, const TextConfig& cfg)
       : TextWidget<const char*>(&storedText, cfg), storedText(text) {}
 
-  void draw() override {
+  bool draw() override {
     if (firstDraw) {
       this->render(*this->data, this->cfg.color);
       firstDraw = false;
+      return true;
     }
+    return false;
   }
 
-  void clear() override {
+  bool clear() override {
     this->render(*this->data, RGB565_BLACK);
     firstDraw = true;
+    return false;
   }
 
  private:
@@ -184,7 +191,7 @@ class Widget : public TextWidget<T> {
  public:
   constexpr Widget(T* data, const TextConfig& cfg) : TextWidget<T>(data, cfg) {}
 
-  void draw() override {
+  bool draw() override {
     char buf[TEXT_BUFFER_SIZE];
     WidgetPrinter::format(*this->data, buf, sizeof(buf), this->cfg.decimalDigits);
     uint16_t color = colorFor(*this->data);
@@ -198,7 +205,7 @@ class Widget : public TextWidget<T> {
     bool needMain = firstDraw || textChanged || colorChanged;
 
     if (!needMain && !trailingChanged) {
-      return;
+      return false;
     }
 
     int16_t mainX = WidgetBase::mainAnchorX(this->cfg.x, trailingStr, this->cfg.trailing, this->cfg.align);
@@ -248,9 +255,10 @@ class Widget : public TextWidget<T> {
 
     prevColor = color;
     firstDraw = false;
+    return true;
   }
 
-  void clear() override {
+  bool clear() override {
     int16_t mainX = WidgetBase::mainAnchorX(this->cfg.x, this->cfg.trailing.present() ? prevTrailing : nullptr,
                                             this->cfg.trailing, this->cfg.align);
     WidgetBase::drawText(prevString, mainX, this->cfg.y, this->cfg.align, this->cfg.size, RGB565_BLACK);
@@ -262,6 +270,7 @@ class Widget : public TextWidget<T> {
     prevH = 0;
     prevColor = 0;
     firstDraw = true;
+    return false;
   }
 
  protected:
@@ -339,7 +348,7 @@ class Button : public TextWidget<const char*> {
     dirty = true;
   }
 
-  void draw() override {
+  bool draw() override {
     if (firstDraw || dirty) {
       if (dirty && !firstDraw) {
         int16_t rectX, rectY;
@@ -357,10 +366,12 @@ class Button : public TextWidget<const char*> {
       prevText = storedText;
       firstDraw = false;
       dirty = false;
+      return true;
     }
+    return false;
   }
 
-  void clear() override {
+  bool clear() override {
     const char* text = (prevText != nullptr) ? prevText : storedText;
     int16_t rectX, rectY;
     uint16_t rw, rh;
@@ -370,6 +381,7 @@ class Button : public TextWidget<const char*> {
     firstDraw = true;
     dirty = false;
     prevText = nullptr;
+    return false;
   }
 
   void pressed(TS_Point point) override {
@@ -421,13 +433,17 @@ class Page {
   size_t size() const { return count; }
   const WidgetBase* operator[](size_t i) const { return widgets[i]; }
 
-  void refresh();
-  void clear();
+  // Round-robin: draws at most one widget per call (the first that reports a screen write).
+  bool refresh();
+  // Teardown: clears at most one widget per call; stays on a widget while its clear() reports in progress.
+  bool clearStep();
   void pressed(TS_Point point);
 
  private:
   WidgetBase* const* widgets;
   size_t count;
+  size_t index = 0;       // Round-robin cursor: next widget to consider
+  size_t clearIndex = 0;  // Teardown cursor: next widget to clear
 };
 
 // TODO display errors on screen?
@@ -444,18 +460,20 @@ class DebugText : public WidgetBase {
  public:
   DebugText(int16_t x, int16_t y, uint8_t linePitch, uint8_t contentLines, uint16_t color);
 
-  void draw() override;
-  void clear() override;
+  bool draw() override;
+  bool clear() override;
   void pressed(TS_Point point) override {}
 
   void prev();  // Wrap backwards
   void next();  // Wrap forwards
-  void reset();  // Back to page 0 + full redraw
+  void reset();  // Back to page 0 (erasure handled by draw's page-transition path)
 
  private:
   void drawLine(const char* text, int16_t lx, int16_t ly, uint16_t col) const;
   uint16_t textWidth(const char* text) const;
   void drawHeader();
+  void eraseBand(uint8_t band) const;
+  void resetLines();
 
   int16_t x;
   int16_t y;
@@ -465,6 +483,9 @@ class DebugText : public WidgetBase {
   uint8_t page = 0;
   uint8_t drawnPage = 0xFF;
   bool firstDraw = true;
+  uint8_t eraseLine = 0;  // Page-transition erasure cursor (band 0 = header, then content lines)
+  uint8_t clearLine = 0;  // Teardown erasure cursor (same band indexing)
+  uint8_t lineCursor = 0; // Round-robin cursor into content lines (prevents a hot line starving the rest)
   int16_t valueX[DEBUG_MAX_LINES];  // Start x of the value segment (label + gap)
   uint16_t hash[DEBUG_MAX_LINES];   // FNV-16 of the last rendered value segment
   uint8_t prevW[DEBUG_MAX_LINES];   // Pixel width of the last rendered value segment

@@ -7,6 +7,8 @@
 
 IntervalMetric Display::dataProcessTime = IntervalMetric();
 Page* Display::currentPage = &RACE_PAGE;
+Page* Display::pendingPage = nullptr;
+bool Display::switching = false;
 Arduino_HWSPI Display::bus = Arduino_HWSPI(DISPLAY_DATA_COMMAND_PIN, DISPLAY_CHIP_SELECT_PIN);
 Arduino_ILI9488_18bit Display::screen = Arduino_ILI9488_18bit(static_cast<Arduino_DataBus*>(&bus), DISPLAY_RESET_PIN, 1, false);
 XPT2046_Touchscreen Display::touch = XPT2046_Touchscreen(TOUCHSCREEN_CHIP_SELECT_PIN, TOUCHSCREEN_INTERRUPT_PIN);
@@ -33,8 +35,17 @@ void Display::init(SPIClass* spi) {
 void Display::run() {
   if (enabled) {
     dataProcessTime.start();
-    currentPage->refresh();
-    if (touch.tirqTouched() && touch.touched()) {
+    if (switching) {
+      // Tear down the old page one widget at a time so loop() keeps running.
+      if (!currentPage->clearStep()) {
+        switching = false;
+        currentPage = pendingPage;
+        pendingPage = nullptr;
+      }
+    } else {
+      currentPage->refresh();
+    }
+    if (!switching && touch.tirqTouched() && touch.touched()) {
       TS_Point p = touch.getPoint();
       int16_t px, py;
       if (TOUCH_SWAP_XY) {
@@ -51,20 +62,34 @@ void Display::run() {
 }
 
 void Display::changePage(Page* page) {
-  currentPage->clear();
-  currentPage = page;
+  if (currentPage == page) {
+    return;
+  }
+  pendingPage = page;
+  switching = true;
 }
 
-void Page::refresh() {
-  for (uint8_t i = 0; i < count; i++) {
-    widgets[i]->draw();
+bool Page::refresh() {
+  for (size_t i = 0; i < count; i++) {
+    size_t idx = (index + i) % count;
+    if (widgets[idx]->draw()) {
+      index = (idx + 1) % count;
+      return true;
+    }
   }
+  return false;
 }
 
-void Page::clear() {
-  for (uint8_t i = 0; i < count; i++) {
-    widgets[i]->clear();
+bool Page::clearStep() {
+  if (clearIndex >= count) {
+    clearIndex = 0;
+    return false;  // Whole page cleared
   }
+  if (widgets[clearIndex]->clear()) {
+    return true;  // Mid-clear: revisit this widget next call
+  }
+  clearIndex++;
+  return true;
 }
 
 void Page::pressed(TS_Point point) {
@@ -261,18 +286,32 @@ static uint16_t fnv16(const char* s) {
 
 DebugText::DebugText(int16_t x, int16_t y, uint8_t linePitch, uint8_t contentLines, uint16_t color)
     : x(x), y(y), linePitch(linePitch), contentLines(contentLines), color(color) {
+  resetLines();
+}
+
+void DebugText::resetLines() {
   memset(valueX, 0, sizeof(valueX));
   memset(hash, 0, sizeof(hash));
   memset(prevW, 0, sizeof(prevW));
   memset(present, 0, sizeof(present));
+  lineCursor = 0;
 }
 
-void DebugText::clear() {
-  Display::screen.fillRect(x, y, Display::screen.width(), (contentLines + 1) * linePitch, RGB565_BLACK);
+void DebugText::eraseBand(uint8_t band) const {
+  Display::screen.fillRect(x, y + (int16_t)band * linePitch, Display::screen.width(), linePitch, RGB565_BLACK);
+}
+
+bool DebugText::clear() {
+  if (clearLine <= contentLines) {
+    eraseBand(clearLine++);
+    return true;  // Still erasing: page teardown will revisit this widget
+  }
+  clearLine = 0;
+  eraseLine = 0;
+  resetLines();
   firstDraw = true;
-  memset(hash, 0, sizeof(hash));
-  memset(prevW, 0, sizeof(prevW));
-  memset(present, 0, sizeof(present));
+  drawnPage = 0xFF;
+  return false;
 }
 
 void DebugText::prev() {
@@ -287,7 +326,7 @@ void DebugText::next() {
 
 void DebugText::reset() {
   page = 0;
-  firstDraw = true;
+  eraseLine = 0;
 }
 
 void DebugText::drawLine(const char* text, int16_t lx, int16_t ly, uint16_t col) const {
@@ -312,17 +351,29 @@ void DebugText::drawHeader() {
   drawLine(hdr, x, y, color);
 }
 
-void DebugText::draw() {
-  if (firstDraw || page != drawnPage) {
-    Display::screen.fillRect(x, y, Display::screen.width(), (contentLines + 1) * linePitch, RGB565_BLACK);
+bool DebugText::draw() {
+  if (firstDraw) {
+    // Boot / after teardown: region already black, render fresh.
+    firstDraw = false;
     drawnPage = page;
     drawHeader();
-    firstDraw = true;  // Force label + value redraw for every line on the new page
+    resetLines();
+  } else if (page != drawnPage) {
+    // In-place page transition: erase the old page one band at a time.
+    if (eraseLine <= contentLines) {
+      eraseBand(eraseLine++);
+      return true;
+    }
+    eraseLine = 0;
+    drawnPage = page;
+    drawHeader();
+    resetLines();
   }
 
   char buf[DEBUG_LINE_BUF];
   char labelBuf[16];
-  for (uint8_t cl = 0; cl < contentLines; cl++) {
+  for (uint8_t i = 0; i < contentLines; i++) {
+    uint8_t cl = (uint8_t)(lineCursor + i) % contentLines;
     int16_t lineY = y + (int16_t)(cl + 1) * linePitch;
     DebugLine dl;
     if (!debugItem(page, cl, dl, buf, sizeof(buf))) {
@@ -330,16 +381,18 @@ void DebugText::draw() {
         Display::screen.fillRect(x, lineY, Display::screen.width(), linePitch, RGB565_BLACK);
         present[cl] = 0;
         hash[cl] = 0;
+        lineCursor = (uint8_t)(cl + 1) % contentLines;
+        return true;
       }
       continue;
     }
 
     uint16_t h = fnv16(buf);
-    if (!firstDraw && present[cl] && h == hash[cl]) {
+    if (present[cl] && h == hash[cl]) {
       continue;
     }
 
-    if (firstDraw || !present[cl] || dl.wholeLine) {
+    if (!present[cl] || dl.wholeLine) {
       // Full redraw of this line (labels re-rendered on page activation)
       Display::screen.fillRect(x, lineY, Display::screen.width(), linePitch, RGB565_BLACK);
       if (dl.wholeLine) {
@@ -364,6 +417,8 @@ void DebugText::draw() {
 
     hash[cl] = h;
     present[cl] = 1;
+    lineCursor = (uint8_t)(cl + 1) % contentLines;
+    return true;  // One line per call; other widgets get their turns in between
   }
-  firstDraw = false;
+  return false;
 }
