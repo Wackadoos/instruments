@@ -105,6 +105,15 @@ struct WidgetPrinter {
     formatValue(static_cast<const char*>(value), buf, len, decimalDigits);
   }
 
+  // Explicit overloads so integer widgets don't fall through to the heap-allocating String template
+  static void formatValue(uint8_t value, char* buf, size_t len, uint8_t) {
+    ultoa(value, buf, 10);
+  }
+
+  static void formatValue(uint16_t value, char* buf, size_t len, uint8_t) {
+    ultoa(value, buf, 10);
+  }
+
   template <typename T>
   static void formatValue(T value, char* buf, size_t len, uint8_t) {
     String(value).toCharArray(buf, len);

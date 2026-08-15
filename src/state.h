@@ -56,7 +56,7 @@ struct State {
   static inline String sat_string = "";
   //* Timing
   static inline String currentTime = "";
-  static inline String splitDiff = "+~~:~~:~~";
+  // static inline String splitDiff = "+~~:~~:~~";
   //* Settings
   static inline String timezone_string = "";  // Timezone offset formatted as ±hh:mm for the settings page
   //* Battery
@@ -65,5 +65,4 @@ struct State {
   static inline String battery_stats = "~% ~m";         // Battery Stats String
   //* System Stats
   static inline uint16_t ram_free_bytes_minimum = 0;  // Least recorded available ram
-  static inline uint32_t longest_scheduler_isr = 0;   // Longest recorded scheduler ISR
 };
