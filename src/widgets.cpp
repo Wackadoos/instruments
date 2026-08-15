@@ -1,7 +1,7 @@
 #include "widgets.h"
 
 //* Centre
-Widget<String> BATT_WIDGET(&State::battery_stats, {240, 40, TextAlign::CENTER, RGB565_AZURE, 3});
+Widget<char[12]> BATT_WIDGET(&State::battery_stats, {240, 40, TextAlign::CENTER, RGB565_AZURE, 3});
 Widget<float> SPEED_WIDGET(&State::gps_speed, {240, 70, TextAlign::CENTER, RGB565_ORANGE, 14, 0, {"Km/h", 2, 0, 12}});
 SetpointWidget<float> POWER_WIDGET(&State::battery_power, {240, 184, TextAlign::CENTER, RGB565_AQUA, 9, 0, {"W", 2, 2, 7}}, &POWER_WARNING_SETPOINT, &POWER_ERROR_SETPOINT, RGB565_AQUA, RGB565_YELLOW, RGB565_RED);
 
@@ -16,9 +16,9 @@ SetpointWidget<float> MOTOR_TEMP1_WIDGET(&State::temp_motor_1, {180, 295, TextAl
 SetpointWidget<float> MOTOR_TEMP2_WIDGET(&State::temp_motor_2, {240, 295, TextAlign::LEFT, RGB565_LIGHTGREEN, 3}, &MOTOR_TEMP_WARNING_SETPOINT, &MOTOR_TEMP_ERROR_SETPOINT, RGB565_LIGHTGREEN, RGB565_YELLOW, RGB565_RED);
 
 //* Top Row
-Widget<String> TIME_WIDGET(&State::currentTime, {0, 0, TextAlign::LEFT, RGB565_DARKORANGE, 3});
-// Widget<String> LAP_TIME_WIDGET(&State::splitDiff, {0, 30, TextAlign::LEFT, RGB565_MEDIUMSPRINGGREEN, 2});
-SetpointWidget<uint8_t> GPS_WIDGET(&State::fix_satellites, {480, 0, TextAlign::RIGHT, RGB565_BLUE, 3, 0, {&State::sat_string, 3, 0, 0}}, &GPS_WARNING_SETPOINT, &GPS_ERROR_SETPOINT, RGB565_BLUE, RGB565_YELLOW, RGB565_RED, true);
+Widget<char[8]> TIME_WIDGET(&State::currentTime, {0, 0, TextAlign::LEFT, RGB565_DARKORANGE, 3});
+// Widget<char[8]> LAP_TIME_WIDGET(&State::splitDiff, {0, 30, TextAlign::LEFT, RGB565_MEDIUMSPRINGGREEN, 2});
+SetpointWidget<uint8_t> GPS_WIDGET(&State::fix_satellites, {480, 0, TextAlign::RIGHT, RGB565_BLUE, 3, 0, {State::sat_string, 3, 0, 0}}, &GPS_WARNING_SETPOINT, &GPS_ERROR_SETPOINT, RGB565_BLUE, RGB565_YELLOW, RGB565_RED, true);
 
 //* Buttons
 static void onSettingsPagePress() {
@@ -80,7 +80,7 @@ Button PULSES_PLUS_BUTTON("+", {370, 115, TextAlign::CENTER, RGB565_LIGHTGREEN, 
 
 //* Settings Page: Timezone offset (15-min units, displayed as ±hh:mm)
 StaticWidget TIMEZONE_LABEL_WIDGET("TIMEZONE", {0, 195, TextAlign::LEFT, RGB565_WHITESMOKE, 2});
-Widget<String> TIMEZONE_VALUE_WIDGET(&State::timezone_string, {130, 195, TextAlign::LEFT, RGB565_WHITE, 3});
+Widget<char[8]> TIMEZONE_VALUE_WIDGET(&State::timezone_string, {130, 195, TextAlign::LEFT, RGB565_WHITE, 3});
 Button TIMEZONE_MINUS_BUTTON("-", {310, 185, TextAlign::CENTER, RGB565_RED, 3}, 40, 40, 8, 0, &onTimezoneDec);
 Button TIMEZONE_PLUS_BUTTON("+", {370, 185, TextAlign::CENTER, RGB565_LIGHTGREEN, 3}, 40, 40, 8, 0, &onTimezoneInc);
 

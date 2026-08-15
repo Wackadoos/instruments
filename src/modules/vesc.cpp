@@ -33,12 +33,10 @@ void VESC::update() {
         BatteryEstimator::updateEWMA(vesc.data.avgInputCurrent);
         State::battery_soc_compensated = BatteryEstimator::estimateSOC(vesc.data.wattHours, vesc.data.wattHoursCharged, State::ambient_temperature_2);
         State::battery_time_remaining_mins = BatteryEstimator::estimateTimeRemainingMinutes();
-        char buf[24];
         char fbuf1[8], fbuf2[8];
         dtostrf(State::battery_soc_compensated, 3, 0, fbuf1);  // width 3, 0 decimal
         dtostrf(State::battery_time_remaining_mins, 3, 0, fbuf2);
-        sprintf(buf, "%s%% %sm", fbuf1, fbuf2);
-        State::battery_stats = buf;
+        sprintf(State::battery_stats, "%s%% %sm", fbuf1, fbuf2);
 
         Logging::logDebug(F("VESC Motor Current: "), State::motor_current);
         Logging::logDebug(F("VESC Battery Current: "), State::battery_current);

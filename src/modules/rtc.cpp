@@ -40,8 +40,12 @@ void RTC::update() {
       }
     }
     char buffer[] = "hh:mmap";
-    State::currentTime = (clock.now() + TimeSpan(0, SETTINGS::getSettings().timezone_offset / 4, (SETTINGS::getSettings().timezone_offset % 4) * 15, 0)).toString(buffer);
-    Logging::logDebug(F("RTC Time: "), clock.now().timestamp(DateTime::TIMESTAMP_FULL));
+    auto tzTime = clock.now() + TimeSpan(0, SETTINGS::getSettings().timezone_offset / 4, (SETTINGS::getSettings().timezone_offset % 4) * 15, 0);
+    tzTime.toString(buffer);  // reads the format string from buffer, overwrites it in-place
+    memcpy(State::currentTime, buffer, sizeof(buffer));
+    char tsbuf[] = "YYYY-MM-DDThh:mm:ss";
+    clock.now().toString(tsbuf);  // full timestamp, in-place (no String alloc)
+    Logging::logDebug(F("RTC Time: "), tsbuf);
     dataProcessTime.stop();
   }
 }

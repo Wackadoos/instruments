@@ -49,7 +49,7 @@ class Errors {
   inline static ErrorEvent errors[CACHED_ERRORS] = {};  // Circular buffer of last few errors for display on screen
   static void init();
   static void logError(Error error);
-  static String errorDescription(Error error);
+  static const __FlashStringHelper* errorDescription(Error error);
 
  private:
   inline static uint8_t errors_head = 0;

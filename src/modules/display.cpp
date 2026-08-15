@@ -72,13 +72,29 @@ void Page::pressed(TS_Point point) {
   }
 }
 
+void WidgetBase::copyString(const char* text, char* dst, size_t len) {
+  strncpy(dst, text, len - 1);
+  dst[len - 1] = '\0';
+}
+
+void WidgetBase::copyString(const __FlashStringHelper* text, char* dst, size_t len) {
+  strncpy_P(dst, reinterpret_cast<const char*>(text), len - 1);
+  dst[len - 1] = '\0';
+}
+
+void WidgetBase::textBlockBounds(const __FlashStringHelper* text, int16_t x, int16_t y, uint8_t textSize, uint8_t linePad,
+                                 int16_t& outX, int16_t& outY, uint16_t& w, uint16_t& h) {
+  char buf[TEXT_BUFFER_SIZE];
+  copyString(text, buf, sizeof(buf));
+  textBlockBounds(buf, x, y, textSize, linePad, outX, outY, w, h);
+}
+
 void WidgetBase::textBlockBounds(const char* text, int16_t x, int16_t y, uint8_t textSize, uint8_t linePad,
                                  int16_t& outX, int16_t& outY, uint16_t& w, uint16_t& h) {
   Display::screen.setTextSize(textSize);
 
   char buf[TEXT_BUFFER_SIZE];
-  strncpy(buf, text, sizeof(buf) - 1);
-  buf[sizeof(buf) - 1] = '\0';
+  copyString(text, buf, sizeof(buf));
 
   uint16_t lineHeight = 8 * textSize;
   uint16_t lineCount = 1;
@@ -108,6 +124,13 @@ void WidgetBase::textBlockBounds(const char* text, int16_t x, int16_t y, uint8_t
   h = lineCount * lineHeight + (lineCount - 1) * linePad;
 }
 
+void WidgetBase::drawText(const __FlashStringHelper* text, int16_t x, int16_t y, TextAlign align, uint8_t textSize,
+                          uint16_t color, uint8_t linePad) {
+  char buf[TEXT_BUFFER_SIZE];
+  copyString(text, buf, sizeof(buf));
+  drawText(buf, x, y, align, textSize, color, linePad);
+}
+
 void WidgetBase::drawText(const char* text, int16_t x, int16_t y, TextAlign align, uint8_t textSize, uint16_t color, uint8_t linePad) {
   int16_t calcX, calcY;
   uint16_t w, h;
@@ -116,8 +139,7 @@ void WidgetBase::drawText(const char* text, int16_t x, int16_t y, TextAlign alig
   Display::screen.setTextColor(color, RGB565_BLACK);
 
   char buf[TEXT_BUFFER_SIZE];
-  strncpy(buf, text, sizeof(buf) - 1);
-  buf[sizeof(buf) - 1] = '\0';
+  copyString(text, buf, sizeof(buf));
 
   uint16_t lineHeight = 8 * textSize;
   char* line = buf;
@@ -147,6 +169,13 @@ void WidgetBase::drawText(const char* text, int16_t x, int16_t y, TextAlign alig
       line = p + 1;
     }
   }
+}
+
+void WidgetBase::textRegion(const __FlashStringHelper* text, int16_t x, int16_t y, TextAlign align, uint8_t textSize,
+                            uint8_t linePad, TextRegion& out) {
+  char buf[TEXT_BUFFER_SIZE];
+  copyString(text, buf, sizeof(buf));
+  textRegion(buf, x, y, align, textSize, linePad, out);
 }
 
 void WidgetBase::textRegion(const char* text, int16_t x, int16_t y, TextAlign align, uint8_t textSize, uint8_t linePad,

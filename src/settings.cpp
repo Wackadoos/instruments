@@ -49,9 +49,7 @@ void SETTINGS::apply() {
 
   // Format timezone offset (15-min units) as +hh:mm, e.g. 40 -> "+10:00"
   int8_t quarters = constrain(settings.timezone_offset, TIMEZONE_OFFSET_MIN, TIMEZONE_OFFSET_MAX);
-  char buf[8];
-  sprintf(buf, "%c%02d:%02d", quarters < 0 ? '-' : '+', abs(quarters) / 4, (abs(quarters) % 4) * 15);
-  State::timezone_string = buf;
+  sprintf(State::timezone_string, "%c%02d:%02d", quarters < 0 ? '-' : '+', abs(quarters) / 4, (abs(quarters) % 4) * 15);
 }
 
 SettingsBlock SETTINGS::defaultSettings() {

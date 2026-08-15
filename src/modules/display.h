@@ -34,19 +34,16 @@ enum class TextAlign : uint8_t { LEFT,
 
 struct TrailingText {
   const char* text = nullptr;
-  String* str = nullptr;
   uint8_t size = 0;
   uint8_t gap = 2;
   uint8_t verticalPad = 0;
 
   constexpr TrailingText() = default;
   constexpr TrailingText(const char* t, uint8_t s = 0, uint8_t g = 2, uint8_t v = 0)
-      : text(t), str(nullptr), size(s), gap(g), verticalPad(v) {}
-  TrailingText(String* s, uint8_t size = 0, uint8_t gap = 2, uint8_t verticalPad = 0)
-      : text(nullptr), str(s), size(size), gap(gap), verticalPad(verticalPad) {}
+      : text(t), size(s), gap(g), verticalPad(v) {}
 
-  bool present() const { return size != 0 && (text != nullptr || str != nullptr); }
-  const char* current() const { return str ? str->c_str() : text; }
+  bool present() const { return size != 0 && text != nullptr; }
+  const char* current() const { return text; }
 };
 
 struct TextConfig {
@@ -74,14 +71,26 @@ class WidgetBase {
   virtual ~WidgetBase() = default;
   constexpr WidgetBase() = default;
 
+  // Copy text from RAM or flash (F()) into a caller buffer; always NUL-terminates.
+  static void copyString(const char* text, char* dst, size_t len);
+  static void copyString(const __FlashStringHelper* text, char* dst, size_t len);
+
+  // Flash (F()) overloads: copy into a temp buffer then delegate to the RAM versions.
+  // Keeps the main RAM path untouched for speed; used by flash-resident debug-page strings.
   static void textBlockBounds(const char* text, int16_t x, int16_t y, uint8_t textSize, uint8_t linePad,
+                              int16_t& outX, int16_t& outY, uint16_t& w, uint16_t& h);
+  static void textBlockBounds(const __FlashStringHelper* text, int16_t x, int16_t y, uint8_t textSize, uint8_t linePad,
                               int16_t& outX, int16_t& outY, uint16_t& w, uint16_t& h);
   static void drawText(const char* text, int16_t x, int16_t y, TextAlign align, uint8_t textSize, uint16_t color,
                        uint8_t linePad = 0);
+  static void drawText(const __FlashStringHelper* text, int16_t x, int16_t y, TextAlign align, uint8_t textSize,
+                       uint16_t color, uint8_t linePad = 0);
   static void drawTrailing(const char* mainText, int16_t x, int16_t y, TextAlign align, uint8_t mainTextSize,
                            uint16_t color, const TrailingText& trailing);
   static void textRegion(const char* text, int16_t x, int16_t y, TextAlign align, uint8_t textSize, uint8_t linePad,
                          TextRegion& out);
+  static void textRegion(const __FlashStringHelper* text, int16_t x, int16_t y, TextAlign align, uint8_t textSize,
+                         uint8_t linePad, TextRegion& out);
   static void trailingRegion(const char* text, const TrailingText& trailing, const TextRegion& main, TextRegion& out);
   static void eraseStale(const TextRegion& oldR, const TextRegion& newR);
   static int16_t mainAnchorX(int16_t x, const char* trailingText, const TrailingText& trailing, TextAlign align);
@@ -182,8 +191,7 @@ class Widget : public TextWidget<T> {
 
     bool hasTrailing = this->cfg.trailing.present();
     const char* trailingStr = hasTrailing ? this->cfg.trailing.current() : "";
-    bool trailingChanged = hasTrailing && this->cfg.trailing.str != nullptr &&
-                           strcmp(trailingStr, prevTrailing) != 0;
+    bool trailingChanged = hasTrailing && strcmp(trailingStr, prevTrailing) != 0;
 
     bool textChanged = strcmp(buf, prevString) != 0;
     bool colorChanged = color != prevColor;

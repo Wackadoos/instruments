@@ -52,17 +52,17 @@ struct State {
   static inline float gps_speed = 0;             // GPS Speed in km/h
   static inline float heading = 0;               // GPS Heading in km/h
   static inline uint8_t visible_satellites = 0;  // Number of satellites currently in view
-  static inline uint8_t fix_satellites = 0;      // Number of satellites used in fix
-  static inline String sat_string = "";
+  static inline uint8_t fix_satellites = 0;  // Number of satellites used in fix
+  static inline char sat_string[8] = "";     // " / N" visible satellite count for the GPS widget trailing text
   //* Timing
-  static inline String currentTime = "";
+  static inline char currentTime[8] = "";  // "hh:mmap" 12-hour time string, e.g. "10:30pm"
   // static inline String splitDiff = "+~~:~~:~~";
   //* Settings
-  static inline String timezone_string = "";  // Timezone offset formatted as ±hh:mm for the settings page
+  static inline char timezone_string[8] = "";  // Timezone offset formatted as ±hh:mm for the settings page
   //* Battery
   static inline float battery_soc_compensated = 0;      // Battery State of Charge accounting for Peukert's Law, Temperature, etc.
   static inline float battery_time_remaining_mins = 0;  // Time estimate remaining in minutes
-  static inline String battery_stats = "~% ~m";         // Battery Stats String
+  static inline char battery_stats[12] = "~% ~m";       // Battery Stats String, e.g. "100% 120m"
   //* System Stats
   static inline uint16_t ram_free_bytes_minimum = 0;  // Least recorded available ram
 };

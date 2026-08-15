@@ -10,7 +10,7 @@
 //* Definitions in src/widgets.cpp (single TU so no inline-variable init guards)
 
 //* Centre
-extern Widget<String> BATT_WIDGET;
+extern Widget<char[12]> BATT_WIDGET;
 extern Widget<float> SPEED_WIDGET;
 extern SetpointWidget<float> POWER_WIDGET;
 
@@ -25,7 +25,7 @@ extern SetpointWidget<float> MOTOR_TEMP1_WIDGET;
 extern SetpointWidget<float> MOTOR_TEMP2_WIDGET;
 
 //* Top Row
-extern Widget<String> TIME_WIDGET;
+extern Widget<char[8]> TIME_WIDGET;
 extern SetpointWidget<uint8_t> GPS_WIDGET;
 
 extern Button SETTINGS_BUTTON;

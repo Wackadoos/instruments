@@ -78,9 +78,7 @@ void GPS::run() {
       State::visible_satellites = 0;
       State::fix_satellites = 0;
     }
-    char buf[16];
-    sprintf(buf, " / %d", State::visible_satellites);
-    State::sat_string = buf;
+    sprintf(State::sat_string, " / %d", State::visible_satellites);
 #ifdef DEBUG_LOGGING
     trace_all(DEBUG_PORT, gps, fix);
 #endif
