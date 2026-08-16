@@ -27,7 +27,7 @@ void RTC::init(TwoWire* wire) {
 void RTC::update() {
   if (enabled) {
     dataProcessTime.start();
-    if (GPS::dateTimeCalibrated) {
+    if (!State::isRace() && GPS::dateTimeCalibrated) {
       auto GPStime = DateTime(GPS::fix.dateTime.year, GPS::fix.dateTime.month, GPS::fix.dateTime.date, GPS::fix.dateTime.hours, GPS::fix.dateTime.minutes, GPS::fix.dateTime.seconds);
       auto diff = clock.now() - GPStime;
 
@@ -39,6 +39,7 @@ void RTC::update() {
         needs_adjust = false;
       }
     }
+
     char buffer[] = "hh:mmap";
     auto tzTime = clock.now() + TimeSpan(0, SETTINGS::getSettings().timezone_offset / 4, (SETTINGS::getSettings().timezone_offset % 4) * 15, 0);
     tzTime.toString(buffer);  // reads the format string from buffer, overwrites it in-place
