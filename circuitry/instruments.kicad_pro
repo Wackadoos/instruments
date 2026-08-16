@@ -240,7 +240,7 @@
       "internal_id": "",
       "mfg": "",
       "mpn": "",
-      "sch_revision": "4"
+      "sch_revision": "4.1"
     },
     "layer_pairs": [],
     "layer_presets": [],
@@ -664,7 +664,7 @@
         "uuid": "39bd7319-5a50-41f0-9b9e-a03a1d4d30dc"
       }
     ],
-    "used_designators": "F1-8,D1-2,#PWR1-92,A1,RN1,MCU1-2,SW1-10,U1-5,DS1-2,ESC1-2,IC1,HUI1-2,DISP1,BT1-5,R1-6,BZ1-2,P2-48,ACC1,M1-6,DC1-2,LS1,GPS1,RV1-3,Q1,J1-124,S1-14,CB1-4,RF1-2,TP1,MA1-6",
+    "used_designators": "F1-8,D1-2,#PWR1-92,A1,RN1,MCU1-2,SW1-10,U1-5,DS1-2,ESC1-2,IC1,HUI1-2,DISP1,BT1-5,R1-7,BZ1-2,P2-48,ACC1,M1-6,DC1-2,LS1,GPS1,RV1-3,Q1,J1-124,S1-14,CB1-4,RF1-2,TP1,MA1-6",
     "variants": []
   },
   "sheets": [

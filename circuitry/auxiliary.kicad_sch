@@ -7,7 +7,7 @@
 	(title_block
 		(title "Instruments Box Circuit")
 		(date "2026-06-28")
-		(rev "4")
+		(rev "4.1")
 		(company "Wackadoos F24+")
 		(comment 1 "Connector Convention: Pin 1 = GND. Pin 2 = VCC. Further pins are signal")
 		(comment 2 "Power Wire: 10AWG Tinned Copper with Polyvinyl Chloride Insulation, 30A Continuous")
@@ -6652,6 +6652,12 @@
 		(uuid "7851b15e-7e59-4aa3-92d1-b555595cdd47")
 	)
 	(junction
+		(at 162.56 106.68)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "7ad97ceb-64ac-4d30-bd9c-30c741a8abdd")
+	)
+	(junction
 		(at 43.18 173.99)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -7535,7 +7541,7 @@
 	)
 	(wire
 		(pts
-			(xy 227.33 106.68) (xy 133.35 106.68)
+			(xy 133.35 106.68) (xy 162.56 106.68)
 		)
 		(stroke
 			(width 0)
@@ -8002,6 +8008,16 @@
 			(type default)
 		)
 		(uuid "8bb280f2-81d9-4348-a6e3-e456782ab95b")
+	)
+	(wire
+		(pts
+			(xy 162.56 106.68) (xy 227.33 106.68)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8d516aba-4c99-4a12-af54-885082429103")
 	)
 	(wire
 		(pts
@@ -12552,6 +12568,84 @@
 		)
 	)
 	(symbol
+		(lib_id "power:+5V")
+		(at 162.56 99.06 0)
+		(mirror y)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "7f590835-e23b-4609-8843-58bbb30d500b")
+		(property "Reference" "#PWR044"
+			(at 162.56 102.87 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "+5V"
+			(at 162.56 94.742 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 162.56 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 162.56 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+5V\""
+			(at 162.56 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "cf784c01-397f-43f8-a84c-deac3ea27274")
+		)
+		(instances
+			(project "instruments"
+				(path "/7b3a8acc-a7bf-4991-b6ab-1771768f1043/48c869f0-37c7-4f58-87f7-eb0e41b18d06"
+					(reference "#PWR044")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Device:R")
 		(at 105.41 184.15 90)
 		(unit 1)
@@ -13257,6 +13351,85 @@
 			(project "instruments"
 				(path "/7b3a8acc-a7bf-4991-b6ab-1771768f1043/48c869f0-37c7-4f58-87f7-eb0e41b18d06"
 					(reference "MA1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 162.56 102.87 180)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "ae2c1798-0600-4989-9c3f-4710d8d5cc17")
+		(property "Reference" "R7"
+			(at 160.02 102.87 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "4.7k"
+			(at 162.56 102.87 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 164.338 102.87 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 162.56 102.87 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 162.56 102.87 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "65a58a9b-7c88-49f6-b9a8-ccbd98937f4b")
+		)
+		(pin "2"
+			(uuid "ceda6983-7b87-47fe-845b-f6b65de87f7f")
+		)
+		(instances
+			(project "instruments"
+				(path "/7b3a8acc-a7bf-4991-b6ab-1771768f1043/48c869f0-37c7-4f58-87f7-eb0e41b18d06"
+					(reference "R7")
 					(unit 1)
 				)
 			)

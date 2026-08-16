@@ -7,7 +7,7 @@
 	(title_block
 		(title "Main Circuit Diagram")
 		(date "2026-06-28")
-		(rev "4")
+		(rev "4.1")
 		(company "Wackadoos F24+")
 		(comment 1 "Connector Convention: Pin 1 = GND. Pin 2 = VCC. Further pins are signal")
 		(comment 2 "Power Wire: 10AWG Tinned Copper with Polyvinyl Chloride Insulation, 30A Continuous")
