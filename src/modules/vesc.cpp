@@ -27,6 +27,9 @@ void VESC::update() {
       State::watts_charged = vesc.data.wattHoursCharged;
       State::esc_temp = vesc.data.tempMosfet;
       State::battery_power = State::battery_voltage * State::battery_current;
+      State::battery_power_avg = (State::battery_power_avg == 0)
+                                     ? State::battery_power
+                                     : 0.025f * State::battery_power + 0.975f * State::battery_power_avg;
 
       static uint8_t counter = 0;
       if (counter >= 3) {  // every 4th VESC read = 1.0s @ 250ms task, so 60 window samples = 1 min

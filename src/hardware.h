@@ -28,6 +28,10 @@
 //* Setpoint thresholds (warning/error) for SetpointWidgets
 inline float POWER_WARNING_SETPOINT = 250.0f;
 inline float POWER_ERROR_SETPOINT = 500.0f;
+inline float POWER_AVG_WARNING_SETPOINT = 240.0f;
+inline float POWER_AVG_ERROR_SETPOINT = 340.0f;
+inline float VOLTAGE_WARNING_SETPOINT = 11.5f;
+inline float VOLTAGE_ERROR_SETPOINT = 10.8f;
 inline float TEMP1_WARNING_SETPOINT = 35.0f;
 inline float TEMP1_ERROR_SETPOINT = 45.0f;
 inline float ESC_TEMP_WARNING_SETPOINT = 60.0f;

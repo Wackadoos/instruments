@@ -456,9 +456,6 @@ class Page {
   size_t clearIndex = 0;  // Teardown cursor: next widget to clear
 };
 
-// TODO Display average watts while driving, maybe 1min rolling average or something? Or exponential decay?
-// TODO display battery voltage
-
 //* Debug page: single widget rendering a paginated list of flash-resident debug lines.
 //* Labels are drawn once per page; only the changed value tail re-renders (never the leading text).
 #define DEBUG_MAX_LINES 24   // Max content lines per page

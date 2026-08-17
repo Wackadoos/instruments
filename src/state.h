@@ -41,7 +41,8 @@ struct State {
   //* Vesc
   static inline float motor_current = 0;    // Current through the windings (during duty cycle on period ONLY)
   static inline float battery_current = 0;  // Current into ESC (overall average regardless duty cycle)
-  static inline float battery_power = 0;    // Power currently being used (battery_voltage * battery_current)
+  static inline float battery_power = 0;      // Power currently being used (battery_voltage * battery_current)
+  static inline float battery_power_avg = 0;  // EWMA of battery_power (~20 s window)
   static inline float duty_cycle = 0;       // Duty cycle right now
   static inline float battery_voltage = 0;  // Battery Voltage
   static inline float watts_used = 0;       // Total WH consumed

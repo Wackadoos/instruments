@@ -5,6 +5,10 @@ Widget<char[12]> BATT_WIDGET(&State::battery_stats, {240, 40, TextAlign::CENTER,
 Widget<float> SPEED_WIDGET(&State::gps_speed, {240, 70, TextAlign::CENTER, RGB565_ORANGE, 14, 0, {"Km/h", 2, 0, 12}});
 SetpointWidget<float> POWER_WIDGET(&State::battery_power, {240, 184, TextAlign::CENTER, RGB565_AQUA, 9, 0, {"W", 2, 2, 7}}, &POWER_WARNING_SETPOINT, &POWER_ERROR_SETPOINT, RGB565_AQUA, RGB565_YELLOW, RGB565_RED);
 
+//* Left column
+SetpointWidget<float> AVG_WATTS_WIDGET(&State::battery_power_avg, {0, 120, TextAlign::LEFT, RGB565_LIGHTGREEN, 4, 0, {"W", 2, 4, 0}}, &POWER_AVG_WARNING_SETPOINT, &POWER_AVG_ERROR_SETPOINT, RGB565_LIGHTGREEN, RGB565_YELLOW, RGB565_RED);
+SetpointWidget<float> VOLTAGE_WIDGET(&State::battery_voltage, {0, 160, TextAlign::LEFT, RGB565_YELLOW, 4, 1, {"V", 2, 4, 0}}, &VOLTAGE_WARNING_SETPOINT, &VOLTAGE_ERROR_SETPOINT, RGB565_YELLOW, RGB565_YELLOW, RGB565_RED, true);
+
 //* Bottom Row
 StaticWidget AMBIENT_TEMP_TEXT_WIDGET("Ambient", {0, 275, TextAlign::LEFT, RGB565_WHITESMOKE, 2});
 SetpointWidget<float> TEMP1_WIDGET(&State::ambient_temperature, {0, 295, TextAlign::LEFT, RGB565_LIGHTGREEN, 3}, &TEMP1_WARNING_SETPOINT, &TEMP1_ERROR_SETPOINT, RGB565_LIGHTGREEN, RGB565_YELLOW, RGB565_RED);
@@ -106,9 +110,11 @@ Button TIMEZONE_PLUS_BUTTON("+", {370, 185, TextAlign::CENTER, RGB565_LIGHTGREEN
 
 //* Pages
 static WidgetBase* RACE_PAGE_WIDGETS[] = {&BATT_WIDGET,
-                                          &SPEED_WIDGET,
-                                          &POWER_WIDGET,
-                                          &AMBIENT_TEMP_TEXT_WIDGET,
+                                           &SPEED_WIDGET,
+                                           &POWER_WIDGET,
+                                           &AVG_WATTS_WIDGET,
+                                           &VOLTAGE_WIDGET,
+                                           &AMBIENT_TEMP_TEXT_WIDGET,
                                           &TEMP1_WIDGET,
                                           &TEMP2_WIDGET,
                                           &ESC_TEMP_WIDGET,

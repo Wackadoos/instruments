@@ -14,6 +14,10 @@ extern Widget<char[12]> BATT_WIDGET;
 extern Widget<float> SPEED_WIDGET;
 extern SetpointWidget<float> POWER_WIDGET;
 
+//* Left column (race page)
+extern SetpointWidget<float> AVG_WATTS_WIDGET;
+extern SetpointWidget<float> VOLTAGE_WIDGET;
+
 //* Bottom Row
 extern StaticWidget AMBIENT_TEMP_TEXT_WIDGET;
 extern SetpointWidget<float> TEMP1_WIDGET;
