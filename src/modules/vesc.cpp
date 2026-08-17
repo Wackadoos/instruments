@@ -52,7 +52,6 @@ void VESC::update() {
       }
 
       if (vesc.data.error) {  // Errors should be uncommon, avoid unnecessarily setting up jump table
-        // TODO need a way to log additional error data like code
         switch (vesc.data.error) {
           case FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_1:
           case FAULT_CODE_HIGH_OFFSET_CURRENT_SENSOR_2:

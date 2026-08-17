@@ -19,15 +19,10 @@
 
 IntervalMetric mainLoopTime = IntervalMetric();
 
-void reportRam() {
-  Serial.print(F("Free RAM = "));         // F function does the same and is now a built in library, in IDE > 1.0.0
-  Serial.println(State::ram_free_bytes);  // print how much RAM is available in bytes.
-}
-
 ScheduledTask tasks[] = {
     // ScheduledTask(500, 0, displayBattStats),
     // ScheduledTask(500, 0, displayLapTiming),
-    ScheduledTask(200, 0, reportRam),
+    ScheduledTask(200, 0, measureRam),
     ScheduledTask(100, 5, SPEED::update),
     ScheduledTask(250, 10, VESC::update),
     ScheduledTask(500, 100, ATH::update),
@@ -55,12 +50,7 @@ void setup() {
 }
 
 void loop() {
-  State::ram_free_bytes = freeMemory();  // Fixed measurement point so all consumers agree (display, serial, min)
-  if (State::ram_free_bytes < State::ram_free_bytes_minimum) {
-    State::ram_free_bytes_minimum = State::ram_free_bytes;
-  }  // TODO move out of tight loop. Maybe into isr?
-
-  mainLoopTime.start();  // TODO maybe have a minimum threshold on this? So a busy-wait isn't included
+  mainLoopTime.start();
   Scheduler::runTasks();
   HARDWARE::run();
   TEMPS::run();    // Runs once conversion is complete
