@@ -16,7 +16,6 @@ struct State {
   // ---- AppMode state machine (definitions in src/utils/appmode.cpp) ----
   static bool isRace();              // Is currentMode RACE?
   static void enterMode(AppMode next);  // Transition: set current mode + associated logic
-  static void runMode();             // Per-mode tick, dispatched from loop()
   static void saveRaceState();       // Persist temporary race state (periodic task)
   static void tryResumeRace();       // Boot-time decision + state restore
   //* DS18B20 Temp Sensors (Motor)

@@ -6,53 +6,39 @@
 #include "utils/errors.h"
 #include "utils/logging.h"
 
+SPIClass* SD::spi = nullptr;
 SdExFat SD::card = SdExFat();
 ExFile SD::file = ExFile();
 RingBuf<ExFile, 512> SD::buffer = RingBuf<ExFile, 512>();
 IntervalMetric SD::dataProcessTime = IntervalMetric();
 char SD::fileName[LOG_FILE_NAME_SIZE] = "";
 
-// Two write failures inside this window mean the card is unhealthy, not just
-// briefly wedged; logging is abandoned instead of restarting a new file each
-// time (which would churn out many small files during a race).
-static const uint32_t kMinRecoveryIntervalMs = 5000;
-static const uint8_t kInitAttempts = 3;
-static const uint16_t kInitRetryDelayMs = 100;
-static const uint8_t kStartLogAttempts = 3;
-static const uint16_t kStartLogRetryDelayMs = 25;
+void SD::init(SPIClass* spi_ref) {
+  spi = spi_ref;
 
-bool SD::ensureCardInited() {
-  if (enabled) return true;
-
-  // Marginal cards occasionally fail the first init at boot but succeed on a
-  // retry. Re-try lazily from startLog() too, so a boot hiccup doesn't disable
-  // logging for the whole session.
-  for (uint8_t i = 0; i < kInitAttempts; i++) {
-    if (card.begin(SD_CARD_CHIP_SELECT_PIN, SD_SPI_SPEED)) {
-      enabled = true;
-      return true;
-    }
-    delay(kInitRetryDelayMs);
+  if (!init_card()) {
+    return;
   }
-  return false;
+
+  dataProcessTime.init(F("SD Write"), F("Time to write to the SD card"));
+  enabled = true;
 }
 
-void SD::init() {
-  // Shared SPI: display/touch/SD all use the same bus with separate chip selects.
-  dataProcessTime.init(F("SD Write"), F("Time to write to the SD card"));
-  if (!ensureCardInited()) {
+bool SD::init_card() {
+  if (!card.begin(SdSpiConfig(SD_CARD_CHIP_SELECT_PIN, SHARED_SPI, SD_SPI_SPEED, spi))) {
     Errors::logError(Error::SD_UNINITIALISED);
+    return false;
   }
+  return true;
 }
 
 bool SD::openLogFile() {
   // "<date-time>.bin" from the RTC, appending a numeric suffix if the name exists.
   DateTime now = RTC::clock.now();
   char base[LOG_FILE_NAME_SIZE];
-  snprintf(base, sizeof(base), "%04d-%02d-%02d_%02d%02d%02d", now.year(), now.month(), now.day(),
-           now.hour(), now.minute(), now.second());
+  snprintf(base, sizeof(base), "%04d-%02d-%02d_%02d%02d%02d", now.year(), now.month(), now.day(), now.hour(), now.minute(), now.second());
 
-  for (uint8_t n = 0; true; n++) {
+  for (uint8_t n = 0; n < 99; n++) {
     if (n == 0) {
       snprintf(fileName, sizeof(fileName), "%s.bin", base);
     } else {
@@ -61,14 +47,11 @@ bool SD::openLogFile() {
     if (!card.exists(fileName)) break;
   }
 
-  if (!file.open(fileName, O_RDWR | O_CREAT)) {
+  if (!file.open(fileName, O_WRONLY | O_CREAT)) {
     Errors::logError(Error::SD_OPEN_FAILED);
     return false;
   }
 
-  // Preallocate BEFORE writing anything: on exFAT a write allocates the file's
-  // first cluster, and ExFatFile::preAllocate() then bails out (m_firstCluster
-  // already set) so the allocation would always fail.
   if (!file.preAllocate(LOG_PREALLOC_BYTES)) {
     Errors::logError(Error::SD_PREALLOCATE_FAILED);
     file.close();
@@ -81,34 +64,37 @@ bool SD::openLogFile() {
     file.close();
     return false;
   }
+
+  file.sync();  // Ensure header is immediately written
   return true;
 }
 
 void SD::startLog() {
-  if (!enabled || logging) return;
+  if (!enabled) return;
 
-  if (!ensureCardInited()) {
-    Errors::logError(Error::SD_UNINITIALISED);
-    return;
-  }
-
-  for (uint8_t attempt = 0; attempt < kStartLogAttempts; attempt++) {
-    if (openLogFile()) {
-      buffer.begin(&file);
-      logging = true;
-      Logging::logDebug(F("SD log started: "), fileName);
+  auto started = openLogFile();
+  if (!started) {
+    // Try re-initialising the card and opening new log file
+    if (!init_card() || !openLogFile()) {
+      Errors::logError(Error::SD_STALLED);
       return;
     }
-    // A failed open/write may have left the card wedged (SdFat aborts a
-    // multi-block write without sending STOP_TRAN, so the card holds its busy
-    // line). Re-running card init (a CMD0 reset) unsticks it; drop the blank
-    // file it left behind, then space out before retrying.
-    card.begin(SD_CARD_CHIP_SELECT_PIN, SD_SPI_SPEED);
-    file.remove();
-    delay(kStartLogRetryDelayMs);
   }
 
-  Errors::logError(Error::SD_STALLED);
+  buffer.begin(&file);
+  logging = true;
+  Logging::logDebug(F("SD log started: "), fileName);
+}
+
+void SD::stopLog() {
+  if (!enabled) return;
+
+  buffer.sync();    // Flush whatever remains in the ring buffer
+  file.sync();      // Sync all data & dir fields to the card
+  file.truncate();  // Trim the preallocated space back to the written data
+  file.close();
+  logging = false;
+  Logging::logDebug(F("SD log stopped: "), fileName);
 }
 
 void SD::logFrame() {
@@ -170,72 +156,15 @@ void SD::logFrame() {
 }
 
 void SD::run() {
-  if (!logging) return;
+  if (!enabled) return;
   dataProcessTime.start();
 
-  bool stalled = false;
-  // Drain everything currently buffered, but only when the card reports idle so
-  // we never busy-wait on a flash erase/program operation inside loop(). Writing
-  // as soon as data is available keeps the small ring near-empty and minimises
-  // data lost to a power cut.
-  while (buffer.bytesUsed() && !file.isBusy()) {
+  // Drain everything currently buffered to card cache, but only when the card reports idle so we never busy-wait on a flash erase/program operation inside loop. Writing as soon as data is available keeps the small ring near-empty and minimises data lost to a power cut. Card flushes it's internal sector cache to disk when full.
+  if (buffer.bytesUsed() && !file.isBusy()) {
     if (buffer.writeOut(buffer.bytesUsed()) == 0) {
       Errors::logError(Error::SD_WRITE_FAILED);
-      stalled = true;
-      break;
     }
   }
 
-  // Unconditional: SdFat buffers data in a single 512-byte sector cache that
-  // only reaches the card when it fills up (or on sync), so this forces out a
-  // partial sector each cycle at ~2-5 ms. It also converts a wedged card into
-  // a detectable failure: the isBusy() gate must not skip it, or a card stuck
-  // holding its busy line would silently stop the log forever.
-  if (!stalled && !file.sync()) {
-    Errors::logError(Error::SD_WRITE_FAILED);
-    stalled = true;
-  }
-
-  if (stalled) {
-    recoverLog();
-  }
   dataProcessTime.stop();
-}
-
-void SD::recoverLog() {
-  // A failed sector write aborts mid multi-block transfer: SdFat's error path
-  // never sends STOP_TRAN, leaving the card holding its busy line and the log
-  // permanently wedged. Re-running card init (a CMD0 reset) unsticks it.
-  if (millis() - lastRecoveryMillis < kMinRecoveryIntervalMs) {
-    // A second failure inside the recovery window: the card is genuinely
-    // struggling, so abandon this race's logging rather than churn out files.
-    Errors::logError(Error::SD_STALLED);
-    logging = false;
-    file.close();
-    return;
-  }
-  lastRecoveryMillis = millis();
-
-  if (!card.begin(SD_CARD_CHIP_SELECT_PIN, SD_SPI_SPEED)) {
-    Errors::logError(Error::SD_STALLED);
-    logging = false;
-    file.close();
-    return;
-  }
-
-  // Card healthy again: finish the current file (flush the recovered cache and
-  // trim the preallocation) and continue in a fresh one.
-  stopLog();
-  startLog();
-}
-
-void SD::stopLog() {
-  if (!logging) return;
-
-  buffer.sync();        // Flush whatever remains in the ring buffer
-  file.truncate();      // Trim the preallocated space back to the written data
-  file.sync();
-  file.close();
-  logging = false;
-  Logging::logDebug(F("SD log stopped: "), fileName);
 }

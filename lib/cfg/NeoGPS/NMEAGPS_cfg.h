@@ -126,7 +126,7 @@
 // but you have to be more careful about using gps.fix() structure,
 // because it will be modified as characters are received.
 
-#define NMEAGPS_FIX_MAX 1
+#define NMEAGPS_FIX_MAX 3
 
 #if defined(NMEAGPS_EXPLICIT_MERGING) && (NMEAGPS_FIX_MAX == 0)
 #error You must define FIX_MAX >= 1 to allow EXPLICIT merging in NMEAGPS_cfg.h

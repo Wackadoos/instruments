@@ -20,7 +20,7 @@
 IntervalMetric mainLoopTime = IntervalMetric();
 
 void reportRam() {
-  Serial.print(F("Free RAM = "));  // F function does the same and is now a built in library, in IDE > 1.0.0
+  Serial.print(F("Free RAM = "));         // F function does the same and is now a built in library, in IDE > 1.0.0
   Serial.println(State::ram_free_bytes);  // print how much RAM is available in bytes.
 }
 
@@ -41,8 +41,6 @@ ScheduledTask tasks[] = {
 void setup() {
   Errors::init();
 
-  //! Setup SD class first before errors class
-
   HARDWARE::init();
 
   SETTINGS::init();
@@ -60,18 +58,15 @@ void loop() {
   State::ram_free_bytes = freeMemory();  // Fixed measurement point so all consumers agree (display, serial, min)
   if (State::ram_free_bytes < State::ram_free_bytes_minimum) {
     State::ram_free_bytes_minimum = State::ram_free_bytes;
-  }
+  }  // TODO move out of tight loop. Maybe into isr?
 
   mainLoopTime.start();  // TODO maybe have a minimum threshold on this? So a busy-wait isn't included
   Scheduler::runTasks();
   HARDWARE::run();
-  TEMPS::run();  // Runs once conversion is complete
-  IMU::run();    // Internally scheduled via data ready interrupt
-  GPS::run();    // Runs when new fix available
-  Display::run();
-  SD::run();     // Drains the log ring buffer when the card is idle
-
-  State::runMode();
-  // for dev track framerate of display updates for different values?
+  TEMPS::run();    // Runs once conversion is complete
+  IMU::run();      // Internally scheduled via data ready interrupt
+  GPS::run();      // Runs when new fix available
+  Display::run();  // Updates displayed widgets
+  SD::run();       // Drains the log ring buffer when the card is idle
   mainLoopTime.stop();
 }

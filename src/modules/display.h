@@ -456,7 +456,6 @@ class Page {
   size_t clearIndex = 0;  // Teardown cursor: next widget to clear
 };
 
-// TODO display errors on screen?
 // TODO Display average watts while driving, maybe 1min rolling average or something? Or exponential decay?
 // TODO display battery voltage
 

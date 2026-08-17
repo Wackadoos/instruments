@@ -2,8 +2,8 @@
 
 #include <Arduino.h>
 #include <SdFat.h>
-#include "RingBuf.h"
 
+#include "RingBuf.h"
 #include "utils/metrics.h"
 
 //! MicroSD binary logging of the shared State struct.
@@ -22,19 +22,15 @@
 #define LOG_PAYLOAD_BYTES 128
 #define LOG_FRAME_HEADER_BYTES 10  // magic u16 + epoch u32 + millis u32
 #define LOG_FRAME_BYTES (LOG_FRAME_HEADER_BYTES + LOG_PAYLOAD_BYTES)
-
-#define LOG_SAMPLES_PER_SECOND 2     // Scheduled task runs every 500ms
+#define LOG_SAMPLES_PER_SECOND 2  // Scheduled task runs every 500ms
 #define LOG_DURATION_SECONDS (3UL * 60 * 60)
 #define LOG_PREALLOC_BYTES ((uint64_t)LOG_DURATION_SECONDS * LOG_SAMPLES_PER_SECOND * LOG_FRAME_BYTES)
 #define LOG_FILE_NAME_SIZE 48
 
-//! SPI clock for the SD card. We only log ~280 B/s so this is deliberately far
-//! below the 8 MHz AVR maximum (F_CPU/2): full-speed SPI on the shared
-//! breadboard bus shows up as intermittent write failures and busy-timeouts.
+//! SPI clock for the SD card. We only log ~280 B/s so this is deliberately far below the 8 MHz AVR maximum (F_CPU/2):
 #define SD_SPI_SPEED SD_SCK_MHZ(4)
 
-// Fixed-layout snapshot of every numeric State member (char arrays excluded).
-// sizeof() is exactly LOG_PAYLOAD_BYTES on AVR (no struct padding).
+// Fixed-layout snapshot of every numeric State member (char arrays excluded). sizeof() is exactly LOG_PAYLOAD_BYTES on AVR (no struct padding).
 struct LogPayload {
   uint8_t mode;  // AppMode::RACE during logging
   float temp_motor_1;
@@ -77,19 +73,16 @@ static_assert(sizeof(LogPayload) == LOG_PAYLOAD_BYTES, "LogPayload layout mismat
 
 class SD {
  public:
-  static void init();
+  static void init(SPIClass* spi);
   static void startLog();
   static void stopLog();
   static void logFrame();
   static void run();
 
-  static inline bool isEnabled() { return enabled; }
-  static inline bool isLogging() { return logging; }
-
  private:
-  static bool ensureCardInited();
+  static bool init_card();
   static bool openLogFile();
-  static void recoverLog();
+  static SPIClass* spi;
   static SdExFat card;
   static ExFile file;
   static RingBuf<ExFile, 512> buffer;
@@ -98,5 +91,4 @@ class SD {
 
   inline static bool enabled = false;
   inline static bool logging = false;
-  inline static uint32_t lastRecoveryMillis = 0;
 };

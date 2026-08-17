@@ -33,17 +33,6 @@ void State::enterMode(AppMode next) {
   }
 }
 
-void State::runMode() {
-  switch (currentMode) {
-    case AppMode::IDLE:
-      break;
-    case AppMode::RACE:
-      break;
-    case AppMode::DEBUG:
-      break;
-  }
-}
-
 void State::saveRaceState() {
   if (isRace() && !RTC::needs_adjust) {
     auto settings = SETTINGS::getSettings();

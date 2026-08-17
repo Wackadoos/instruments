@@ -43,7 +43,7 @@ void HARDWARE::init() {
 
   //* SPI Devices
   Display::init(&SPI);  // Display has long blocking setup, do first
-  SD::init();           // SD shares the SPI bus via its own chip select
+  SD::init(&SPI);       // SD shares the SPI bus via its own chip select
 
   //* I2C Devices
   Wire.begin();
